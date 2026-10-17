@@ -44,8 +44,10 @@ function mockCtx({ pluginManager, home, fence } = {}) {
     },
   }
   // The API handler asks the kernel's `connection` service for a trust verdict
-  // on every request. The default stub passes (no rejection); pass a `fence`
-  // function to exercise the rejection and unavailable branches.
+  // on every request, through `ctx.get('connection')` (NOT Reflect.get: a real
+  // cordis Context throws on undeclared services). The default stub passes (no
+  // rejection); pass a `fence` function to exercise the rejection branch, or
+  // `connection: null` for the unavailable branch.
   const connection = {
     requestRejection: fence ?? (() => undefined),
   }
@@ -53,6 +55,9 @@ function mockCtx({ pluginManager, home, fence } = {}) {
     pluginManager,
     connection,
     logger: { info() {}, warn() {}, error() {} },
+    get(name) {
+      return name === 'connection' ? connection : undefined
+    },
     effect(fn) {
       return fn()
     },

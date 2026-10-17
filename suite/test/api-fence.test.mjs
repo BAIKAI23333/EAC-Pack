@@ -10,7 +10,9 @@
  * These tests pin the contract:
  *   - a rejected request is answered with the kernel's own status code,
  *   - an unreachable/failing fence answers 503 and NEVER lets the request through,
- *   - a rejected request has NO side effects (no body read, no job enqueued).
+ *   - a rejected request has NO side effects (no body read, no job enqueued),
+ *   - and, at the bottom of this file, the same behaviour holds inside a REAL
+ *     cordis context rather than a hand-written mock (see that section's note).
  */
 process.env.DSH_SUITE_NO_RESOURCES = '1'
 import { test } from 'node:test'
@@ -59,8 +61,14 @@ function makeReq(url, method = 'GET', body) {
 /**
  * Mount the API with a controllable fence.
  * `fence` receives the request; return a status code to reject, undefined to pass.
+ * `connection: null` simulates a host with no connection service.
+ *
+ * The handler resolves the service through `ctx.get('connection')`, so the mock
+ * MUST expose `get()`. A plain object carrying only a `connection` property is
+ * NOT faithful: a real cordis Context is a Proxy with its own read rules, which
+ * is exactly what the real-cordis test at the bottom of this file covers.
  */
-function mount({ fence, pluginManager } = {}) {
+function mount({ fence, pluginManager, connection: connectionOverride } = {}) {
   const registered = []
   const calls = { installed: 0, removed: 0, enabled: 0 }
   const pm = pluginManager ?? {
@@ -75,11 +83,16 @@ function mount({ fence, pluginManager } = {}) {
       return () => registered.splice(registered.indexOf(def), 1)
     },
   }
-  const connection = fence === null ? undefined : { requestRejection: fence ?? (() => undefined) }
+  const connection = connectionOverride !== undefined
+    ? connectionOverride
+    : (fence === null ? undefined : { requestRejection: fence ?? (() => undefined) })
   const ctx = {
     pluginManager: pm,
     ...(connection ? { connection } : {}),
     logger: { info() {}, warn() {}, error() {} },
+    get(name) {
+      return name === 'connection' ? connection : undefined
+    },
     effect(fn) { return fn() },
     inject(deps, cb) {
       cb({ webServer, pluginManager: pm, ...(connection ? { connection } : {}) })
@@ -168,4 +181,111 @@ test('the fence is consulted on every request, not cached at apply time', async 
   const second = makeRes()
   await handler(makeReq('http://localhost/api/eac-plugin-suite/catalog'), second)
   assert.equal(second.statusCode, 200, 'a late/unblocked verdict is picked up without re-mounting')
+})
+
+test('a host without ctx.get() fails CLOSED instead of crashing', async () => {
+  // Defensive branch: an older host may not expose ctx.get at all.
+  const registered = []
+  const ctx = {
+    pluginManager: {},
+    logger: {},
+    effect(fn) { return fn() },
+    inject(deps, cb) { cb({ webServer: { register(def) { registered.push(def); return () => {} } }, pluginManager: {} }) },
+  }
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'suite-fence-'))
+  process.env.DSH_HOME = home
+  apply(ctx, {})
+  const res = makeRes()
+  await registered[0].handler(makeReq('http://localhost/api/eac-plugin-suite/catalog'), res)
+  assert.equal(res.statusCode, 503, 'no ctx.get -> cannot verify -> refuse')
+  assert.equal(res.body, '', 'and say nothing about why')
+})
+
+// ---------------------------------------------------------------------------
+// Real-cordis integration coverage.
+//
+// Everything above runs against a hand-written ctx object, and that is exactly
+// how an earlier revision of this patch shipped broken: a real cordis Context is
+// a Proxy, `Reflect.get(ctx, name)` THROWS for a service not declared in
+// `inject`, and the resulting exception was swallowed into a blanket 503. Every
+// mock-based test still passed while the plugin answered 503 for every request
+// in a real host — protected, but completely unusable.
+//
+// This test therefore mounts the shipped `apply()` into a REAL cordis Context
+// with real Services, so the service-resolution path is exercised for real.
+// It skips (rather than fails) when cordis is not installed in this checkout.
+// ---------------------------------------------------------------------------
+
+/** Locate a real cordis in this checkout, or null when unavailable. */
+async function loadCordis() {
+  const candidates = [
+    '@deepseek-ai/cordis',
+    // Kernel used by the isolated test runtime.
+    new URL(
+      '../../../../DSH-Desktop-EAC/.test-runtime/p0-lab/development/runtimes/dsh-020rc2-node24/kernel/node_modules/@deepseek-ai/cordis/lib/index.js',
+      import.meta.url,
+    ).href,
+  ]
+  for (const spec of candidates) {
+    try {
+      const mod = await import(spec)
+      if (mod?.Context && mod?.Service) return mod
+    } catch {
+      /* try the next candidate */
+    }
+  }
+  return null
+}
+
+test('real cordis: a present connection service must NOT be turned into 503', async (t) => {
+  const cordis = await loadCordis()
+  if (!cordis) return t.skip('cordis is not installed in this checkout')
+  const { Context, Service } = cordis
+
+  class FakeConnection extends Service {
+    constructor(ctx) { super(ctx, 'connection') }
+    requestRejection(req) {
+      return req.headers?.host === 'evil.example' ? 403 : undefined
+    }
+  }
+  class FakeWebServer extends Service {
+    constructor(ctx) { super(ctx, 'webServer'); this.routes = [] }
+    register(def) { this.routes.push(def); return () => {} }
+  }
+  class FakePluginManager extends Service {
+    constructor(ctx) { super(ctx, 'pluginManager') }
+    async installBundle() { throw new Error('must not be called for a rejected request') }
+    async removeBundle() { throw new Error('must not be called for a rejected request') }
+    async setBundleEnabled() { throw new Error('must not be called for a rejected request') }
+    async listBundles() { return [] }
+  }
+
+  const app = new Context()
+  app.plugin(FakeConnection)
+  app.plugin(FakeWebServer)
+  app.plugin(FakePluginManager)
+  await new Promise((r) => setTimeout(r, 100))
+
+  apply(app, {})
+  await new Promise((r) => setTimeout(r, 200))
+
+  const routes = app.get('webServer')?.routes ?? []
+  assert.equal(routes.length, 1, 'route mounted inside a real cordis context')
+  const handler = routes[0].handler
+
+  // The benign case is the one the Reflect.get bug broke: it must be served,
+  // not refused. 503 here means the fence could not see a service that exists.
+  const ok = makeRes()
+  const okReq = makeReq('http://localhost/api/eac-plugin-suite/catalog')
+  okReq.headers = { host: '127.0.0.1:3000' }
+  await handler(okReq, ok)
+  assert.notEqual(ok.statusCode, 503, 'an existing service must never be reported as unavailable')
+  assert.equal(ok.statusCode, 200, 'benign request served normally')
+
+  // The forged-host case must forward the kernel's own verdict.
+  const forged = makeRes()
+  const forgedReq = makeReq('http://localhost/api/eac-plugin-suite/catalog')
+  forgedReq.headers = { host: 'evil.example' }
+  await handler(forgedReq, forged)
+  assert.equal(forged.statusCode, 403, 'kernel 403 verdict is forwarded')
 })

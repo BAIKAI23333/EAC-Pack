@@ -1240,6 +1240,24 @@ function json(res, status, payload) {
 }
 
 /**
+ * Resolve the kernel `connection` service for one request.
+ *
+ * This MUST go through `ctx.get()`, not `Reflect.get(ctx, 'connection')`.
+ * A cordis Context is a Proxy: reading an undeclared service off it throws
+ * `cannot get property "..." without inject`. This plugin deliberately keeps
+ * `connection` OUT of `inject`, because `inject` is a hard dependency -- when
+ * the host does not provide the service, `apply()` never runs at all and the
+ * whole plugin stops loading. `ctx.get()` has the semantics we need here:
+ * the service when present, `undefined` when absent, no throw either way.
+ *
+ * @returns {object|undefined} service instance, or undefined (caller answers 503).
+ */
+function connectionOf(ctx) {
+  if (!ctx || typeof ctx.get !== 'function') return undefined
+  return ctx.get('connection')
+}
+
+/**
  * Kernel trust fence for every route below this prefix.
  *
  * `webServer` matches the LONGEST registered prefix first, so the moment this
@@ -1257,7 +1275,7 @@ function json(res, status, payload) {
 function rejected(ctx, req, res) {
   let connection
   try {
-    connection = Reflect.get(ctx, 'connection')
+    connection = connectionOf(ctx)
   } catch (err) {
     return fenceUnavailable(res, err)
   }

@@ -1,5 +1,5 @@
 diff --git a/lib/index.js b/lib/index.js
-index cde3e54..4093b1a 100644
+index cde3e54..0a924f9 100644
 --- a/lib/index.js
 +++ b/lib/index.js
 @@ -14,7 +14,9 @@ const execFileP = promisify(execFile);
@@ -13,7 +13,7 @@ index cde3e54..4093b1a 100644
  //   GET /api/dsh-files/list?path=...     —— 一层目录列表（「全部文件」树）
  //   GET /dsh-files/static/<绝对路径>     —— 静态文件服务（HTML 站内侧边预览，
  //                                           相对资源引用随 URL 路径自然解析）
-@@ -91,6 +93,53 @@ function isLoopback(req) {
+@@ -91,6 +93,67 @@ function isLoopback(req) {
    return ra === "127.0.0.1" || ra === "::1" || ra === "::ffff:127.0.0.1";
  }
  
@@ -28,6 +28,20 @@ index cde3e54..4093b1a 100644
 +// 是 fail-closed —— 取不到或调用异常一律 503，绝不静默放行。
 +// ---------------------------------------------------------------------------
 +
++/**
++ * 取内核 connection 服务。
++ *
++ * 必须用 ctx.get()，不能用 Reflect.get()：cordis 的 Context 是 Proxy，通过
++ * Proxy 取服务时要求该服务已写进 inject 声明，否则抛
++ * `cannot get property "..." without inject`。本插件刻意不把 connection 写进
++ * inject（硬依赖会在宿主缺该服务时让 apply 不执行、整个插件不加载），所以走
++ * ctx.get()：服务在就返回实例，不在就返回 undefined。
++ */
++function connectionOf(ctx) {
++  if (!ctx || typeof ctx.get !== "function") return undefined;
++  return ctx.get("connection");
++}
++
 +/** 围栏判定不可得时：503 + 空响应体，不泄露内部信息。 */
 +function fenceUnavailable(res) {
 +  res.writeHead(503, { "cache-control": "no-store" });
@@ -39,7 +53,7 @@ index cde3e54..4093b1a 100644
 +function rejected(ctx, req, res) {
 +  let connection;
 +  try {
-+    connection = Reflect.get(ctx, "connection");
++    connection = connectionOf(ctx);
 +  } catch {
 +    return fenceUnavailable(res);
 +  }
@@ -67,7 +81,7 @@ index cde3e54..4093b1a 100644
  function sendJson(res, status, body) {
    const data = Buffer.from(JSON.stringify(body), "utf8");
    res.writeHead(status, {
-@@ -504,12 +553,12 @@ const inject = ["sessionProjections", "webServer"];
+@@ -504,12 +567,12 @@ const inject = ["sessionProjections", "webServer"];
  function apply(ctx) {
    ctx.sessionProjections.register(fileChangesProjectionDefinition);
    const disposers = [

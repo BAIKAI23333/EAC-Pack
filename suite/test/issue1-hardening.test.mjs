@@ -46,13 +46,17 @@ function mockCtx({ pluginManager, fence } = {}) {
       return () => registered.splice(registered.indexOf(def), 1)
     },
   }
-  // See host.test.mjs: the API handler consults the kernel `connection` service
-  // per request; default stub passes, `fence` overrides it for negative cases.
+  // See host.test.mjs: the handler resolves the kernel `connection` service via
+  // `ctx.get('connection')` (a real cordis Context throws on Reflect.get for
+  // undeclared services). Default stub passes; `fence` overrides for negatives.
   const connection = { requestRejection: fence ?? (() => undefined) }
   const ctx = {
     pluginManager,
     connection,
     logger: { info() {}, warn() {}, error() {} },
+    get(name) {
+      return name === 'connection' ? connection : undefined
+    },
     effect(fn) {
       return fn()
     },
