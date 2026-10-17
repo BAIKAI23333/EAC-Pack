@@ -35,7 +35,7 @@ function makeReq(url, method = 'GET', body) {
   }
 }
 
-function mockCtx({ pluginManager, home }) {
+function mockCtx({ pluginManager, home, fence } = {}) {
   const registered = []
   const webServer = {
     register(def) {
@@ -43,14 +43,21 @@ function mockCtx({ pluginManager, home }) {
       return () => registered.splice(registered.indexOf(def), 1)
     },
   }
+  // The API handler asks the kernel's `connection` service for a trust verdict
+  // on every request. The default stub passes (no rejection); pass a `fence`
+  // function to exercise the rejection and unavailable branches.
+  const connection = {
+    requestRejection: fence ?? (() => undefined),
+  }
   const ctx = {
     pluginManager,
+    connection,
     logger: { info() {}, warn() {}, error() {} },
     effect(fn) {
       return fn()
     },
     inject(deps, cb) {
-      cb({ webServer, pluginManager })
+      cb({ webServer, pluginManager, connection })
     },
   }
   return { ctx, registered }

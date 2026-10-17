@@ -39,7 +39,7 @@ function makeReq(url, method = 'GET', body) {
   }
 }
 
-function mockCtx({ pluginManager }) {
+function mockCtx({ pluginManager, fence } = {}) {
   const registered = []
   const webServer = {
     register(def) {
@@ -47,14 +47,18 @@ function mockCtx({ pluginManager }) {
       return () => {}
     },
   }
+  // See host.test.mjs: the API handler consults the kernel `connection` service
+  // per request; default stub passes, `fence` overrides it for negative cases.
+  const connection = { requestRejection: fence ?? (() => undefined) }
   const ctx = {
     pluginManager,
+    connection,
     logger: { info() {}, warn() {}, error() {} },
     effect(fn) {
       return fn()
     },
     inject(deps, cb) {
-      cb({ webServer, pluginManager })
+      cb({ webServer, pluginManager, connection })
     },
   }
   return { ctx, registered }

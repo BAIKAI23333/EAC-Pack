@@ -350,16 +350,18 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-file-changes-0.1.0.tgz",
-      "sha256": "601b23fcec3d39f8d726dbe09fca9720361bf3d4f402ceaff655cbcdf52ecb4d",
-      "bytes": 6979,
+      "sha256": "43a7b57791ffcebcf12b15cbd06d897665bf851e313c7c6c0719e19c9433e25d",
+      "bytes": 7523,
       "source": "eac-tag",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-file-changes-0.1.0.tgz",
-          "bytes": 6979,
-          "sha256": "601b23fcec3d39f8d726dbe09fca9720361bf3d4f402ceaff655cbcdf52ecb4d"
+          "bytes": 7523,
+          "sha256": "43a7b57791ffcebcf12b15cbd06d897665bf851e313c7c6c0719e19c9433e25d"
         }
-      ]
+      ],
+      "locallyRepacked": true,
+      "repackNote": "Auth-fence defect (BUG-AUTH-FENCE-HANDOVER-20261017): the kernel authentication gate is itself a route on /api and webServer matches the LONGEST prefix first, so mounting /api/dsh-files/* silently bypasses it — register() adds no fence of its own. Every route (the 4 JSON endpoints plus the /dsh-files/static/ preview prefix) now asks the kernel connection.requestRejection() before doing any work, and FAILS CLOSED (503) when that service is unreachable instead of letting the request through."
     },
     {
       "id": "float-window",
