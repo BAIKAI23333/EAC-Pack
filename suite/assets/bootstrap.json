@@ -272,54 +272,16 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-balance-0.1.0.tgz",
-      "sha256": "82cd2e34590e314d887d6033b8db35cdb261458d8f24811bb7abba8bbb48b6b7",
-      "bytes": 5281,
+      "sha256": "55ab2f12bbf06ab71ce56ecfe247ba244e5544d8ce294606105c2058cd7bda40",
+      "bytes": 5344,
       "source": "eac-tag",
       "locallyRepacked": true,
       "repackNote": "Drops the 价格设置 settings section and its now-unreachable implementation: its balancePrices/balanceModels/refreshBalance bridge is retired by ADR 0006, so the section could only ever render a misleading \"桥接不可用\" error. The composer dock is unchanged.",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-balance-0.1.0.tgz",
-          "bytes": 5281,
-          "sha256": "82cd2e34590e314d887d6033b8db35cdb261458d8f24811bb7abba8bbb48b6b7"
-        }
-      ]
-    },
-    {
-      "id": "client-file-changes",
-      "name": "@deepseek-ai/dsh-client-file-changes",
-      "version": "0.1.0",
-      "packs": [
-        "eac"
-      ],
-      "file": "@deepseek-ai_dsh-client-file-changes-0.1.0.tgz",
-      "sha256": "a8a47277fc7bc4187093764c860e7a510fd8fd08df4eee740c9462d5a5491545",
-      "bytes": 11528,
-      "source": "eac-tag",
-      "parts": [
-        {
-          "file": "@deepseek-ai_dsh-client-file-changes-0.1.0.tgz",
-          "bytes": 11528,
-          "sha256": "a8a47277fc7bc4187093764c860e7a510fd8fd08df4eee740c9462d5a5491545"
-        }
-      ]
-    },
-    {
-      "id": "conversation-tweaks",
-      "name": "@deepseek-ai/dsh-conversation-tweaks",
-      "version": "0.1.0",
-      "packs": [
-        "eac"
-      ],
-      "file": "@deepseek-ai_dsh-conversation-tweaks-0.1.0.tgz",
-      "sha256": "58606e78dc2abed5bf83a83a3aaa754de75521e386678ec965415988291543cc",
-      "bytes": 4782,
-      "source": "eac-tag",
-      "parts": [
-        {
-          "file": "@deepseek-ai_dsh-conversation-tweaks-0.1.0.tgz",
-          "bytes": 4782,
-          "sha256": "58606e78dc2abed5bf83a83a3aaa754de75521e386678ec965415988291543cc"
+          "bytes": 5344,
+          "sha256": "55ab2f12bbf06ab71ce56ecfe247ba244e5544d8ce294606105c2058cd7bda40"
         }
       ]
     },
@@ -402,26 +364,6 @@
       ]
     },
     {
-      "id": "plugin-manager",
-      "name": "@deepseek-ai/dsh-plugin-manager",
-      "version": "0.1.0",
-      "packs": [
-        "aio",
-        "eac"
-      ],
-      "file": "@deepseek-ai_dsh-plugin-manager-0.1.0.tgz",
-      "sha256": "ddf6cc334d2b806b021ace107b79f660a4a974a89ed3b513e0ce35fc9322bbe0",
-      "bytes": 8053,
-      "source": "eac-tag",
-      "parts": [
-        {
-          "file": "@deepseek-ai_dsh-plugin-manager-0.1.0.tgz",
-          "bytes": 8053,
-          "sha256": "ddf6cc334d2b806b021ace107b79f660a4a974a89ed3b513e0ce35fc9322bbe0"
-        }
-      ]
-    },
-    {
       "id": "prompt-custom",
       "name": "@deepseek-ai/dsh-prompt-custom",
       "version": "0.1.0",
@@ -457,25 +399,6 @@
           "file": "@deepseek-ai_dsh-skin-switch-0.1.0.tgz",
           "bytes": 12757,
           "sha256": "d0a6755ba5803ab19e8117af6dd8a8a5ca6a61a33a0113e09254543653471178"
-        }
-      ]
-    },
-    {
-      "id": "terminal",
-      "name": "@deepseek-ai/dsh-terminal",
-      "version": "0.1.0",
-      "packs": [
-        "eac"
-      ],
-      "file": "@deepseek-ai_dsh-terminal-0.1.0.tgz",
-      "sha256": "5a4c01b1d9861d28a1dfd47d2ccd7aaafc62ca9ba890c38de43d7850604052d8",
-      "bytes": 12020,
-      "source": "eac-tag",
-      "parts": [
-        {
-          "file": "@deepseek-ai_dsh-terminal-0.1.0.tgz",
-          "bytes": 12020,
-          "sha256": "5a4c01b1d9861d28a1dfd47d2ccd7aaafc62ca9ba890c38de43d7850604052d8"
         }
       ]
     },
@@ -824,21 +747,19 @@
     {
       "id": "computer-user",
       "name": "computer-user",
-      "version": "0.3.7",
+      "version": "0.3.6",
       "packs": [
         "eac"
       ],
-      "file": "computer-user-0.3.7.tgz",
-      "sha256": "f07cd2ad42e120cc33ce0c9c682c0a11fd0ffac385e8dced425ece1c374cebd6",
-      "bytes": 44585,
+      "file": "computer-user-0.3.6.tgz",
+      "sha256": "5d5ef7e332dfdf54361811e603f7d8f7af818aae0b720b0982edcc99a08bb955",
+      "bytes": 40528,
       "source": "npm",
-      "locallyRepacked": true,
-      "repackNote": "Expose Config on the default export (the loader unwraps to default, so a named export alone is dropped), mark its fields volatile, and swap the retired settingsScope inject for a dual-generation configForms probe. Upstream 0.3.7 is maintained but targets the 0.1.3 kernel; drop these patches once it ships a 0.2.x release.",
       "parts": [
         {
-          "file": "computer-user-0.3.7.tgz",
-          "bytes": 44585,
-          "sha256": "f07cd2ad42e120cc33ce0c9c682c0a11fd0ffac385e8dced425ece1c374cebd6"
+          "file": "computer-user-0.3.6.tgz",
+          "bytes": 40528,
+          "sha256": "5d5ef7e332dfdf54361811e603f7d8f7af818aae0b720b0982edcc99a08bb955"
         }
       ]
     },
@@ -877,45 +798,6 @@
           "file": "dsh-auto-compact-0.1.0.tgz",
           "bytes": 6002,
           "sha256": "4d42dbaa229cde82e0ef2fe5e320a721baac8f8e30e926e71c1ce12c9952c748"
-        }
-      ]
-    },
-    {
-      "id": "better-sidebar",
-      "name": "dsh-better-sidebar",
-      "version": "0.15.3-eac.1",
-      "packs": [
-        "aio",
-        "eac"
-      ],
-      "file": "dsh-better-sidebar-0.15.3-eac.1.tgz",
-      "sha256": "95e5fc933189765088dca83bd6589e22eaa494a9c9d25277ca43355856197fad",
-      "bytes": 2473554,
-      "source": "eac-tag",
-      "parts": [
-        {
-          "file": "dsh-better-sidebar-0.15.3-eac.1.tgz",
-          "bytes": 2473554,
-          "sha256": "95e5fc933189765088dca83bd6589e22eaa494a9c9d25277ca43355856197fad"
-        }
-      ]
-    },
-    {
-      "id": "change-review",
-      "name": "dsh-change-review",
-      "version": "0.1.0",
-      "packs": [
-        "eac"
-      ],
-      "file": "dsh-change-review-0.1.0.tgz",
-      "sha256": "e8614a40c491b144eac9427d500d0871b43b35f476af7c3c421a9e8d3693f39e",
-      "bytes": 6618,
-      "source": "eac-tag",
-      "parts": [
-        {
-          "file": "dsh-change-review-0.1.0.tgz",
-          "bytes": 6618,
-          "sha256": "e8614a40c491b144eac9427d500d0871b43b35f476af7c3c421a9e8d3693f39e"
         }
       ]
     },
@@ -974,45 +856,6 @@
           "file": "dsh-composer-dynamic-island-2.1.0.tgz",
           "bytes": 18512,
           "sha256": "7095e75b4e297d74772deae3ec526592373607c3a50a3db5732438335d9b1a3c"
-        }
-      ]
-    },
-    {
-      "id": "dafeiyu",
-      "name": "dsh-dafeiyu",
-      "version": "0.1.14",
-      "packs": [
-        "eac"
-      ],
-      "file": "dsh-dafeiyu-0.1.14.tgz",
-      "sha256": "e9f506542488b6cc0aad5999315af54551b182214d6cfcce0d284e912d2489e2",
-      "bytes": 167827628,
-      "source": "npm",
-      "parts": [
-        {
-          "file": "dsh-dafeiyu-0.1.14.tgz.chunk-000.bin",
-          "bytes": 41943040,
-          "sha256": "9b5664dc7a6cbc66db5ff6c38543b0d0fe5ad8933410950d8a4820637f9d9479"
-        },
-        {
-          "file": "dsh-dafeiyu-0.1.14.tgz.chunk-001.bin",
-          "bytes": 41943040,
-          "sha256": "e60bd29d507d4a1018d4282548b1f7bd422ce5b5f58dce74248431e21c98cc8e"
-        },
-        {
-          "file": "dsh-dafeiyu-0.1.14.tgz.chunk-002.bin",
-          "bytes": 41943040,
-          "sha256": "43c74d3cceedeadfedf880b61dfec1aa4e33dafd8d1933ce6b3d76669447f5a3"
-        },
-        {
-          "file": "dsh-dafeiyu-0.1.14.tgz.chunk-003.bin",
-          "bytes": 41943040,
-          "sha256": "28db092978bfa90f3127cda6afd3f5316b159654039e967cd0daabc2e2f64eb9"
-        },
-        {
-          "file": "dsh-dafeiyu-0.1.14.tgz.chunk-004.bin",
-          "bytes": 55468,
-          "sha256": "574f73b7c2e8829c199d844f402a74ff7c8807b26096594cb51ed539d2d89b97"
         }
       ]
     },
@@ -1348,21 +1191,21 @@
     {
       "id": "wallpaper-engine",
       "name": "dsh-plugin-wallpaper-engine",
-      "version": "1.3.3",
+      "version": "0.6.7",
       "packs": [
         "aio"
       ],
-      "file": "dsh-plugin-wallpaper-engine-1.3.3.tgz",
-      "sha256": "581d75a69634e82469988da798df1713470cd6eb673be77ace4b0e4df77278b3",
-      "bytes": 3529607,
+      "file": "dsh-plugin-wallpaper-engine-0.6.7.tgz",
+      "sha256": "f2f2581091bfb6d59794604caf707abbfc254661829cc301a6f51c44103867e3",
+      "bytes": 794329,
       "source": "npm",
       "locallyRepacked": true,
-      "repackNote": "Update-notice button contrast: pin light values (outline 1.10:1 -> 3.11:1, label 1.06:1 -> 4.95:1) on the dark glass card. Regenerated for 1.3.3 (anchor line moved 4795 -> 4721; upstream still ships align-self: flex-end unchanged).",
+      "repackNote": "Update-notice button contrast: pin light values (outline 1.10:1 -> 3.11:1, label 1.06:1 -> 4.95:1) on the dark glass card.",
       "parts": [
         {
-          "file": "dsh-plugin-wallpaper-engine-1.3.3.tgz",
-          "bytes": 3529607,
-          "sha256": "581d75a69634e82469988da798df1713470cd6eb673be77ace4b0e4df77278b3"
+          "file": "dsh-plugin-wallpaper-engine-0.6.7.tgz",
+          "bytes": 794329,
+          "sha256": "f2f2581091bfb6d59794604caf707abbfc254661829cc301a6f51c44103867e3"
         }
       ]
     },
@@ -1412,16 +1255,16 @@
         "eac"
       ],
       "file": "dsh-settings-groups-0.1.0.tgz",
-      "sha256": "7cbe1cb485c2138794fd35a98e438371f442d2cb3f0677f94a20d79b429ed457",
-      "bytes": 5887,
+      "sha256": "75b56ccd2e1d5f27fd4d0e9b734318116d97e769a08432e6b5e8750974cd652c",
+      "bytes": 5894,
       "source": "eac-tag",
       "locallyRepacked": true,
       "repackNote": "General-settings collapser: real rows are the slot wrapper children, not the wrapper itself (the whole page used to be hidden as a single \"advanced\" row).",
       "parts": [
         {
           "file": "dsh-settings-groups-0.1.0.tgz",
-          "bytes": 5887,
-          "sha256": "7cbe1cb485c2138794fd35a98e438371f442d2cb3f0677f94a20d79b429ed457"
+          "bytes": 5894,
+          "sha256": "75b56ccd2e1d5f27fd4d0e9b734318116d97e769a08432e6b5e8750974cd652c"
         }
       ]
     },
@@ -1658,19 +1501,19 @@
     {
       "id": "picturereader",
       "name": "picturereader",
-      "version": "3.5.0",
+      "version": "3.3.1",
       "packs": [
         "eac"
       ],
-      "file": "picturereader-3.5.0.tgz",
-      "sha256": "bcc453665ff3b63c63b299f6d62296c1d131e888e31ee7794f1885e8ad8d8a54",
-      "bytes": 156405,
-      "source": "github",
+      "file": "picturereader-3.3.1.tgz",
+      "sha256": "6db6246aba1cdaa5a426df6353c6bbc983549d531b99ae012897dfdc5bcf0157",
+      "bytes": 133657,
+      "source": "npm",
       "parts": [
         {
-          "file": "picturereader-3.5.0.tgz",
-          "bytes": 156405,
-          "sha256": "bcc453665ff3b63c63b299f6d62296c1d131e888e31ee7794f1885e8ad8d8a54"
+          "file": "picturereader-3.3.1.tgz",
+          "bytes": 133657,
+          "sha256": "6db6246aba1cdaa5a426df6353c6bbc983549d531b99ae012897dfdc5bcf0157"
         }
       ]
     }
