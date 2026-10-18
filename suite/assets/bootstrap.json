@@ -936,25 +936,6 @@
       ]
     },
     {
-      "id": "feature-toggles",
-      "name": "dsh-feature-toggles",
-      "version": "0.1.1",
-      "packs": [
-        "eac"
-      ],
-      "file": "dsh-feature-toggles-0.1.1.tgz",
-      "sha256": "a79d3d1329ca8f635c978a2384762a7447f4975ff9b4c1ec866d794fc59d541a",
-      "bytes": 4126,
-      "source": "eac-tag",
-      "parts": [
-        {
-          "file": "dsh-feature-toggles-0.1.1.tgz",
-          "bytes": 4126,
-          "sha256": "a79d3d1329ca8f635c978a2384762a7447f4975ff9b4c1ec866d794fc59d541a"
-        }
-      ]
-    },
-    {
       "id": "file-drop-eac",
       "name": "dsh-file-drop-eac",
       "version": "0.1.0",

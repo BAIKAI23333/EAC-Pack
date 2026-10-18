@@ -499,25 +499,6 @@
     "notes": "EAC 自研（private），npm 无发布。重外部集成：无 EAC 壳 sidecar 时配对/代理不可用。"
   },
   {
-    "id": "feature-toggles",
-    "name": "dsh-feature-toggles",
-    "version": "0.1.1",
-    "source": "eac-tag",
-    "spec": "file:dist/dsh-feature-toggles-0.1.1.tgz",
-    "packs": [
-      "eac"
-    ],
-    "tier": "core",
-    "defaultEnabled": true,
-    "titleZh": "增强功能开关",
-    "titleEn": "Feature Toggles",
-    "descZh": "设置页「增强功能」分区：为默认关闭的内置插件（余额小鲸鱼/AgentTeams 等）提供一键启用/停用开关。",
-    "descEn": "Settings section providing one-click toggles for bundled plugins that ship disabled (whale widget, agent teams, etc.).",
-    "license": "MIT",
-    "upstream": "https://github.com/DSH-EAC/DSH-Desktop-EAC (tag v5.3.6)",
-    "notes": "EAC 自研，npm 无发布。EAC 注册表行 id: dsh-feature-toggles。"
-  },
-  {
     "id": "whale-widget",
     "name": "dsh-whale-widget",
     "version": "0.3.17",
