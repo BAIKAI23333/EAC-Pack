@@ -1,1 +1,7 @@
 # Baseline binary assets are distributed through the registry, not this Git tree.
+
+# Tracked unified diffs under patches/ must keep their exact bytes.
+# With core.autocrlf=true a normal text checkout rewrites every line to CRLF,
+# which destroys the hunk context and makes `git apply -p1` fail at repack time.
+# `-text` disables all EOL conversion for these files on every platform.
+patches/**/*.diff -text
