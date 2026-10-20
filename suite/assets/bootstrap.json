@@ -312,18 +312,18 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-conversation-tweaks-0.1.0.tgz",
-      "sha256": "5c2bfdd547815ffed202700bd493110be002763fbd655323736f54c442dcf6a9",
-      "bytes": 7307,
+      "sha256": "26c262b67cd6a8bd2f9e16a05d3439bff99c144e725e09234cce6f98dc4b0716",
+      "bytes": 7351,
       "source": "eac-tag",
+      "locallyRepacked": true,
+      "repackNote": "0.2.x 内核移除了 @deepseek-ai/dsh-settings 的 settingsNamespace / installSettingsSection 与 settingsScope 服务：前者让服务端在 ESM 链接期抛 SyntaxError、整棵插件树无法激活；后者让客户端 fiber 永久停在 waitingFor、设置项静默消失。本补丁改指随插件分发的兼容垫片，并把客户端改为 configForms（0.2.x）优先 / settingsScope（0.1.x）兜底的运行时探测。",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-conversation-tweaks-0.1.0.tgz",
-          "bytes": 7307,
-          "sha256": "5c2bfdd547815ffed202700bd493110be002763fbd655323736f54c442dcf6a9"
+          "bytes": 7351,
+          "sha256": "26c262b67cd6a8bd2f9e16a05d3439bff99c144e725e09234cce6f98dc4b0716"
         }
-      ],
-      "locallyRepacked": true,
-      "repackNote": "0.2.x 内核移除了 @deepseek-ai/dsh-settings 的 settingsNamespace / installSettingsSection 与 settingsScope 服务：前者让服务端在 ESM 链接期抛 SyntaxError、整棵插件树无法激活；后者让客户端 fiber 永久停在 waitingFor、设置项静默消失。本补丁改指随插件分发的兼容垫片，并把客户端改为 configForms（0.2.x）优先 / settingsScope（0.1.x）兜底的运行时探测。"
+      ]
     },
     {
       "id": "easy-setup",
@@ -390,18 +390,18 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-openclaw-bridge-0.7.0.tgz",
-      "sha256": "b3cbbc5fdefd5fae33249322ee7a63de8eeb1dfffc7f2fafeae68a7ca7b2d417",
-      "bytes": 46075,
+      "sha256": "476121daaacccae837ea842ebd601e8140103e4e465c15d052907695fb4ba298",
+      "bytes": 46151,
       "source": "eac-tag",
+      "locallyRepacked": true,
+      "repackNote": "0.2.x 内核移除了 @deepseek-ai/dsh-settings 的 settingsNamespace / installSettingsSection 与 settingsScope 服务。前者让服务端在 ESM 链接期抛 SyntaxError，整棵插件树（含桥接路由）无法激活；后者让客户端 fiber 永久 waitingFor。本补丁改指随插件分发的兼容垫片并改为运行时探测。",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-openclaw-bridge-0.7.0.tgz",
-          "bytes": 46075,
-          "sha256": "b3cbbc5fdefd5fae33249322ee7a63de8eeb1dfffc7f2fafeae68a7ca7b2d417"
+          "bytes": 46151,
+          "sha256": "476121daaacccae837ea842ebd601e8140103e4e465c15d052907695fb4ba298"
         }
-      ],
-      "locallyRepacked": true,
-      "repackNote": "0.2.x 内核移除了 @deepseek-ai/dsh-settings 的 settingsNamespace / installSettingsSection 与 settingsScope 服务。前者让服务端在 ESM 链接期抛 SyntaxError，整棵插件树（含桥接路由）无法激活；后者让客户端 fiber 永久 waitingFor。本补丁改指随插件分发的兼容垫片并改为运行时探测。"
+      ]
     },
     {
       "id": "plugin-manager",
@@ -431,18 +431,18 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-prompt-custom-0.1.0.tgz",
-      "sha256": "0a9093938f56be2f69b5768785ec6247a2b9f5ee9f35f9f18567155a32bc18e1",
-      "bytes": 8979,
+      "sha256": "f5e04c87bf18e2596b948458f4cedbaf4d2f81170f00e86e136d6766ec1426c5",
+      "bytes": 8972,
       "source": "eac-tag",
+      "locallyRepacked": true,
+      "repackNote": "0.2.x 内核移除了 @deepseek-ai/dsh-settings 的 settingsNamespace / installSettingsSection 与 settingsScope 服务（服务端链接期 SyntaxError、客户端 fiber 永久 waitingFor），并把人格分段常量 PERSONA_SECTION / PERSONA_ORDER 改名为 PERSONA_PREFIX_SECTION / PERSONA_SUFFIX_SECTION。本补丁三处一并适配，保持原有分段顺序。",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-prompt-custom-0.1.0.tgz",
-          "bytes": 8979,
-          "sha256": "0a9093938f56be2f69b5768785ec6247a2b9f5ee9f35f9f18567155a32bc18e1"
+          "bytes": 8972,
+          "sha256": "f5e04c87bf18e2596b948458f4cedbaf4d2f81170f00e86e136d6766ec1426c5"
         }
-      ],
-      "locallyRepacked": true,
-      "repackNote": "0.2.x 内核移除了 @deepseek-ai/dsh-settings 的 settingsNamespace / installSettingsSection 与 settingsScope 服务（服务端链接期 SyntaxError、客户端 fiber 永久 waitingFor），并把人格分段常量 PERSONA_SECTION / PERSONA_ORDER 改名为 PERSONA_PREFIX_SECTION / PERSONA_SUFFIX_SECTION。本补丁三处一并适配，保持原有分段顺序。"
+      ]
     },
     {
       "id": "skin-switch",
@@ -896,15 +896,15 @@
       "sha256": "a9556343af1646c76674f7f8af6c6ed5ccb95b31763d5aa33ac93eb4d535af3c",
       "bytes": 2476253,
       "source": "eac-tag",
+      "locallyRepacked": true,
+      "repackNote": "0.2.x 内核移除了 @deepseek-ai/dsh-settings 的 settingsNamespace 具名导出（SettingsConflictError 仍在）。具名 import 在 ESM 链接期解析，缺失导出让服务端整棵插件树 SyntaxError、侧栏永不激活。本补丁把该符号改指随插件分发的兼容垫片。",
       "parts": [
         {
           "file": "dsh-better-sidebar-0.15.3-eac.1.tgz",
           "bytes": 2476253,
           "sha256": "a9556343af1646c76674f7f8af6c6ed5ccb95b31763d5aa33ac93eb4d535af3c"
         }
-      ],
-      "locallyRepacked": true,
-      "repackNote": "0.2.x 内核移除了 @deepseek-ai/dsh-settings 的 settingsNamespace 具名导出（SettingsConflictError 仍在）。具名 import 在 ESM 链接期解析，缺失导出让服务端整棵插件树 SyntaxError、侧栏永不激活。本补丁把该符号改指随插件分发的兼容垫片。"
+      ]
     },
     {
       "id": "change-review",
@@ -955,15 +955,15 @@
       "sha256": "0ab31301c9f400bf6c8363f062a2b08619af55a82c70763e534e4d09dd95e49f",
       "bytes": 16912,
       "source": "eac-tag",
+      "locallyRepacked": true,
+      "repackNote": "0.2.x 内核移除了 @deepseek-ai/dsh-settings 的 settingsNamespace 与 settingsScope 服务。前者让服务端在 ESM 链接期抛 SyntaxError、整棵插件树无法激活；后者让客户端 fiber 永久 waitingFor。本补丁改指随插件分发的兼容垫片并改为运行时探测。",
       "parts": [
         {
           "file": "dsh-compact-1.0.1.tgz",
           "bytes": 16912,
           "sha256": "0ab31301c9f400bf6c8363f062a2b08619af55a82c70763e534e4d09dd95e49f"
         }
-      ],
-      "locallyRepacked": true,
-      "repackNote": "0.2.x 内核移除了 @deepseek-ai/dsh-settings 的 settingsNamespace 与 settingsScope 服务。前者让服务端在 ESM 链接期抛 SyntaxError、整棵插件树无法激活；后者让客户端 fiber 永久 waitingFor。本补丁改指随插件分发的兼容垫片并改为运行时探测。"
+      ]
     },
     {
       "id": "composer-dynamic-island",
