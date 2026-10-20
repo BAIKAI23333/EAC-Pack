@@ -272,16 +272,16 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-balance-0.1.0.tgz",
-      "sha256": "55ab2f12bbf06ab71ce56ecfe247ba244e5544d8ce294606105c2058cd7bda40",
-      "bytes": 5344,
+      "sha256": "82cd2e34590e314d887d6033b8db35cdb261458d8f24811bb7abba8bbb48b6b7",
+      "bytes": 5281,
       "source": "eac-tag",
       "locallyRepacked": true,
       "repackNote": "Drops the 价格设置 settings section and its now-unreachable implementation: its balancePrices/balanceModels/refreshBalance bridge is retired by ADR 0006, so the section could only ever render a misleading \"桥接不可用\" error. The composer dock is unchanged.",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-balance-0.1.0.tgz",
-          "bytes": 5344,
-          "sha256": "55ab2f12bbf06ab71ce56ecfe247ba244e5544d8ce294606105c2058cd7bda40"
+          "bytes": 5281,
+          "sha256": "82cd2e34590e314d887d6033b8db35cdb261458d8f24811bb7abba8bbb48b6b7"
         }
       ]
     },
@@ -1408,16 +1408,16 @@
         "eac"
       ],
       "file": "dsh-settings-groups-0.1.0.tgz",
-      "sha256": "75b56ccd2e1d5f27fd4d0e9b734318116d97e769a08432e6b5e8750974cd652c",
-      "bytes": 5894,
+      "sha256": "7cbe1cb485c2138794fd35a98e438371f442d2cb3f0677f94a20d79b429ed457",
+      "bytes": 5887,
       "source": "eac-tag",
       "locallyRepacked": true,
       "repackNote": "General-settings collapser: real rows are the slot wrapper children, not the wrapper itself (the whole page used to be hidden as a single \"advanced\" row).",
       "parts": [
         {
           "file": "dsh-settings-groups-0.1.0.tgz",
-          "bytes": 5894,
-          "sha256": "75b56ccd2e1d5f27fd4d0e9b734318116d97e769a08432e6b5e8750974cd652c"
+          "bytes": 5887,
+          "sha256": "7cbe1cb485c2138794fd35a98e438371f442d2cb3f0677f94a20d79b429ed457"
         }
       ]
     },
@@ -1654,19 +1654,19 @@
     {
       "id": "picturereader",
       "name": "picturereader",
-      "version": "3.3.1",
+      "version": "3.5.0",
       "packs": [
         "eac"
       ],
-      "file": "picturereader-3.3.1.tgz",
-      "sha256": "6db6246aba1cdaa5a426df6353c6bbc983549d531b99ae012897dfdc5bcf0157",
-      "bytes": 133657,
-      "source": "npm",
+      "file": "picturereader-3.5.0.tgz",
+      "sha256": "bcc453665ff3b63c63b299f6d62296c1d131e888e31ee7794f1885e8ad8d8a54",
+      "bytes": 156405,
+      "source": "github",
       "parts": [
         {
-          "file": "picturereader-3.3.1.tgz",
-          "bytes": 133657,
-          "sha256": "6db6246aba1cdaa5a426df6353c6bbc983549d531b99ae012897dfdc5bcf0157"
+          "file": "picturereader-3.5.0.tgz",
+          "bytes": 156405,
+          "sha256": "bcc453665ff3b63c63b299f6d62296c1d131e888e31ee7794f1885e8ad8d8a54"
         }
       ]
     }
