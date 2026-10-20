@@ -19,6 +19,18 @@
  * A drifted upstream therefore fails the build loudly instead of shipping a
  * half-applied fix.
  *
+ * Create mode (new files)
+ * -----------------------
+ * A file entry with `"create": true` adds a file the upstream package does not
+ * ship (e.g. a self-contained compat shim). Its contract is still fail-closed:
+ *   1. the target MUST NOT exist, and `inputSha256` MUST be absent — supplying
+ *      one means “patch an existing file”, which contradicts `create`;
+ *   2. the tracked diff (`--- /dev/null` → `+++ b/<path>`) is applied with the
+ *      same byte-exact `git apply` in the same scratch directory;
+ *   3. the produced bytes MUST hash to `outputSha256`, else throw — only then is
+ *      the file written into staging (parent directories created as needed).
+ * Entries without `create: true` keep the byte-for-byte replay described above.
+ *
  * Why the patch is applied in a scratch directory
  * ----------------------------------------------
  * repack.mjs stages inside `<repo>/.cache/...`, which .gitignore excludes.
@@ -48,10 +60,15 @@ export function loadPatchManifest() {
 }
 
 /**
+ * @param {object} entry        catalog entry ({name, version, ...})
+ * @param {string} staging      materialized package root that patches are applied to
+ * @param {Function} [log]      logger; defaults to console.log
+ * @param {object} [manifestOverride]  in-memory manifest, for tests that must not
+ *                               depend on the tracked patches/source-patches.json
  * @returns {Array<{path:string, sha256:string, note:string}>} applied files (empty when none apply)
  */
-export function applySourcePatches(entry, staging, log = console.log) {
-  const manifest = loadPatchManifest();
+export function applySourcePatches(entry, staging, log = console.log, manifestOverride = null) {
+  const manifest = manifestOverride ?? loadPatchManifest();
   const patch = manifest.patches.find((p) => p.name === entry.name);
   if (!patch) return [];
   if (patch.version !== entry.version) {
@@ -68,17 +85,34 @@ export function applySourcePatches(entry, staging, log = console.log) {
         throw new Error(`unsafe patch path: ${String(file.path)}`);
       }
       const target = path.join(staging, ...file.path.split('/'));
-      if (!fs.existsSync(target)) {
-        throw new Error(`source patch target missing: ${entry.name} ${file.path}`);
-      }
+      const isCreate = file.create === true;
+      if (isCreate) {
+        // Create mode: the file must NOT exist yet, and a pinned input hash would
+        // contradict that. Both are authoring mistakes, so fail loudly.
+        if (fs.existsSync(target)) {
+          throw new Error(
+            `source patch create target already exists: ${entry.name} ${file.path}\n` +
+              '  drop "create" and pin inputSha256 if the file is meant to be patched in place',
+          );
+        }
+        if (file.inputSha256 !== undefined) {
+          throw new Error(
+            `source patch create entry must not pin inputSha256: ${entry.name} ${file.path}`,
+          );
+        }
+      } else {
+        if (!fs.existsSync(target)) {
+          throw new Error(`source patch target missing: ${entry.name} ${file.path}`);
+        }
 
-      const beforeSha = sha256(fs.readFileSync(target));
-      if (beforeSha !== file.inputSha256) {
-        throw new Error(
-          `source patch input mismatch for ${entry.name} ${file.path}\n` +
-            `  expected ${file.inputSha256}\n  actual   ${beforeSha}\n` +
-            '  upstream source drifted -> regenerate patches/ or re-pin the base',
-        );
+        const beforeSha = sha256(fs.readFileSync(target));
+        if (beforeSha !== file.inputSha256) {
+          throw new Error(
+            `source patch input mismatch for ${entry.name} ${file.path}\n` +
+              `  expected ${file.inputSha256}\n  actual   ${beforeSha}\n` +
+              '  upstream source drifted -> regenerate patches/ or re-pin the base',
+          );
+        }
       }
 
       const diffPath = path.join(ROOT, 'patches', ...file.diff.split('/'));
@@ -87,7 +121,7 @@ export function applySourcePatches(entry, staging, log = console.log) {
       // Apply outside the repository (see the header note), then copy the verified result back.
       const scratchFile = path.join(scratchRoot, ...file.path.split('/'));
       fs.mkdirSync(path.dirname(scratchFile), { recursive: true });
-      fs.copyFileSync(target, scratchFile);
+      if (!isCreate) fs.copyFileSync(target, scratchFile);
       try {
         execFileSync(
           'git',
@@ -107,6 +141,11 @@ export function applySourcePatches(entry, staging, log = console.log) {
           `source patch output mismatch for ${entry.name} ${file.path}\n` +
             `  expected ${file.outputSha256}\n  actual   ${afterSha}`,
         );
+      }
+      if (isCreate) {
+        // The staging package has no such directory yet, unlike the in-place case
+        // where it was created by materialization.
+        fs.mkdirSync(path.dirname(target), { recursive: true });
       }
       fs.writeFileSync(target, after);
 

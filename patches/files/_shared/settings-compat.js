@@ -1,0 +1,67 @@
+// settings-compat.js — dsh-settings 0.1.x → 0.2.x 兼容垫片（Pack 补丁共享）。
+//
+// 0.2.0-rc.2 的 @deepseek-ai/dsh-settings 只剩这些导出：
+//     SettingsConflictError, SettingsForms（同时是 default）, redactSecrets
+// 0.1.x 时代的 `settingsNamespace` / `installSettingsSection` 已移除，直接具名
+// import 会让 ESM 在**链接期**解析失败抛 SyntaxError —— 整个插件树随之无法
+// 激活（web boot 报 "N entries did not activate" 并拒绝启动），且插件本身
+// 一行代码都没跑到。
+//
+// 本垫片按 0.1.x 的导出形状重建这两个符号，语义对齐 0.2.x 的实际能力：
+//
+//   settingsNamespace(value)
+//     纯品牌 + 校验函数，无运行时状态。0.2.x 的 register/update 路径本来就只做
+//     命名空间形状校验，喂裸字符串语义完全相同。
+//
+//   installSettingsSection(ctx, ns, schema, entry, hooks)
+//     0.2.x **没有** settings.installSection（0.1.3 曾把它收编为 provider 方法，
+//     0.2.x 又整体退役了命名空间注册模型）。因此降级为：settings 服务若提供
+//     installSection 就转发（兼容 0.1.3 段），否则**静默跳过**，插件其余接线
+//     （工具、GUI、语言包）照常完成 —— 与 0.1.2 在 provider 未挂载时的 inject
+//     语义一致，不阻断启动。
+//
+// 为什么用「可选能力探测」而不是硬调：内核跨版本演进，硬调一个此刻不存在的
+// 成员会让插件再次整树失败；探测则最坏情况只是少一张设置卡，不影响功能本体。
+//
+// 分发方式：本文件随插件自包含（EAC 插件本就是自包含分发，不进内核包解析
+// 链），插件内 `from '@deepseek-ai/dsh-settings'` 改为指向本文件。
+
+const NAMESPACE_PATTERN = /^[a-z][a-z0-9-]*$/;
+
+/** Brand a raw string as a settings namespace; validates exactly like the kernel's parser. */
+export function settingsNamespace(value) {
+  if (typeof value !== 'string' || !NAMESPACE_PATTERN.test(value)) {
+    throw new TypeError(`settings namespace "${String(value)}" must match ${String(NAMESPACE_PATTERN)}`);
+  }
+  return value;
+}
+
+/**
+ * Compat wrapper for the retired installSettingsSection(ctx, ns, schema, entry, hooks).
+ *
+ * Never throws: a settings surface is optional, and the surrounding apply() must still
+ * wire up the plugin's real functionality. When the kernel has no settings provider
+ * method at all (0.2.x), this is a no-op and the plugin keeps working.
+ */
+export function installSettingsSection(ctx, ns, schema, entry, hooks) {
+  try {
+    if (!ctx || typeof ctx.inject !== 'function') return;
+    ctx.inject(['settings'], (sctx) => {
+      const settings = sctx && sctx.settings;
+      if (!settings) return;
+      // 0.1.3-era provider method: forward when present.
+      if (typeof settings.installSection === 'function') {
+        settings.installSection(ctx, ns, schema, entry, hooks);
+        return;
+      }
+      // 0.2.x: the namespace-registration model is retired. Best effort only —
+      // never fail plugin activation over a missing settings card.
+      if (typeof hooks?.setSource === 'function') {
+        try {
+          hooks.setSource(() => (entry ?? {}));
+          hooks.onChange?.();
+        } catch { /* best effort */ }
+      }
+    });
+  } catch { /* settings is optional; never block activation */ }
+}

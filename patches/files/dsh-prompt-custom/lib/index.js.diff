@@ -1,0 +1,31 @@
+diff --git a/lib/index.js b/lib/index.js
+index 806b3bc..93a7547 100644
+--- a/lib/index.js
++++ b/lib/index.js
+@@ -14,8 +14,12 @@
+ // system prompt 全文（只读），供客户端设置页「预览官方提示词」入口对照编辑自定义提示词。
+ 
+ import z from "@deepseek-ai/schemastery";
+-import { installSettingsSection, settingsNamespace } from "@deepseek-ai/dsh-settings";
+-import { PERSONA_SECTION, PERSONA_ORDER, renderPrompt } from "@deepseek-ai/dsh-system-prompt";
++// 0.2.x 移除了 dsh-settings 的这两个具名导出；改指随插件自包含分发的兼容垫片。
++// （具名 import 在 ESM 链接期解析，缺失导出会让整棵插件树 SyntaxError。）
++import { installSettingsSection, settingsNamespace } from "./settings-compat.js";
++// 0.2.x 把人格分段常量改名为 PREFIX/SUFFIX 两段（值未变，仍是
++// "deployment:persona-prefix" / "deployment:persona-suffix"）。
++import { PERSONA_PREFIX_SECTION, PERSONA_SUFFIX_SECTION, renderPrompt } from "@deepseek-ai/dsh-system-prompt";
+ 
+ const name = "@deepseek-ai/dsh-prompt-custom";
+ const inject = ["settings", "systemPrompt", "webServer"];
+@@ -117,9 +121,9 @@ function apply(ctx, config) {
+ 		if (!cfg.enabled || !String(cfg.text || "").trim()) return;
+ 		const text = String(cfg.text).trim();
+ 		if (cfg.mode === "replace") {
+-			agent.ctx.systemPrompt.section({ name: PERSONA_SECTION, order: PERSONA_ORDER, text });
++			agent.ctx.systemPrompt.section({ name: PERSONA_PREFIX_SECTION, order: PERSONA_SUFFIX_SECTION - 1, text });
+ 		} else {
+-			agent.ctx.systemPrompt.section({ name: "dsh:custom-prompt", order: PERSONA_ORDER + 1, text });
++			agent.ctx.systemPrompt.section({ name: "dsh:custom-prompt", order: PERSONA_SUFFIX_SECTION + 1, text });
+ 		}
+ 	});
+ 

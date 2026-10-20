@@ -402,6 +402,33 @@ function ensureAttributionFiles(pkg, staging) {
   return added;
 }
 
+// 补丁重建出的文件必须能过 npm pack 的 `files` 白名单。有 `files` 的包只发布
+// 白名单命中的路径 —— 补丁新建的 lib/settings-compat.js 若不在白名单里会被
+// **静默丢弃**（tgz 里没有，但 repack 全绿），运行期才炸。这里把 applySourcePatches
+// 实际写过的路径补进白名单；已被某条（精确路径 / 目录前缀 / glob 前缀）覆盖的跳过。
+function isCoveredByFilesEntry(filePath, entry) {
+  if (entry === filePath) return true;
+  // 目录形式（"lib/" 或 "lib"）覆盖其下全部内容。
+  const dir = entry.replace(/\/+$/, '');
+  if (dir && filePath.startsWith(`${dir}/`)) return true;
+  // glob：只做前缀判断（npm 的 files 用的是 glob，但本仓既有条目都是 `lib/types/**/*.d.ts`
+  // 这类固定前缀形态，按字面前缀判即可，宁可多加一条精确路径也不漏）。
+  const star = entry.indexOf('*');
+  if (star > 0 && filePath.startsWith(entry.slice(0, star))) return true;
+  return false;
+}
+
+function ensurePatchedFiles(pkg, appliedSourcePatches) {
+  if (!Array.isArray(pkg.files)) return []; // 无白名单 = npm 全收，无需补
+  const added = [];
+  for (const { path: patchedPath } of appliedSourcePatches) {
+    if (!patchedPath || pkg.files.some((f) => isCoveredByFilesEntry(patchedPath, f))) continue;
+    pkg.files.push(patchedPath);
+    added.push(patchedPath);
+  }
+  return added;
+}
+
 function sha256(file) {
   return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 }
@@ -455,11 +482,13 @@ for (const entry of entries) {
     if (!Object.keys(pkg.scripts).length) delete pkg.scripts;
   }
   const addedFiles = ensureAttributionFiles(pkg, staging);
-  if (override || changes.length || addedFiles.length || strippedScripts.length) {
+  const addedPatched = ensurePatchedFiles(pkg, appliedSourcePatches);
+  if (override || changes.length || addedFiles.length || addedPatched.length || strippedScripts.length) {
     fs.writeFileSync(pkgFile, JSON.stringify(pkg, null, 2) + '\n');
     for (const c of changes) log(`  peer: ${c}`);
     if (strippedScripts.length) log(`  scripts-= ${strippedScripts.join(', ')}`);
-    if (addedFiles.length) log(`  files+= ${addedFiles.join(', ')}`);
+    const filesAdded = [...addedFiles, ...addedPatched];
+    if (filesAdded.length) log(`  files+= ${filesAdded.join(', ')}`);
   }
 
   const packOut = JSON.parse(

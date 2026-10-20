@@ -79,6 +79,144 @@
         }
       ],
       "summary": "Expose Config on the default export (the loader unwraps to default, so a named export alone is dropped), mark its fields volatile, and swap the retired settingsScope inject for a dual-generation configForms probe. Upstream 0.3.7 is maintained but targets the 0.1.3 kernel; drop these patches once it ships a 0.2.x release."
+    },
+    {
+      "name": "@deepseek-ai/dsh-conversation-tweaks",
+      "version": "0.1.0",
+      "source": "eac-tag",
+      "summary": "0.2.x 内核移除了 @deepseek-ai/dsh-settings 的 settingsNamespace / installSettingsSection 与 settingsScope 服务：前者让服务端在 ESM 链接期抛 SyntaxError、整棵插件树无法激活；后者让客户端 fiber 永久停在 waitingFor、设置项静默消失。本补丁改指随插件分发的兼容垫片，并把客户端改为 configForms（0.2.x）优先 / settingsScope（0.1.x）兜底的运行时探测。",
+      "files": [
+        {
+          "path": "lib/index.js",
+          "diff": "files/dsh-conversation-tweaks/lib/index.js.diff",
+          "inputSha256": "e5265e00d503bdbddf14749243af1d36f803ba656383eee229c2abad70fecae4",
+          "outputSha256": "ea716d83a36d120865befafb215a9df8e815f46a0247b544d6f2584684d92433",
+          "note": "Host side stops importing the retired settingsNamespace/installSettingsSection from @deepseek-ai/dsh-settings: on 0.2.x those named exports are gone and ESM link-time resolution throws SyntaxError, which prevents the whole plugin tree from activating. The self-contained shim keeps the 0.1.x call shape."
+        },
+        {
+          "path": "lib/client.js",
+          "diff": "files/dsh-conversation-tweaks/lib/client.js.diff",
+          "inputSha256": "77f4f08fd66ed7be5c7ccd6c3ed2cf90dad57e28a95465fceaae3c32086eef7a",
+          "outputSha256": "acb1a982018d5bc3a3579e2c667c5d51bb1a300da7950f64cccfc9141b9ff9e5",
+          "note": "Client fiber no longer injects the retired settingsScope service (it parked forever in waitingFor and the settings row silently vanished). Runtime probe prefers configForms (0.2.x) and falls back to settingsScope (0.1.x); when neither exists the row is not registered instead of rendering a permanently \"unavailable\" card."
+        },
+        {
+          "path": "lib/settings-compat.js",
+          "diff": "files/dsh-conversation-tweaks/lib/settings-compat.js.diff",
+          "create": true,
+          "outputSha256": "6a025e12fc6fb8242e9818b3ad294999cae6c86b7a3a0bb2c0d78d092bae1a69",
+          "note": "Self-contained 0.1.x-compatible shim for the two @deepseek-ai/dsh-settings exports that 0.2.x retired (settingsNamespace / installSettingsSection). EAC plugins ship self-contained and do not resolve through the kernel package graph, so this file travels with the plugin."
+        }
+      ]
+    },
+    {
+      "name": "@deepseek-ai/dsh-prompt-custom",
+      "version": "0.1.0",
+      "source": "eac-tag",
+      "summary": "0.2.x 内核移除了 @deepseek-ai/dsh-settings 的 settingsNamespace / installSettingsSection 与 settingsScope 服务（服务端链接期 SyntaxError、客户端 fiber 永久 waitingFor），并把人格分段常量 PERSONA_SECTION / PERSONA_ORDER 改名为 PERSONA_PREFIX_SECTION / PERSONA_SUFFIX_SECTION。本补丁三处一并适配，保持原有分段顺序。",
+      "files": [
+        {
+          "path": "lib/index.js",
+          "diff": "files/dsh-prompt-custom/lib/index.js.diff",
+          "inputSha256": "65fd41d532635502cc3eda2a78c727b52549440a023aec3d523f19318d15faae",
+          "outputSha256": "dc81b0dc2f25f0f56611947f8e0682d1bce1147c20958b6bdcd72316c153732c",
+          "note": "Host side stops importing the retired settingsNamespace/installSettingsSection (ESM link-time SyntaxError on 0.2.x kills the whole plugin tree) and tracks the 0.2.x rename of the persona section constants PERSONA_SECTION/PERSONA_ORDER to PERSONA_PREFIX_SECTION/PERSONA_SUFFIX_SECTION, preserving the original section ordering."
+        },
+        {
+          "path": "lib/client.js",
+          "diff": "files/dsh-prompt-custom/lib/client.js.diff",
+          "inputSha256": "cb504d63f6d8de877fd967f819972f4a9aae3064e4ffea210b17f1e0e40e39eb",
+          "outputSha256": "f634b240dfac03483a036812b194b62b3569199138639bfe80f1ce33bb847330",
+          "note": "Client fiber no longer injects the retired settingsScope service (it parked forever in waitingFor and the settings section silently vanished). Runtime probe prefers configForms (0.2.x) and falls back to settingsScope (0.1.x)."
+        },
+        {
+          "path": "lib/settings-compat.js",
+          "diff": "files/dsh-prompt-custom/lib/settings-compat.js.diff",
+          "create": true,
+          "outputSha256": "6a025e12fc6fb8242e9818b3ad294999cae6c86b7a3a0bb2c0d78d092bae1a69",
+          "note": "Self-contained 0.1.x-compatible shim for the two @deepseek-ai/dsh-settings exports that 0.2.x retired (settingsNamespace / installSettingsSection). EAC plugins ship self-contained and do not resolve through the kernel package graph, so this file travels with the plugin."
+        }
+      ]
+    },
+    {
+      "name": "@deepseek-ai/dsh-openclaw-bridge",
+      "version": "0.7.0",
+      "source": "eac-tag",
+      "summary": "0.2.x 内核移除了 @deepseek-ai/dsh-settings 的 settingsNamespace / installSettingsSection 与 settingsScope 服务。前者让服务端在 ESM 链接期抛 SyntaxError，整棵插件树（含桥接路由）无法激活；后者让客户端 fiber 永久 waitingFor。本补丁改指随插件分发的兼容垫片并改为运行时探测。",
+      "files": [
+        {
+          "path": "lib/index.js",
+          "diff": "files/dsh-openclaw-bridge/lib/index.js.diff",
+          "inputSha256": "ac2ae2c664c6c5112d0e7c7312a2766dd45710d312041c8e16096a827fd5cb36",
+          "outputSha256": "7c60eccecf661564cd53b25fed23400b10199347fc60e3492b5d722b2a51d7e2",
+          "note": "Host side stops importing the retired settingsNamespace/installSettingsSection from @deepseek-ai/dsh-settings: on 0.2.x the named exports are gone and ESM link-time resolution throws SyntaxError, taking down the entire plugin tree including the bridge routes."
+        },
+        {
+          "path": "lib/client.js",
+          "diff": "files/dsh-openclaw-bridge/lib/client.js.diff",
+          "inputSha256": "8490527cc6454244f83287d26bc1a7f70f6ae98dad32489ce6527f14b0519a39",
+          "outputSha256": "46ba50491f92a4595d52c5cd7aa805ea89f4d9a819df8229b2d4af5b9371f61c",
+          "note": "Client fiber no longer injects the retired settingsScope service (permanent waitingFor, settings section silently vanished). Runtime probe prefers configForms (0.2.x) and falls back to settingsScope (0.1.x)."
+        },
+        {
+          "path": "lib/settings-compat.js",
+          "diff": "files/dsh-openclaw-bridge/lib/settings-compat.js.diff",
+          "create": true,
+          "outputSha256": "6a025e12fc6fb8242e9818b3ad294999cae6c86b7a3a0bb2c0d78d092bae1a69",
+          "note": "Self-contained 0.1.x-compatible shim for the two @deepseek-ai/dsh-settings exports that 0.2.x retired (settingsNamespace / installSettingsSection). EAC plugins ship self-contained and do not resolve through the kernel package graph, so this file travels with the plugin."
+        }
+      ]
+    },
+    {
+      "name": "dsh-compact",
+      "version": "1.0.1",
+      "source": "eac-tag",
+      "summary": "0.2.x 内核移除了 @deepseek-ai/dsh-settings 的 settingsNamespace 与 settingsScope 服务。前者让服务端在 ESM 链接期抛 SyntaxError、整棵插件树无法激活；后者让客户端 fiber 永久 waitingFor。本补丁改指随插件分发的兼容垫片并改为运行时探测。",
+      "files": [
+        {
+          "path": "lib/index.js",
+          "diff": "files/dsh-compact/lib/index.js.diff",
+          "inputSha256": "dc1b17b40196c2152125e508c3c4cbca4d4f623558f655fbfb0fac659860dbf5",
+          "outputSha256": "075b8021e012416ddaa9bc3ca7e7cf31ef07377cd4fe673711fa6f8ec4004549",
+          "note": "Host side stops importing the retired settingsNamespace from @deepseek-ai/dsh-settings (ESM link-time SyntaxError on 0.2.x, whole plugin tree fails to activate) and points at the self-contained shim."
+        },
+        {
+          "path": "lib/client.js",
+          "diff": "files/dsh-compact/lib/client.js.diff",
+          "inputSha256": "0184065b47420ca515b46f4342be928fa5145d85129b88b8fea16e216fac4a4a",
+          "outputSha256": "ff9b098d6e952dbf7949381de24adc695a47d2ad40b579628294f17d635ff047",
+          "note": "Client fiber no longer injects the retired settingsScope service (permanent waitingFor). Runtime probe prefers configForms (0.2.x) and falls back to settingsScope (0.1.x)."
+        },
+        {
+          "path": "lib/settings-compat.js",
+          "diff": "files/dsh-compact/lib/settings-compat.js.diff",
+          "create": true,
+          "outputSha256": "6a025e12fc6fb8242e9818b3ad294999cae6c86b7a3a0bb2c0d78d092bae1a69",
+          "note": "Self-contained 0.1.x-compatible shim for the two @deepseek-ai/dsh-settings exports that 0.2.x retired (settingsNamespace / installSettingsSection). EAC plugins ship self-contained and do not resolve through the kernel package graph, so this file travels with the plugin."
+        }
+      ]
+    },
+    {
+      "name": "dsh-better-sidebar",
+      "version": "0.15.3-eac.1",
+      "source": "eac-tag",
+      "summary": "0.2.x 内核移除了 @deepseek-ai/dsh-settings 的 settingsNamespace 具名导出（SettingsConflictError 仍在）。具名 import 在 ESM 链接期解析，缺失导出让服务端整棵插件树 SyntaxError、侧栏永不激活。本补丁把该符号改指随插件分发的兼容垫片。",
+      "files": [
+        {
+          "path": "lib/index.js",
+          "diff": "files/dsh-better-sidebar/lib/index.js.diff",
+          "inputSha256": "91095b98550ea0989604ed1aae6cc2b5f4c83e9f979e280b0444d4d5dc0510d1",
+          "outputSha256": "4ec91c161016844eb9b3d2e81cbec5f5f3803b875a263ac47f7d8f0641214e1f",
+          "note": "Host side stops importing the retired settingsNamespace from @deepseek-ai/dsh-settings (ESM link-time SyntaxError on 0.2.x kills the whole plugin tree, so the sidebar never activates); SettingsConflictError is still exported there and stays."
+        },
+        {
+          "path": "lib/settings-compat.js",
+          "diff": "files/dsh-better-sidebar/lib/settings-compat.js.diff",
+          "create": true,
+          "outputSha256": "6a025e12fc6fb8242e9818b3ad294999cae6c86b7a3a0bb2c0d78d092bae1a69",
+          "note": "Self-contained 0.1.x-compatible shim for the two @deepseek-ai/dsh-settings exports that 0.2.x retired (settingsNamespace / installSettingsSection). EAC plugins ship self-contained and do not resolve through the kernel package graph, so this file travels with the plugin."
+        }
+      ]
     }
   ]
 }

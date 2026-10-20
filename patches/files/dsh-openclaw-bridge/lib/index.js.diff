@@ -1,0 +1,15 @@
+diff --git a/lib/index.js b/lib/index.js
+index 3958fc1..5fd39f8 100644
+--- a/lib/index.js
++++ b/lib/index.js
+@@ -35,7 +35,9 @@ const PLUGIN_VERSION = (() => {
+ import { installModelSelection } from "@deepseek-ai/dsh-agent";
+ import { createUserMessage } from "@deepseek-ai/dsh-llm";
+ import { SessionId } from "@deepseek-ai/dsh-session";
+-import { installSettingsSection, settingsNamespace } from "@deepseek-ai/dsh-settings";
++// 0.2.x 移除了这两个具名导出；改指随插件自包含分发的兼容垫片。
++// （具名 import 在 ESM 链接期解析，缺失导出会让整棵插件树 SyntaxError。）
++import { installSettingsSection, settingsNamespace } from "./settings-compat.js";
+ import z from "@deepseek-ai/schemastery";
+ import { createWechatClient } from "./wechat.js";
+ import { OpenAiCompatAdapter, PROVIDER_ID } from "./openai-compat.js";

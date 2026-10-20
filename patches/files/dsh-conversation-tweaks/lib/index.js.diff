@@ -1,0 +1,15 @@
+diff --git a/lib/index.js b/lib/index.js
+index ef72794..dd62dad 100644
+--- a/lib/index.js
++++ b/lib/index.js
+@@ -1,7 +1,9 @@
+ // Host-side entry for dsh-conversation-tweaks:
+ // registers the durable settings namespace used by the General-settings row.
+ import z from "@deepseek-ai/schemastery";
+-import { installSettingsSection, settingsNamespace } from "@deepseek-ai/dsh-settings";
++// 0.2.x 移除了这两个具名导出；改指随插件自包含分发的兼容垫片。
++// （具名 import 在 ESM 链接期解析，缺失导出会让整棵插件树 SyntaxError。）
++import { installSettingsSection, settingsNamespace } from "./settings-compat.js";
+ 
+ const name = "@deepseek-ai/dsh-conversation-tweaks";
+ const inject = ["settings"];

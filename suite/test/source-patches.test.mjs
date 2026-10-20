@@ -44,16 +44,84 @@ test('source-patch manifest is well formed and every diff file exists', () => {
     assert.ok(Array.isArray(patch.files) && patch.files.length > 0)
     for (const file of patch.files) {
       assert.ok(file.path && !file.path.includes('..') && !path.isAbsolute(file.path))
-      assert.match(file.inputSha256, /^[0-9a-f]{64}$/)
       assert.match(file.outputSha256, /^[0-9a-f]{64}$/)
-      assert.notEqual(file.inputSha256, file.outputSha256, `${patch.name}: patch must change the file`)
       assert.ok(file.note && file.note.length > 10, `${patch.name}: note should explain the fix`)
       const diffPath = path.join(ROOT, 'patches', ...file.diff.split('/'))
       assert.ok(fs.existsSync(diffPath), `missing diff file: ${file.diff}`)
       const diff = fs.readFileSync(diffPath, 'utf8')
-      assert.match(diff, /^--- a\//m, `${file.diff}: needs -p1 compatible 'a/' header`)
       assert.match(diff, /^\+\+\+ b\//m, `${file.diff}: needs -p1 compatible 'b/' header`)
+      if (file.create === true) {
+        // Create mode adds a file the upstream package does not ship: there is no
+        // input to hash, so pinning one would be a contradiction. The diff must
+        // come from /dev/null.
+        assert.equal(file.inputSha256, undefined, `${patch.name} ${file.path}: create entry must not pin inputSha256`)
+        assert.match(diff, /^--- \/dev\/null$/m, `${file.diff}: create diffs must originate from /dev/null`)
+      } else {
+        assert.match(file.inputSha256, /^[0-9a-f]{64}$/, `${patch.name} ${file.path}: inputSha256 required`)
+        assert.notEqual(file.inputSha256, file.outputSha256, `${patch.name}: patch must change the file`)
+        assert.match(diff, /^--- a\//m, `${file.diff}: needs -p1 compatible 'a/' header`)
+      }
     }
+  }
+})
+
+test('create-mode replay materializes a new file byte-exactly', async (t) => {
+  const { applySourcePatches } = await import('../../scripts/repack/source-patches.mjs')
+  const os = await import('node:os')
+
+  // Build a throwaway package staging dir and an in-memory manifest whose single
+  // create entry adds lib/new-file.js. Nothing here touches the tracked manifest
+  // or dist/, so this test is meaningful on a clean clone.
+  const staging = fs.mkdtempSync(path.join(os.tmpdir(), 'eac-create-stage-'))
+  const diffAbs = path.join(ROOT, 'patches', 'files', 'dsh-conversation-tweaks', 'lib', 'settings-compat.js.diff')
+  const shipped = fs.readFileSync(path.join(ROOT, 'patches', 'files', '_shared', 'settings-compat.js'))
+  const shippedSha = sha256(shipped)
+  try {
+    const manifest = {
+      schemaVersion: 1,
+      patches: [
+        {
+          name: 'create-probe',
+          version: '1.0.0',
+          source: 'eac-tag',
+          files: [
+            {
+              path: 'lib/settings-compat.js',
+              diff: 'files/dsh-conversation-tweaks/lib/settings-compat.js.diff',
+              create: true,
+              outputSha256: shippedSha,
+              note: 'in-memory probe entry',
+            },
+          ],
+        },
+      ],
+    }
+    assert.ok(fs.existsSync(diffAbs), 'the tracked create diff must exist for this probe')
+    const applied = applySourcePatches({ name: 'create-probe', version: '1.0.0' }, staging, () => {}, manifest)
+    assert.equal(applied.length, 1)
+    assert.equal(applied[0].path, 'lib/settings-compat.js')
+    const written = fs.readFileSync(path.join(staging, 'lib', 'settings-compat.js'))
+    assert.equal(sha256(written), shippedSha, 'created file must match outputSha256 byte-for-byte')
+
+    // Re-running must fail closed: the target now exists, so create mode is invalid.
+    assert.throws(
+      () => applySourcePatches({ name: 'create-probe', version: '1.0.0' }, staging, () => {}, manifest),
+      /create target already exists/,
+    )
+    // A pinned inputSha256 contradicts create mode and must be rejected too.
+    const contradicting = JSON.parse(JSON.stringify(manifest))
+    contradicting.patches[0].files[0].inputSha256 = shippedSha
+    const other = fs.mkdtempSync(path.join(os.tmpdir(), 'eac-create-stage2-'))
+    try {
+      assert.throws(
+        () => applySourcePatches({ name: 'create-probe', version: '1.0.0' }, other, () => {}, contradicting),
+        /must not pin inputSha256/,
+      )
+    } finally {
+      fs.rmSync(other, { recursive: true, force: true })
+    }
+  } finally {
+    fs.rmSync(staging, { recursive: true, force: true })
   }
 })
 
