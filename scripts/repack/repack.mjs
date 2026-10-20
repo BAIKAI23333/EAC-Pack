@@ -24,6 +24,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { applySourcePatches } from './source-patches.mjs';
+import { ensurePatchedFiles } from './package-files.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const CATALOG_DIR = path.join(ROOT, 'catalog');
@@ -439,30 +440,9 @@ function ensureAttributionFiles(pkg, staging) {
 
 // 补丁重建出的文件必须能过 npm pack 的 `files` 白名单。有 `files` 的包只发布
 // 白名单命中的路径 —— 补丁新建的 lib/settings-compat.js 若不在白名单里会被
-// **静默丢弃**（tgz 里没有，但 repack 全绿），运行期才炸。这里把 applySourcePatches
-// 实际写过的路径补进白名单；已被某条（精确路径 / 目录前缀 / glob 前缀）覆盖的跳过。
-function isCoveredByFilesEntry(filePath, entry) {
-  if (entry === filePath) return true;
-  // 目录形式（"lib/" 或 "lib"）覆盖其下全部内容。
-  const dir = entry.replace(/\/+$/, '');
-  if (dir && filePath.startsWith(`${dir}/`)) return true;
-  // glob：只做前缀判断（npm 的 files 用的是 glob，但本仓既有条目都是 `lib/types/**/*.d.ts`
-  // 这类固定前缀形态，按字面前缀判即可，宁可多加一条精确路径也不漏）。
-  const star = entry.indexOf('*');
-  if (star > 0 && filePath.startsWith(entry.slice(0, star))) return true;
-  return false;
-}
-
-function ensurePatchedFiles(pkg, appliedSourcePatches) {
-  if (!Array.isArray(pkg.files)) return []; // 无白名单 = npm 全收，无需补
-  const added = [];
-  for (const { path: patchedPath } of appliedSourcePatches) {
-    if (!patchedPath || pkg.files.some((f) => isCoveredByFilesEntry(patchedPath, f))) continue;
-    pkg.files.push(patchedPath);
-    added.push(patchedPath);
-  }
-  return added;
-}
+// **静默丢弃**（tgz 里没有，但 repack 全绿），运行期才炸。
+// 实现抽到 ./package-files.mjs，好处是 suite/test 能直接对同一份代码做单元
+// 测试，不必跑完整条 300 MB 的打包管线。
 
 function sha256(file) {
   return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
