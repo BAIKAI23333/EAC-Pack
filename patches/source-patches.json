@@ -50,6 +50,34 @@
           "note": "Update-notice button contrast: pin light values (outline 1.10:1 -> 3.11:1, label 1.06:1 -> 4.95:1) on the dark glass card."
         }
       ]
+    },
+    {
+      "name": "computer-user",
+      "version": "0.3.7",
+      "source": "npm",
+      "files": [
+        {
+          "path": "src/index.js",
+          "diff": "files/computer-user/src/index.js.diff",
+          "inputSha256": "40a7e7f1b2694076155b7122debf74e85ce84d454e2e35722d357b1f1f44f896",
+          "outputSha256": "de5d8ec8097e0ae68c952a0867202da1e659455a9dd8c33767a0bea938bde4be",
+          "note": "Export the settings schema. SettingsForms.schema(entry) reads entry.fiber.runtime.Config on a 0.2.x kernel (configForms was retired alongside the namespace-registration model), but upstream 0.3.7 keeps Config module-private: it is imported only to feed the now-dead settings.register call, so the entry exports no schema, volatileForm() projects nothing, describe() omits the namespace and the browser configForms.get('computer-user') answers status:'unavailable'. A real ESM named export restores the form."
+        },
+        {
+          "path": "src/config.js",
+          "diff": "files/computer-user/src/config.js.diff",
+          "inputSha256": "fbbb6a7df7701723c49a777534edbe7963f07b4bfcb10793d9fff3052fb97005",
+          "outputSha256": "b16b49805948052cb240b8b7b989eda62f0b24d8ee4a090c2e6412357bdcb6db",
+          "note": "Mark every Config field volatile(). volatileForm() keeps only fields under a volatile ancestor, so the unmarked upstream schema still projects to undefined and no form is produced even once Config is exported. The live() helper degrades to the plain schema when a schemastery build has no volatile()."
+        },
+        {
+          "path": "client.js",
+          "diff": "files/computer-user/client.js.diff",
+          "inputSha256": "7f6b6988cbb230a1515dbbe2d212411df60374fa77fcbcc7a26c9d3a9dd4527a",
+          "outputSha256": "ca51b6665351668ec452f1ba08150ed9058224f22cc17b057ec74a00880e88c9",
+          "note": "Drop the retired settingsScope inject and probe both transport generations instead. Declaring a service no kernel provides parks the client fiber forever in waitingFor, so the whole card vanishes with no error. Now: configForms.get(entryId) on 0.2.x (ConfigFormController already carries the same getSnapshot/subscribe/set/unset surface the Section component uses), settingsScope.bind() on 0.1.x, and no section registered at all when neither exists. Upstream 0.3.7 client.js is byte-identical to 0.3.6 (modulo CRLF), i.e. the browser half was never adapted."
+        }
+      ]
     }
   ]
 }
