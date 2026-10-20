@@ -1,1 +1,13 @@
 # Baseline binary assets are distributed through the registry, not this Git tree.
+
+# Tracked unified diffs under patches/ must keep their exact bytes.
+# With core.autocrlf=true a normal text checkout rewrites every line to CRLF,
+# which destroys the hunk context and makes `git apply -p1` fail at repack time.
+# `-text` disables all EOL conversion for these files on every platform.
+#
+# 2026-10-20 实测：main 上 dsh-plugin-wallpaper-engine 的补丁是 CRLF（另两个是
+# LF），而 npm 解包出的 lib/client.js 是 LF，于是 repack 报
+# `error: patch failed: lib/client.js:4795 / patch does not apply` 并 fail-closed
+# 中断。补丁内容本身正确 —— 归一化行尾后重建的 0.6.7 产物为 794329 B /
+# f2f25810…，与 bootstrap.json 里登记的摘要逐字节一致。
+patches/**/*.diff -text

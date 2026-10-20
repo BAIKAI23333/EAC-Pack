@@ -62,6 +62,13 @@ const GH_TGZ_SOURCES = {
   '@dsh-external/dsh-client-ui-skin-deep-whale-day-night': {
     url: 'https://github.com/GGBond2424648901/deep-whale-day-night-theme/releases/download/v0.1.12/deep-whale-day-night-theme-0.1.12.tgz',
   },
+  // dsh-our-free-model：私有 ESM 包（npm 无发布），上游按 GitHub Release 分发官方
+  // 预构建 tgz + SHA256SUMS.txt。锁定 release 资产 URL 而非 git clone --depth 1，
+  // 使重打包可复现（此前 catalog 写 source=github-repo，但 GH_SOURCES 无该包映射，
+  // repack 会在 materializeGithub 里 die）。
+  'dsh-our-free-model': {
+    url: 'https://github.com/Ebony-Vinyl/dsh-our-free-model/releases/download/v2.5.6/dsh-our-free-model-2.5.6.tgz',
+  },
 };
 
 // aio seed 提取（本机 AIO 离线包 node_modules）的包集合
