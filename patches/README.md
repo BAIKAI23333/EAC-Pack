@@ -85,6 +85,71 @@ fixes belong to the distribution layer, i.e. here.
 | `dsh-settings-groups@0.1.0` | `eac-tag` | `lib/client.js` | General-settings collapser: real rows are the slot wrapper's children, not the wrapper itself (previously the whole page was hidden as a single "advanced" row). |
 | `@deepseek-ai/dsh-balance@0.1.0` | `eac-tag` | `lib/client.js` | Drops the 价格设置 settings section. Its `balancePrices` / `balanceModels` / `refreshBalance` bridge is retired by ADR 0006 (`docs/adr/0006-minimal-core-scope.md:373-376`, locked by `bridge-preload-parity.test.ts`), so the section could only ever render a misleading "bridge unavailable" error. The composer dock is unchanged. |
 | `dsh-plugin-wallpaper-engine@0.6.7` | `npm` | `lib/client.js` | Update-notice button contrast. `.we-picker__btn` inherits light-theme tokens that render near-black on the dark glass notice card (outline 1.10:1, label 1.06:1). Pin light values → outline 3.11:1, label 4.95:1 (WCAG 4.5 text / 3.0 non-text). |
+| `computer-user@0.3.7` | `npm` | `src/index.js` | Re-export the settings schema. DSH 0.1.7-rc.2 derives settings forms from the entry's exported `Config` (`SettingsForms.schema(entry)` reads `entry.fiber.runtime.Config`), but upstream keeps `Config` module-private. Without the export the namespace never appears in `describe()`, so the browser `configForms.get()` answers `unavailable` and the card is blank. |
+| `computer-user@0.3.7` | `npm` | `src/config.js` | Mark every `Config` field `volatile()`. `volatileForm()` keeps only fields under a volatile ancestor, so the unmarked upstream schema still projects to `undefined` — no form even once `Config` is exported. |
+| `computer-user@0.3.7` | `npm` | `client.js` | Drop the retired `settingsScope` inject and probe both transport generations. Declaring a service no kernel provides parks the client fiber in `waitingFor` forever, so the whole card vanishes with no error. Now: `configForms.get(entryId)` on 0.2.x, `settingsScope.bind()` on 0.1.x, and no section at all when neither exists. Upstream 0.3.7's `client.js` is byte-identical to 0.3.6 — the browser half was never adapted. |
+
+### Why `computer-user` needs three patches
+
+They are independent defects, and fixing any one alone still leaves the plugin
+dead. 0.3.7 fixed the *host* import (`settingsNamespace` moved to an inlined
+`src/settings-compat.js` shim) but not the schema export or the client half.
+
+## Kernel export gate
+
+`scripts/repack/kernel-compat.mjs` verifies that the **shipped artifacts** never
+import a named export the kernel no longer provides. This is a different check
+from the Desktop repository's `scripts/plugin-kernel-compat.mjs`:
+
+| | Desktop gate | Pack gate (this one) |
+| --- | --- | --- |
+| Scans | `dsh-desktop/assets/plugins` (11 EAC-owned plugins) | `dist/*.tgz` (all 72 shipped packages) |
+| Judges | built-in plugin **source** | what users actually **receive** |
+
+The gap was real: `computer-user`, `picturereader`, `dsh-conversation-tweaks`,
+`dsh-openclaw-bridge` and `dsh-prompt-custom` all shipped with imports of
+removed kernel exports while the Desktop gate stayed green, because none of them
+live in `assets/plugins`.
+
+```bash
+node scripts/repack/kernel-compat.mjs                 # exit 1 on any hit
+node scripts/repack/kernel-compat.mjs --json           # machine-readable
+node scripts/repack/kernel-compat.mjs --kernel <dir>   # override kernel root
+node scripts/repack/kernel-compat.mjs --allowlist      # print known waivers
+```
+
+The kernel root defaults to a sibling `../EAC-Desktop/dsh-desktop/node_modules/@deepseek-ai`,
+then `$DSH_KERNEL_ROOT`. Missing kernel = exit 2 (environment), never a silent pass.
+`verify.mjs` runs this gate as step (f); it degrades to a warning when the kernel
+is absent, since Pack CI and Desktop need not be installed together.
+
+`DEFAULT_ALLOWLIST` in that module is deliberately empty. Adding an entry requires
+that the plugin is disabled by default *and* a written reason plus a tracking note —
+otherwise the gate turns red, which is the point.
+
+Regenerate nothing here; the gate reads `dist/` only. Rebuild first:
+
+```bash
+node scripts/repack/repack.mjs && node scripts/repack/kernel-compat.mjs
+```
+
+Its own correctness is pinned by `suite/test/kernel-compat.test.mjs` (fixture
+tgz + fake kernel), which asserts both directions: a missing export fails the
+build, and a present export does not. That suite is what caught a real bug in the
+gate itself — the `client/**` excluder originally missed `*.client.js` spellings,
+so front-end bundles could be misreported as server-side imports.
+
+## Replaying a clean build
+
+Two environment quirks bite on a fresh clone and are **not** patch problems:
+
+1. **`core.autocrlf=true`** rewrites `patches/**/*.diff` to CRLF on checkout, so
+   `git apply` can never match the LF context lines. `.gitattributes` pins
+   `patches/**/*.diff -text` to prevent it — do not remove that rule.
+2. **`dist/` is gitignored and shared across branches.** Switching branches
+   leaves another branch's tarballs in place, so `dist/index.json` and the files
+   on disk disagree. Always rebuild before trusting `verify.mjs` or the gate.
+
 
 ## Adding or regenerating a patch
 

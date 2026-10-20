@@ -127,8 +127,28 @@ for (const line of sums) {
 }
 ok('SHA256SUMS 一致性完成');
 
-if (failures) {
-  console.error(`\n[verify] 结果：FAIL（${failures} 项不合格）`);
+// (f) 内核导出兼容：产物里的服务端源码不得 import 内核已删除的具名导出。
+// 单列成模块是因为它需要静态解析内核包导出集合，比上面几项重得多；
+// 内核目录默认取并排检出的 Desktop（可用 DSH_KERNEL_ROOT / --kernel 覆盖），
+// 找不到内核时**不算失败**（只跳过并提示）—— CI 里 Pack 与 Desktop 未必同装。
+try {
+  const { checkKernelCompat, formatReport, guessKernelRoot } = await import('./kernel-compat.mjs');
+  const result = checkKernelCompat({ kernelRoot: guessKernelRoot() });
+  if (!result.kernelExists) {
+    warn('内核目录不存在，跳过导出兼容校验（用 --kernel 或 DSH_KERNEL_ROOT 指定）');
+  } else if (result.ok) {
+    ok(`内核导出兼容：${result.stats.packageCount} 个产物 / ${result.stats.refCount} 处具名导入全部可解析`);
+  } else {
+    console.error(formatReport(result));
+    failures += result.hits.length;
+  }
+} catch (err) {
+  warn(`内核导出兼容校验无法执行: ${String(err && err.message ? err.message : err)}`);
+}
+
+const failures2 = failures; // 快照，便于下方统一判定
+if (failures2) {
+  console.error(`\n[verify] 结果：FAIL（${failures2} 项不合格）`);
   process.exit(1);
 }
 console.log(`\n[verify] 结果：PASS（${index.length} 个 tgz 全部合格；peer 对 ${TARGET} 满足）`);
