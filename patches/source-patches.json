@@ -200,14 +200,21 @@
       "name": "dsh-better-sidebar",
       "version": "0.15.3-eac.1",
       "source": "eac-tag",
-      "summary": "better-sidebar: settingsNamespace 具名导出与 ctx.settings.register 在 0.2.x 均不存在。本补丁改指自包含垫片并重建设置 scope。注意：该包另需内核包可解析（dsh-tools/dsh-llm/dsh-subagent），属装配层缺陷，不在本补丁范围。",
+      "summary": "better-sidebar: 0.2.x 移除了 settingsNamespace 具名导出与 ctx.settings.register（改指自包含垫片重建 scope）；另补 conversation.chat.turnTail 的 options.id —— 它是 list slot，0.2.x 缺 id 直接 throw，该槽位在界面上整体消失。",
       "files": [
         {
           "path": "lib/index.js",
           "diff": "files/dsh-better-sidebar/lib/index.js.diff",
           "inputSha256": "91095b98550ea0989604ed1aae6cc2b5f4c83e9f979e280b0444d4d5dc0510d1",
           "outputSha256": "b9acc7feb08a84bb8034b6bd877a2eb754ad235a93cdcbec78e5d21d1e9ddd6c",
-          "note": "Host side stops importing the retired settingsNamespace and replaces ctx.settings.register (absent on 0.2.x) with the shim scope; SettingsConflictError is still exported there and stays. NOTE: this package also imports @deepseek-ai/dsh-tools / dsh-llm / dsh-subagent, which the profile layer must be able to resolve — an assembly-layer concern outside this patch."
+          "note": "Host side stops importing the retired settingsNamespace and replaces ctx.settings.register (absent on 0.2.x) with the shim scope; SettingsConflictError is still exported there and stays."
+        },
+        {
+          "path": "lib/client.js",
+          "diff": "files/dsh-better-sidebar/lib/client.js.diff",
+          "inputSha256": "3b571e884de8de83b004f821aa80bcb2e43927f2f625483b0dec50c314324419",
+          "outputSha256": "7d2388f5c1a77cd889a334a879e9714a0d1111ca3b0117b5c194b61fbb7d9b07",
+          "note": "conversation.chat.turnTail is a list slot: 0.2.x slot validation throws \"requires options.id\" when id is missing, and that entry then crashes as React #130 so the whole sidebar \"produced files\" seat disappears from the UI. Upstream omits the field; add a stable id following the same convention visualize uses (id: \"dsh-visualize-cards\")."
         },
         {
           "path": "lib/settings-compat.js",

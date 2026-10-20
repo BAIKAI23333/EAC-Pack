@@ -893,16 +893,16 @@
         "eac"
       ],
       "file": "dsh-better-sidebar-0.15.3-eac.1.tgz",
-      "sha256": "753dbd4c1f97d75fdb810751b154710c187fceec74ea43d46606c432ab022445",
-      "bytes": 2477561,
+      "sha256": "492426e4e39537e403d2541c45d6f009752da765ac384c9a0a86e5309ac2633b",
+      "bytes": 2477821,
       "source": "eac-tag",
       "locallyRepacked": true,
-      "repackNote": "better-sidebar: settingsNamespace 具名导出与 ctx.settings.register 在 0.2.x 均不存在。本补丁改指自包含垫片并重建设置 scope。注意：该包另需内核包可解析（dsh-tools/dsh-llm/dsh-subagent），属装配层缺陷，不在本补丁范围。",
+      "repackNote": "better-sidebar: 0.2.x 移除了 settingsNamespace 具名导出与 ctx.settings.register（改指自包含垫片重建 scope）；另补 conversation.chat.turnTail 的 options.id —— 它是 list slot，0.2.x 缺 id 直接 throw，该槽位在界面上整体消失。",
       "parts": [
         {
           "file": "dsh-better-sidebar-0.15.3-eac.1.tgz",
-          "bytes": 2477561,
-          "sha256": "753dbd4c1f97d75fdb810751b154710c187fceec74ea43d46606c432ab022445"
+          "bytes": 2477821,
+          "sha256": "492426e4e39537e403d2541c45d6f009752da765ac384c9a0a86e5309ac2633b"
         }
       ]
     },
