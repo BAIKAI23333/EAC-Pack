@@ -11,3 +11,13 @@
 # 中断。补丁内容本身正确 —— 归一化行尾后重建的 0.6.7 产物为 794329 B /
 # f2f25810…，与 bootstrap.json 里登记的摘要逐字节一致。
 patches/**/*.diff -text
+
+# 垫片源文件（patches/files/_shared/*.js）同样是**字节敏感**的：它被
+# scripts/repack 里的一次性生成器读出来做成 `create` diff，manifest 里钉的是
+# 该文件的 sha256。若检出时被转成 CRLF，内容哈希就变了 —— 干净 clone 上
+# `source-patches.test.mjs` 的 create-mode 用例会报
+#   expected 0dca6997… actual 7903a521…
+# 实测 2026-10-21：在干净的合并 worktree 上复现（主工作区是 LF，检出后 167 个 CR）。
+# 与 *.diff 同理，`-text` 关闭 EOL 转换。
+patches/files/_shared/** -text
+
