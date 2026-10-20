@@ -1245,19 +1245,19 @@
     {
       "id": "our-free-model",
       "name": "dsh-our-free-model",
-      "version": "2.0.0",
+      "version": "2.5.6",
       "packs": [
         "eac"
       ],
-      "file": "dsh-our-free-model-2.0.0.tgz",
-      "sha256": "1f6a322d7fe28ed044ce7b6022cc2fdb9863358301230fb98451d12bee70d8af",
-      "bytes": 1141617,
-      "source": "github-repo",
+      "file": "dsh-our-free-model-2.5.6.tgz",
+      "sha256": "65483fe67b42a38a94da70775af799ff36c4e955da1b0f0e8e928b557a75604a",
+      "bytes": 1336558,
+      "source": "github-tgz",
       "parts": [
         {
-          "file": "dsh-our-free-model-2.0.0.tgz",
-          "bytes": 1141617,
-          "sha256": "1f6a322d7fe28ed044ce7b6022cc2fdb9863358301230fb98451d12bee70d8af"
+          "file": "dsh-our-free-model-2.5.6.tgz",
+          "bytes": 1336558,
+          "sha256": "65483fe67b42a38a94da70775af799ff36c4e955da1b0f0e8e928b557a75604a"
         }
       ]
     },
