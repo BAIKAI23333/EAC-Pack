@@ -1,16 +1,2 @@
 # Baseline binary assets are distributed through the registry, not this Git tree.
-#
-# Tracked unified diffs under patches/ are DATA, not source: source-patches.mjs
-# feeds them to `git apply -p1` inside a scratch directory, and `git apply`
-# matches context lines byte-for-byte. The upstream tarballs these diffs target
-# use LF, while `core.autocrlf=true` (the Windows default, and what this
-# machine has) rewrites every text file to CRLF on checkout — so a clean clone
-# produces CRLF diffs whose context can never match, and the whole repack
-# pipeline dies with "patch does not apply".
-#
-# `-text` disables all end-of-line conversion for these paths, so the working
-# copy is byte-identical to the blob regardless of core.autocrlf. Keep the
-# spelling as `-text` (not `text eol=lf`): both are correct, but a second,
-# differently-spelled rule for the same paths makes future merges conflict
-# instead of agreeing.
 patches/**/*.diff -text
