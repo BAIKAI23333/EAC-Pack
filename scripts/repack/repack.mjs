@@ -45,10 +45,33 @@ const DIR_OVERRIDES = { 'meow-smooth': 'dsh-meow-smooth' };
 // github 源（可复现：缓存目录缺 package.json 时自动浅克隆）。
 // 兼容两种 source 取值：'github'（存量 EAC 独立分发）与 'github-repo'（v0.2.0 社区皮肤）。
 const GH_SOURCES = {
-  'dsh-think-zh-expand-eac': { url: 'https://github.com/jing-hy/dsh-think-zh-expand-eac.git', dir: 'think-zh-src' },
-  '@nagi-ovo/dsh-visualize': { url: 'https://github.com/Nagi-ovo/dsh-visualize.git', dir: 'visualize-src' },
-  'dsh-drag-and-drop': { url: 'https://github.com/bill9109/dsh-drag-and-drop.git', dir: 'dragdrop-src' },
-  'dsh-theme-endfield': { url: 'https://github.com/ymh0000123/dsh-theme-endfield.git', dir: 'endfield-src' },
+  // 这几条原本都不钉 ref，浅克隆于是跟随上游默认分支 —— 实测全量 repack 依次在
+  // dsh-visualize(0.1.7≠0.1.4)、dsh-drag-and-drop(0.1.7≠0.1.6) 处「版本漂移」die。
+  // 清空 dist 后重建在此机器上从来跑不通，正是这批未钉 ref 造成的。
+  // 按 picturereader 的既有做法一律钉完整 SHA（取承载 catalog 期望版本的那个 commit）。
+  'dsh-think-zh-expand-eac': {
+    url: 'https://github.com/jing-hy/dsh-think-zh-expand-eac.git',
+    dir: 'think-zh-src',
+    ref: '669ba75d958ae2f65d26b394a90bc506b2cd829e',
+  },
+  '@nagi-ovo/dsh-visualize': {
+    url: 'https://github.com/Nagi-ovo/dsh-visualize.git',
+    dir: 'visualize-src',
+    ref: 'db54992331d98af68390796d0de4b57bc76453ca',
+  },
+  'dsh-drag-and-drop': {
+    url: 'https://github.com/bill9109/dsh-drag-and-drop.git',
+    dir: 'dragdrop-src',
+    // 8ed0f65 = "chore: rename package scope @omdsh-dev -> bare name"，仍是 0.1.6。
+    // 不能钉 3b70ec4（同版本 0.1.6 但包名带 scope @omdsh-dev/...）—— catalog 与
+    // full-pack seed 用的都是**裸名** dsh-drag-and-drop@0.1.6，钉错会报「包名不符」。
+    ref: '8ed0f65e7e81b09e5d7eb17428871c76a16af769',
+  },
+  'dsh-theme-endfield': {
+    url: 'https://github.com/ymh0000123/dsh-theme-endfield.git',
+    dir: 'endfield-src',
+    ref: '533e549239188bc8c2545b14c571bd6c1d141942',
+  },
   // picturereader 3.5.0：上游 main 已两端适配 0.2.x 内核 —— 客户端不再 inject
   // 已移除的 settingsScope（改为运行时探测：有旧的内核就走 bind，没有就用插件
   // 自建的 loopback 路由 createRemoteScope 提供同构快照面），宿主半不再 import
@@ -262,7 +285,19 @@ function materializeEacTag(entry, staging) {
     const eacDir = path.join(EAC_PLUGINS, dir);
     const aioDir = path.join(AIO_PLUGINS, dir);
     // 共享条目版本以 EAC 包为准：优先 v5.3.6，目录缺失再回退 aio-v1
-    src = fs.existsSync(eacDir) ? eacDir : aioDir;
+    if (fs.existsSync(eacDir)) src = eacDir;
+    else if (fs.existsSync(aioDir)) src = aioDir;
+    // 第三级兜底：本机既没有 `.cache/eac-src` 也没有 `.cache/aio-src` 时
+    // （离线/未拉基线源），退回 full-pack 的 profile-seed —— 它装着同一批
+    // AIO 包，且 `AIO_SEED_NM` 已被指向该目录（见上方默认值 / 环境变量）。
+    // 没有这一级，全量 repack 会在第一个 AIO-only 包（dsh-aio-ui-compat）
+    // 直接 die，导致「清空 dist 后重建」在这台机器上永远跑不通。
+    else if (fs.existsSync(path.join(AIO_SEED_NM, ...entry.name.split('/'), 'package.json'))) {
+      src = path.join(AIO_SEED_NM, ...entry.name.split('/'));
+      log(`fallback to AIO seed for ${entry.name}`);
+    } else {
+      src = eacDir; // 让下面的 die 报出原本期望的 eac-src 路径
+    }
   }
   if (!fs.existsSync(path.join(src, 'package.json'))) die(`eac-tag 源目录缺 package.json: ${src}`);
   log(`copy ${path.relative(ROOT, src) || src} -> staging`);
