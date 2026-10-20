@@ -192,20 +192,41 @@ function extractTgz(tgzFile, dest) {
  * 注意 `*.client.js`（如 window.client.js）与 `client.js` 是两种不同拼写，
  * 早期版本只匹配后者，会让形如 `foo.client.js` 的前端 bundle 被当成服务端
  * 源码误报 —— 由 suite/test/kernel-compat.test.mjs 钉死。
+ *
+ * **不要**把 exports["./client"] 的整个父目录排除（2026-10-20 修复）：
+ * 大量 Pack 包的布局是
+ *     exports: { ".": "./lib/index.js", "./client": "./lib/client.js" }
+ * 服务端入口与客户端 bundle 同处 `lib/`。早期实现把 `lib/` 整体排除，
+ * 于是 `lib/index.js`（真正的服务端入口）被当成客户端跳过 —— 实测 72 个产物里
+ * 22 个因此完全没被扫描，5 个真坏导入（settingsNamespace / installSettingsSection /
+ * PERSONA_ORDER）一路通过门禁进了 full 包装配。只排除**文件本身**即可；
+ * 真正的独立客户端目录（如 `client/`）另有规则覆盖。
  */
 export function makeClientSideExcluder(pluginDir, pkgJson) {
+  // 仅当 exports["./client"] 指向**独立目录**（与 exports["."] 不同目录）时，
+  // 才把该目录整体视为客户端侧；与服务端入口同目录时只排除那一个文件。
   const dirs = new Set()
   const files = new Set()
   const toPosix = (p) => p.replace(/\\/g, '/')
-  const clientExport = pkgJson && pkgJson.exports && pkgJson.exports['./client']
-  const spec = typeof clientExport === 'string'
-    ? clientExport
-    : (clientExport && (clientExport.default || clientExport.import || clientExport.require))
-  if (typeof spec === 'string' && spec) {
+  const dirOf = (spec) => {
     const abs = toPosix(path.join(pluginDir, spec))
-    files.add(abs)
-    const dir = abs.slice(0, abs.lastIndexOf('/'))
-    if (dir && dir !== toPosix(pluginDir)) dirs.add(dir + '/')
+    return { abs, dir: abs.slice(0, abs.lastIndexOf('/')) }
+  }
+  const resolveSpec = (entry) => (typeof entry === 'string'
+    ? entry
+    : (entry && (entry.default || entry.import || entry.require)))
+  const clientSpec = resolveSpec(pkgJson && pkgJson.exports && pkgJson.exports['./client'])
+  const serverSpec = resolveSpec(pkgJson && pkgJson.exports && pkgJson.exports['.'])
+    || (pkgJson && pkgJson.main) || 'index.js'
+  if (typeof clientSpec === 'string' && clientSpec) {
+    const client = dirOf(clientSpec)
+    files.add(client.abs)
+    const server = dirOf(serverSpec)
+    // 只有当客户端入口位于**另一个**目录时，才整目录排除；同目录时整目录排除会
+    // 吞掉服务端入口（本函数的头注记录了这个真实事故）。
+    if (client.dir && client.dir !== toPosix(pluginDir) && client.dir !== server.dir) {
+      dirs.add(client.dir + '/')
+    }
   }
   return (file) => {
     const p = toPosix(file)

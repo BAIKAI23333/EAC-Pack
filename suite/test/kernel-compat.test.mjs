@@ -120,6 +120,35 @@ test('exports["./client"] 指向的文件被排除，服务端入口不被排除
   assert.equal(isClient(path.join(dir, 'src', 'index.js')), false, '服务端入口不得排除')
 })
 
+/**
+ * 回归：服务端入口与客户端 bundle 同目录时，不得整目录排除。
+ *
+ * 真实布局（Pack 里大量存在）：
+ *     exports: { ".": "./lib/index.js", "./client": "./lib/client.js" }
+ * 早期实现把 exports["./client"] 的父目录 `lib/` 整体排除，于是 `lib/index.js`
+ * 这个真正的服务端入口也被当成客户端跳过。实测 72 个产物里 **22 个**因此完全没被扫描，
+ * 5 个真坏导入（settingsNamespace / installSettingsSection / PERSONA_ORDER）因此
+ * 一路通过门禁、进了 full 包装配，最终让 web boot 失败。
+ */
+test('同目录布局：只排除 client 文件，服务端入口必须仍被扫描', () => {
+  const dir = tmpdir('plug')
+  const pkgJson = { exports: { '.': { default: './lib/index.js' }, './client': { default: './lib/client.js' } } }
+  const isClient = makeClientSideExcluder(dir, pkgJson)
+  assert.equal(isClient(path.join(dir, 'lib', 'client.js')), true, 'client 入口排除')
+  assert.equal(isClient(path.join(dir, 'lib', 'index.js')), false,
+    'lib/index.js 是服务端入口，同目录时不得被连带排除（曾致 22 个产物漏扫）')
+  assert.equal(isClient(path.join(dir, 'lib', 'tools.js')), false, '同目录其它服务端文件也不得排除')
+})
+
+test('独立客户端目录布局：整个 client 目录仍排除', () => {
+  const dir = tmpdir('plug')
+  const pkgJson = { exports: { '.': './src/index.js', './client': './client/index.js' } }
+  const isClient = makeClientSideExcluder(dir, pkgJson)
+  assert.equal(isClient(path.join(dir, 'client', 'index.js')), true)
+  assert.equal(isClient(path.join(dir, 'client', 'nested', 'deep.js')), true, '独立 client 目录整目录排除')
+  assert.equal(isClient(path.join(dir, 'src', 'index.js')), false)
+})
+
 test('client/ 子目录与 *.client.js 一律排除', () => {
   const dir = tmpdir('plug')
   const isClient = makeClientSideExcluder(dir, {})
