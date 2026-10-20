@@ -741,15 +741,15 @@
       "sha256": "be4366c86e29f88ed1429ee6b9ef8cb90098b65e69cb6f246ab2d49bbcfbb956",
       "bytes": 1810632,
       "source": "eac-tag",
+      "locallyRepacked": true,
+      "repackNote": "agent-teams 在 0.2.x 上因 ctx.subagents.registerContinuableSetup 被退役（改 provider 模式）而在 apply 期抛 TypeError，整个插件不激活、8 个 agent_teams_* 工具全丢。本补丁改为存在性探测 + 降级：缺该钩子时成员模型选择的持久化/冷恢复降级，建队/任务 DAG/派活/消息/状态照常可用。",
       "parts": [
         {
           "file": "@nanmicoder_dsh-agent-teams-0.1.13-eac.3.tgz",
           "bytes": 1810632,
           "sha256": "be4366c86e29f88ed1429ee6b9ef8cb90098b65e69cb6f246ab2d49bbcfbb956"
         }
-      ],
-      "locallyRepacked": true,
-      "repackNote": "agent-teams 在 0.2.x 上因 ctx.subagents.registerContinuableSetup 被退役（改 provider 模式）而在 apply 期抛 TypeError，整个插件不激活、8 个 agent_teams_* 工具全丢。本补丁改为存在性探测 + 降级：缺该钩子时成员模型选择的持久化/冷恢复降级，建队/任务 DAG/派活/消息/状态照常可用。"
+      ]
     },
     {
       "id": "deep-whale-manager",
@@ -954,16 +954,14 @@
         "eac"
       ],
       "file": "dsh-compact-1.0.1.tgz",
-      "sha256": "a5b310d9257bd4e757e2bccd66a18283bb3f672c68aa3d75b5968048bffaf33e",
-      "bytes": 18340,
+      "sha256": "e3cd7dd5ed198d2b24556b4e3a9ac79d79bf7f425f26c8ae4fe37f6286e169d7",
+      "bytes": 14643,
       "source": "eac-tag",
-      "locallyRepacked": true,
-      "repackNote": "dsh-compact: settingsNamespace 具名导出与 settingsScope 服务在 0.2.x 均退役，ctx.settings.register 也不存在了。本补丁补齐三处并给 schema 标 volatile()。",
       "parts": [
         {
           "file": "dsh-compact-1.0.1.tgz",
-          "bytes": 18340,
-          "sha256": "a5b310d9257bd4e757e2bccd66a18283bb3f672c68aa3d75b5968048bffaf33e"
+          "bytes": 14643,
+          "sha256": "e3cd7dd5ed198d2b24556b4e3a9ac79d79bf7f425f26c8ae4fe37f6286e169d7"
         }
       ]
     },
@@ -1406,15 +1404,15 @@
       "sha256": "a6a28293467894eed1094dc7ec077601be1aa4b884a6a0a0eadfcc25eca786d6",
       "bytes": 12472,
       "source": "npm",
+      "locallyRepacked": true,
+      "repackNote": "session-manager 的客户端引用了 primitives 的两个图标旧名 IconArchiveOutline20 / IconWarningOutline16；0.2.x 已改名为去后缀的 IconArchiveOutline / IconWarningOutline（尺寸由 size prop 控制，本就传了）。不改则 h(undefined) → React #130，sidebar.footer.action 槽位整个消失。",
       "parts": [
         {
           "file": "dsh-session-manager-0.1.0.tgz",
           "bytes": 12472,
           "sha256": "a6a28293467894eed1094dc7ec077601be1aa4b884a6a0a0eadfcc25eca786d6"
         }
-      ],
-      "locallyRepacked": true,
-      "repackNote": "session-manager 的客户端引用了 primitives 的两个图标旧名 IconArchiveOutline20 / IconWarningOutline16；0.2.x 已改名为去后缀的 IconArchiveOutline / IconWarningOutline（尺寸由 size prop 控制，本就传了）。不改则 h(undefined) → React #130，sidebar.footer.action 槽位整个消失。"
+      ]
     },
     {
       "id": "settings-groups",
@@ -1620,15 +1618,15 @@
       "sha256": "7c999aa14522a57b1f0dd5c6d92280fe0730b90bc46adea600622e26d06ddcc4",
       "bytes": 36605,
       "source": "eac-tag",
+      "locallyRepacked": true,
+      "repackNote": "prompt-optimizer 的客户端引用了 primitives 的两个旧图标名 IconLoadingOutline16 / IconSparkle16；0.2.x 只导出 <Name>Regular / <Name>Medium 两种变体。不改则 jsx(undefined) → React #130，conversation.input.right 槽位条目崩掉。",
       "parts": [
         {
           "file": "dsh-webui-prompt-optimizer-0.1.0.tgz",
           "bytes": 36605,
           "sha256": "7c999aa14522a57b1f0dd5c6d92280fe0730b90bc46adea600622e26d06ddcc4"
         }
-      ],
-      "locallyRepacked": true,
-      "repackNote": "prompt-optimizer 的客户端引用了 primitives 的两个旧图标名 IconLoadingOutline16 / IconSparkle16；0.2.x 只导出 <Name>Regular / <Name>Medium 两种变体。不改则 jsx(undefined) → React #130，conversation.input.right 槽位条目崩掉。"
+      ]
     },
     {
       "id": "whale-widget",
