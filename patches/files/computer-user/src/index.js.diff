@@ -1,0 +1,22 @@
+diff --git a/src/index.js b/src/index.js
+index e7f4f99..781381b 100644
+--- a/src/index.js
++++ b/src/index.js
+@@ -30,6 +30,17 @@ export const version = '0.3.7';
+ /** Services required at runtime. */
+ export const inject = ['tools'];
+ 
++// Re-export the settings schema so DSH 0.1.7-rc.2+ can derive a settings form
++// for this entry. `SettingsForms.schema(entry)` reads `entry.fiber.runtime.Config`
++// and bails out unless it is defined AND exposes `toJSON`; upstream 0.3.7 keeps
++// `Config` module-private (imported only to feed the retired `settings.register`
++// call), so on a 0.2.x kernel the entry exposes no schema, `volatileForm()`
++// projects nothing, `describe()` omits the namespace and the browser
++// `configForms.get('computer-user')` answers `status: 'unavailable'` — a blank
++// settings card whose only surface is the fallback text in client.js.
++// A real ESM named export is what the loader namespace hands to the runtime.
++export { Config };
++
+ /** In-memory set of session IDs that have been approved via /computer. */
+ const approvedSessions = new Set();
+ 
