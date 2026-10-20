@@ -1656,19 +1656,19 @@
     {
       "id": "picturereader",
       "name": "picturereader",
-      "version": "3.3.1",
+      "version": "3.5.0",
       "packs": [
         "eac"
       ],
-      "file": "picturereader-3.3.1.tgz",
-      "sha256": "6db6246aba1cdaa5a426df6353c6bbc983549d531b99ae012897dfdc5bcf0157",
-      "bytes": 133657,
-      "source": "npm",
+      "file": "picturereader-3.5.0.tgz",
+      "sha256": "bcc453665ff3b63c63b299f6d62296c1d131e888e31ee7794f1885e8ad8d8a54",
+      "bytes": 156405,
+      "source": "github",
       "parts": [
         {
-          "file": "picturereader-3.3.1.tgz",
-          "bytes": 133657,
-          "sha256": "6db6246aba1cdaa5a426df6353c6bbc983549d531b99ae012897dfdc5bcf0157"
+          "file": "picturereader-3.5.0.tgz",
+          "bytes": 156405,
+          "sha256": "bcc453665ff3b63c63b299f6d62296c1d131e888e31ee7794f1885e8ad8d8a54"
         }
       ]
     }

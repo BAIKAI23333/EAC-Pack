@@ -110,6 +110,48 @@ This pin matters: the EAC main repository **deliberately deleted**
 Do not re-add them to the main repository — that contradicts that decision; the
 fixes belong to the distribution layer, i.e. here.
 
+### Pinning a `github` / `github-repo` source
+
+`GH_SOURCES` entries take an optional `ref`. Give it a **full 40-char commit SHA**
+(or a tag) whenever reproducibility matters — without it the clone tracks the
+upstream default branch, so the same commit of this repo can emit a different
+artifact on a different day.
+
+That is not hypothetical: `@nagi-ovo/dsh-visualize` has catalog version 0.1.4
+while its cached clone was 0.1.7 — the shipped bytes depended on which machine
+ran the build. `ref` also keys the cache (`.cache/<dir>/.repack-ref`), so a
+changed pin forces a fresh clone and the resulting `HEAD` is asserted against it.
+
+`picturereader` is the first entry to use this, because 3.5.0 has **no npm
+release and no git tag** (npm stops at 3.3.3) and is the only version adapted to
+the 0.2.x kernel on both halves: the client no longer injects the retired
+`settingsScope` (it probes at runtime and falls back to its own loopback route),
+and the host half no longer imports the deleted `settingsNamespace`.
+
+Note that 3.5.0 adds a runtime dependency (`webp-wasm`) that 3.3.1 did not have.
+It is a declared `dependencies` entry, so pnpm installs it from the profile's
+dependency graph at install time — it is **not** bundled into the tgz, and a
+bare `npm pack`-style drop-in of the tarball alone would not resolve it.
+
+Adding a `github*` source without a matching map entry makes `repack.mjs` `die`;
+`suite/test/gh-sources.test.mjs` catches that statically, before any build runs.
+That test also keeps a small `KNOWN_MISSING_SOURCE_MAP` table for
+`dsh-our-free-model` (see below) and fails if an allowlisted entry stops being a
+real problem, so the waiver cannot rot.
+
+## Known build blocker: `dsh-our-free-model`
+
+`catalog/eac.json` records this package as `source: github-repo` with
+`spec: file:dist/dsh-our-free-model-2.0.0.tgz`, but `GH_SOURCES` has no mapping
+for it — a **full** `repack.mjs` run dies at that entry. It is waived, not fixed,
+because the pinned version 2.0.0 is no longer obtainable: upstream `main` is now
+2.5.6, no release asset for 2.0.0 survives, and the local tarball is gone.
+
+This does not block day-to-day work: `dist/` is gitignored, rebuilds are normally
+scoped with `--only`, and the committed `bootstrap.json` entry is intact. Fixing
+it needs its own change (restore the 2.0.0 asset, or move the entry to 2.5.6 with
+a new source mapping).
+
 ## Current patches
 
 | Package | Source | File | Fix |

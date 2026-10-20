@@ -255,9 +255,9 @@
   {
     "id": "picturereader",
     "name": "picturereader",
-    "version": "3.3.1",
-    "source": "npm",
-    "spec": "picturereader@3.3.1",
+    "version": "3.5.0",
+    "source": "github",
+    "spec": "git+https://github.com/jing-hy/picturereader.git#ebbb2f098ecf3fe18a47eaaa361ae157d31272cc",
     "packs": [
       "eac"
     ],
@@ -269,7 +269,7 @@
     "descEn": "Unified image understanding: visual twin adapter for native thumbnails, auto-analysis on text-only models, local tools (scan/OCR x4/crop/palette/compare/batch), document-to-image, local photo editing, optional external VLM bridge.",
     "license": "MIT",
     "upstream": "https://github.com/jing-hy/picturereader",
-    "notes": "目录名 picturereader。D10 实测：3.3.3 在官方 RC2 上等待 EAC 分叉版专有 settingsScope 服务 → web boot 门禁拒绝启动（1 entry did not activate）；3.3.1 在 RC2 稳定（D9/D10 验证）。锁定 3.3.1，等上游出 RC2 版再直升。"
+    "notes": "目录名 picturereader。升至 3.5.0（钉上游 commit ebbb2f098ecf3fe18a47eaaa361ae157d31272cc）—— 目前唯一两端都适配 0.2.x 内核的版本：客户端不再 inject 已移除的 settingsScope，改为运行时探测后走 configForms，并带自建 loopback 路由兜底；宿主半不再 import 已删除的 settingsNamespace，且 settings.register 缺失时降级到自有配置覆盖层而非抛 TypeError。3.5.0 既无 npm 发布也无 git tag（npm 最新仅 3.3.3），故 source 由 npm 改为 github 并在 repack.mjs 的 GH_SOURCES 里钉 ref。此前「3.3.1 在 RC2 稳定」的记录有误：npm 上的 3.3.1 真实状态是坏的 —— 宿主半 import 不存在的导出，ESM 链接期即崩，那条结论只验了浏览器侧没验宿主半。"
   },
   {
     "id": "computer-user",
