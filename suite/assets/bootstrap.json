@@ -8,8 +8,8 @@
   "extraFiles": [
     {
       "file": "gallery.json",
-      "bytes": 21342,
-      "sha256": "c259e1e11601e0555486eaa37f2c598bace73ab6aad5e692102ecb44f9516c3b"
+      "bytes": 20906,
+      "sha256": "9df6e809bb8366ffd0b3f1a2d7ed695707502b71746be57191b9467678f465e8"
     },
     {
       "file": "previews/blue-fantasy/dark.png",
@@ -23,13 +23,13 @@
     },
     {
       "file": "previews/deep-whale-day-night/dark.png",
-      "bytes": 1984956,
-      "sha256": "8bc5c844223a532e6b9c821d5ca8f70ff506db6a6dca073cf8a33ce9a87ae972"
+      "bytes": 8970,
+      "sha256": "6e62e5b0d7a7eda460df09cc55b3993f7819a413864c9cfeb044b3d0a554a232"
     },
     {
       "file": "previews/deep-whale-day-night/light.png",
-      "bytes": 2259565,
-      "sha256": "9e842ec80f90a48f438fcf254de416c08c8d72105a89a33a76edce4e4108bb51"
+      "bytes": 8970,
+      "sha256": "6e62e5b0d7a7eda460df09cc55b3993f7819a413864c9cfeb044b3d0a554a232"
     },
     {
       "file": "previews/deep-whale-manager/dark.png",
@@ -272,16 +272,16 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-balance-0.1.0.tgz",
-      "sha256": "82cd2e34590e314d887d6033b8db35cdb261458d8f24811bb7abba8bbb48b6b7",
-      "bytes": 5281,
+      "sha256": "b2e74d784a23ad4b29e0a6fe5079b74f7efc70e083945cc5476f6bb5d5e8f6a3",
+      "bytes": 5346,
       "source": "eac-tag",
       "locallyRepacked": true,
       "repackNote": "Drops the 价格设置 settings section and its now-unreachable implementation: its balancePrices/balanceModels/refreshBalance bridge is retired by ADR 0006, so the section could only ever render a misleading \"桥接不可用\" error. The composer dock is unchanged.",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-balance-0.1.0.tgz",
-          "bytes": 5281,
-          "sha256": "82cd2e34590e314d887d6033b8db35cdb261458d8f24811bb7abba8bbb48b6b7"
+          "bytes": 5346,
+          "sha256": "b2e74d784a23ad4b29e0a6fe5079b74f7efc70e083945cc5476f6bb5d5e8f6a3"
         }
       ]
     },
@@ -293,14 +293,14 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-client-file-changes-0.1.0.tgz",
-      "sha256": "a8a47277fc7bc4187093764c860e7a510fd8fd08df4eee740c9462d5a5491545",
-      "bytes": 11528,
+      "sha256": "827c554c26a5f5cba384f86ff60d4e34442bcdda5cf84e9e864245b05d9c7470",
+      "bytes": 11380,
       "source": "eac-tag",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-client-file-changes-0.1.0.tgz",
-          "bytes": 11528,
-          "sha256": "a8a47277fc7bc4187093764c860e7a510fd8fd08df4eee740c9462d5a5491545"
+          "bytes": 11380,
+          "sha256": "827c554c26a5f5cba384f86ff60d4e34442bcdda5cf84e9e864245b05d9c7470"
         }
       ]
     },
@@ -312,14 +312,14 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-conversation-tweaks-0.1.0.tgz",
-      "sha256": "58606e78dc2abed5bf83a83a3aaa754de75521e386678ec965415988291543cc",
-      "bytes": 4782,
+      "sha256": "a0c36ad41e92681fc954c4ae9e62c475a10d741e0ca48aef5746357f9725285d",
+      "bytes": 4704,
       "source": "eac-tag",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-conversation-tweaks-0.1.0.tgz",
-          "bytes": 4782,
-          "sha256": "58606e78dc2abed5bf83a83a3aaa754de75521e386678ec965415988291543cc"
+          "bytes": 4704,
+          "sha256": "a0c36ad41e92681fc954c4ae9e62c475a10d741e0ca48aef5746357f9725285d"
         }
       ]
     },
@@ -350,14 +350,14 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-file-changes-0.1.0.tgz",
-      "sha256": "601b23fcec3d39f8d726dbe09fca9720361bf3d4f402ceaff655cbcdf52ecb4d",
-      "bytes": 6979,
+      "sha256": "817284e07ea14563dffc550883406d96a6f2810b73a30ed4bb8829d3a14dfa31",
+      "bytes": 6834,
       "source": "eac-tag",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-file-changes-0.1.0.tgz",
-          "bytes": 6979,
-          "sha256": "601b23fcec3d39f8d726dbe09fca9720361bf3d4f402ceaff655cbcdf52ecb4d"
+          "bytes": 6834,
+          "sha256": "817284e07ea14563dffc550883406d96a6f2810b73a30ed4bb8829d3a14dfa31"
         }
       ]
     },
@@ -369,14 +369,14 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-float-window-0.1.0.tgz",
-      "sha256": "48679db7c9193718cf33c07c8970ecfd639fa2468a61d49baa1664a49ea9e90c",
-      "bytes": 6376,
+      "sha256": "526b812a38d608ae8d15a768efb9f02a47949291c340cdadd86353fb33ef7f04",
+      "bytes": 6204,
       "source": "eac-tag",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-float-window-0.1.0.tgz",
-          "bytes": 6376,
-          "sha256": "48679db7c9193718cf33c07c8970ecfd639fa2468a61d49baa1664a49ea9e90c"
+          "bytes": 6204,
+          "sha256": "526b812a38d608ae8d15a768efb9f02a47949291c340cdadd86353fb33ef7f04"
         }
       ]
     },
@@ -388,14 +388,14 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-openclaw-bridge-0.7.0.tgz",
-      "sha256": "e27ffe1f64a4c1b4d5638b581bb552a8c101b826c533997e3f0be8fd9c495aef",
-      "bytes": 43561,
+      "sha256": "7ba15cce58fb12b27db53ed9480274d6e783a41c374580a88ea1421dc4488de3",
+      "bytes": 43447,
       "source": "eac-tag",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-openclaw-bridge-0.7.0.tgz",
-          "bytes": 43561,
-          "sha256": "e27ffe1f64a4c1b4d5638b581bb552a8c101b826c533997e3f0be8fd9c495aef"
+          "bytes": 43447,
+          "sha256": "7ba15cce58fb12b27db53ed9480274d6e783a41c374580a88ea1421dc4488de3"
         }
       ]
     },
@@ -408,14 +408,14 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-plugin-manager-0.1.0.tgz",
-      "sha256": "ddf6cc334d2b806b021ace107b79f660a4a974a89ed3b513e0ce35fc9322bbe0",
-      "bytes": 8053,
+      "sha256": "40a5b2fae348111b73ca899dd3b8854594d85ab02b93401f49886c073fca0dd9",
+      "bytes": 7932,
       "source": "eac-tag",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-plugin-manager-0.1.0.tgz",
-          "bytes": 8053,
-          "sha256": "ddf6cc334d2b806b021ace107b79f660a4a974a89ed3b513e0ce35fc9322bbe0"
+          "bytes": 7932,
+          "sha256": "40a5b2fae348111b73ca899dd3b8854594d85ab02b93401f49886c073fca0dd9"
         }
       ]
     },
@@ -427,14 +427,14 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-prompt-custom-0.1.0.tgz",
-      "sha256": "f6de797b9d12456668f487760da5342bfcb681fc3a8d401d279879e50670dffd",
-      "bytes": 6423,
+      "sha256": "3276b5bc519a530de85f5c058d34f5525b4ae363a65980d0d74b642350933fb7",
+      "bytes": 6266,
       "source": "eac-tag",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-prompt-custom-0.1.0.tgz",
-          "bytes": 6423,
-          "sha256": "f6de797b9d12456668f487760da5342bfcb681fc3a8d401d279879e50670dffd"
+          "bytes": 6266,
+          "sha256": "3276b5bc519a530de85f5c058d34f5525b4ae363a65980d0d74b642350933fb7"
         }
       ]
     },
@@ -447,14 +447,14 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-skin-switch-0.1.0.tgz",
-      "sha256": "d0a6755ba5803ab19e8117af6dd8a8a5ca6a61a33a0113e09254543653471178",
-      "bytes": 12757,
+      "sha256": "943a2d1b449284e9aab651dc26d2d7efc8c4dc5260f1728abfcbf237d5794539",
+      "bytes": 12617,
       "source": "eac-tag",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-skin-switch-0.1.0.tgz",
-          "bytes": 12757,
-          "sha256": "d0a6755ba5803ab19e8117af6dd8a8a5ca6a61a33a0113e09254543653471178"
+          "bytes": 12617,
+          "sha256": "943a2d1b449284e9aab651dc26d2d7efc8c4dc5260f1728abfcbf237d5794539"
         }
       ]
     },
@@ -466,14 +466,14 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-terminal-0.1.0.tgz",
-      "sha256": "5a4c01b1d9861d28a1dfd47d2ccd7aaafc62ca9ba890c38de43d7850604052d8",
-      "bytes": 12020,
+      "sha256": "2e00aafa8d05af662966d64beec95031a9cee4495b333ade542725e2cf894676",
+      "bytes": 11790,
       "source": "eac-tag",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-terminal-0.1.0.tgz",
-          "bytes": 12020,
-          "sha256": "5a4c01b1d9861d28a1dfd47d2ccd7aaafc62ca9ba890c38de43d7850604052d8"
+          "bytes": 11790,
+          "sha256": "2e00aafa8d05af662966d64beec95031a9cee4495b333ade542725e2cf894676"
         }
       ]
     },
@@ -542,14 +542,14 @@
         "skins"
       ],
       "file": "@linxin666_dsh-client-ui-skin-blue-fantasy-0.2.0.tgz",
-      "sha256": "44236cfd09daaa3a00999bcbfcdf081c2a21db015671ad75eee161ab1de690da",
-      "bytes": 5312560,
+      "sha256": "7ccd3726a5aef41c6bde11ae776f67c8ecc658282ac720ce7466c01ffce852cc",
+      "bytes": 5315938,
       "source": "npm",
       "parts": [
         {
           "file": "@linxin666_dsh-client-ui-skin-blue-fantasy-0.2.0.tgz",
-          "bytes": 5312560,
-          "sha256": "44236cfd09daaa3a00999bcbfcdf081c2a21db015671ad75eee161ab1de690da"
+          "bytes": 5315938,
+          "sha256": "7ccd3726a5aef41c6bde11ae776f67c8ecc658282ac720ce7466c01ffce852cc"
         }
       ]
     },
@@ -732,14 +732,14 @@
         "eac"
       ],
       "file": "@nanmicoder_dsh-agent-teams-0.1.13-eac.3.tgz",
-      "sha256": "76631f392e8d335aa99293576dcb3a13f62b3c7737ab834676bafd2ca65fabc5",
-      "bytes": 1809882,
+      "sha256": "6ffd6a596a12cf1766bad2bbe50e118c720f237d85fbecce55e5523b86dcecbd",
+      "bytes": 1809854,
       "source": "eac-tag",
       "parts": [
         {
           "file": "@nanmicoder_dsh-agent-teams-0.1.13-eac.3.tgz",
-          "bytes": 1809882,
-          "sha256": "76631f392e8d335aa99293576dcb3a13f62b3c7737ab834676bafd2ca65fabc5"
+          "bytes": 1809854,
+          "sha256": "6ffd6a596a12cf1766bad2bbe50e118c720f237d85fbecce55e5523b86dcecbd"
         }
       ]
     },
@@ -887,14 +887,14 @@
         "eac"
       ],
       "file": "dsh-better-sidebar-0.15.3-eac.1.tgz",
-      "sha256": "95e5fc933189765088dca83bd6589e22eaa494a9c9d25277ca43355856197fad",
-      "bytes": 2473554,
+      "sha256": "d77545ac8e2725d64222b0d9fd7a561c1ad24f19d58be4fe5781de1219feda79",
+      "bytes": 2473745,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-better-sidebar-0.15.3-eac.1.tgz",
-          "bytes": 2473554,
-          "sha256": "95e5fc933189765088dca83bd6589e22eaa494a9c9d25277ca43355856197fad"
+          "bytes": 2473745,
+          "sha256": "d77545ac8e2725d64222b0d9fd7a561c1ad24f19d58be4fe5781de1219feda79"
         }
       ]
     },
@@ -906,14 +906,14 @@
         "eac"
       ],
       "file": "dsh-change-review-0.1.0.tgz",
-      "sha256": "e8614a40c491b144eac9427d500d0871b43b35f476af7c3c421a9e8d3693f39e",
-      "bytes": 6618,
+      "sha256": "bc998832d516659ff3595fdfd6537fc1d380d05581167cc86fd4dde4091e1d8d",
+      "bytes": 6450,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-change-review-0.1.0.tgz",
-          "bytes": 6618,
-          "sha256": "e8614a40c491b144eac9427d500d0871b43b35f476af7c3c421a9e8d3693f39e"
+          "bytes": 6450,
+          "sha256": "bc998832d516659ff3595fdfd6537fc1d380d05581167cc86fd4dde4091e1d8d"
         }
       ]
     },
@@ -944,14 +944,14 @@
         "eac"
       ],
       "file": "dsh-compact-1.0.1.tgz",
-      "sha256": "d08df7a3cf88dadf08069a6f021a36665ae7540a04e8cab4dfd16cfd3d0ea553",
-      "bytes": 14663,
+      "sha256": "e3cd7dd5ed198d2b24556b4e3a9ac79d79bf7f425f26c8ae4fe37f6286e169d7",
+      "bytes": 14643,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-compact-1.0.1.tgz",
-          "bytes": 14663,
-          "sha256": "d08df7a3cf88dadf08069a6f021a36665ae7540a04e8cab4dfd16cfd3d0ea553"
+          "bytes": 14643,
+          "sha256": "e3cd7dd5ed198d2b24556b4e3a9ac79d79bf7f425f26c8ae4fe37f6286e169d7"
         }
       ]
     },
@@ -964,14 +964,14 @@
         "eac"
       ],
       "file": "dsh-composer-dynamic-island-2.1.0.tgz",
-      "sha256": "7095e75b4e297d74772deae3ec526592373607c3a50a3db5732438335d9b1a3c",
-      "bytes": 18512,
+      "sha256": "df32899da434168c607b4f8e95d4f746df93da4fca1bac8db5924424ca1436d7",
+      "bytes": 18493,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-composer-dynamic-island-2.1.0.tgz",
-          "bytes": 18512,
-          "sha256": "7095e75b4e297d74772deae3ec526592373607c3a50a3db5732438335d9b1a3c"
+          "bytes": 18493,
+          "sha256": "df32899da434168c607b4f8e95d4f746df93da4fca1bac8db5924424ca1436d7"
         }
       ]
     },
@@ -1022,14 +1022,14 @@
         "eac"
       ],
       "file": "dsh-dock-settings-0.1.0.tgz",
-      "sha256": "e3059cea7737a18b52cb66f465aae247ac6988df5e1c682dd2a79ea378085147",
-      "bytes": 13645,
+      "sha256": "65a5ce022a875bf708d05db9fe2ca9b3da63d850a00f6834565010b5daf49545",
+      "bytes": 13627,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-dock-settings-0.1.0.tgz",
-          "bytes": 13645,
-          "sha256": "e3059cea7737a18b52cb66f465aae247ac6988df5e1c682dd2a79ea378085147"
+          "bytes": 13627,
+          "sha256": "65a5ce022a875bf708d05db9fe2ca9b3da63d850a00f6834565010b5daf49545"
         }
       ]
     },
@@ -1060,14 +1060,14 @@
         "eac"
       ],
       "file": "dsh-eac-core-bridge-1.0.0.tgz",
-      "sha256": "abdd2bf93a5f19da8c2837ece38fb89f29c25fc7d6024b869c346b7c8dcf974d",
-      "bytes": 4608,
+      "sha256": "9075a3e6368e95c7cff66137abb8ade274f7162e5d5f8dce853f2fa3e6f14b3d",
+      "bytes": 4463,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-eac-core-bridge-1.0.0.tgz",
-          "bytes": 4608,
-          "sha256": "abdd2bf93a5f19da8c2837ece38fb89f29c25fc7d6024b869c346b7c8dcf974d"
+          "bytes": 4463,
+          "sha256": "9075a3e6368e95c7cff66137abb8ade274f7162e5d5f8dce853f2fa3e6f14b3d"
         }
       ]
     },
@@ -1079,14 +1079,14 @@
         "eac"
       ],
       "file": "dsh-eac-locale-compat-1.0.0.tgz",
-      "sha256": "83b0202784b5b1cd775f63d110d690a49d7dc37572b766a6a47c216a113f07a3",
-      "bytes": 16720,
+      "sha256": "e75771653843f91d579194a4292dfd8d7681433ea28ca40c46993d8d59c97cbc",
+      "bytes": 16557,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-eac-locale-compat-1.0.0.tgz",
-          "bytes": 16720,
-          "sha256": "83b0202784b5b1cd775f63d110d690a49d7dc37572b766a6a47c216a113f07a3"
+          "bytes": 16557,
+          "sha256": "e75771653843f91d579194a4292dfd8d7681433ea28ca40c46993d8d59c97cbc"
         }
       ]
     },
@@ -1098,14 +1098,14 @@
         "eac"
       ],
       "file": "dsh-feature-toggles-0.1.1.tgz",
-      "sha256": "a79d3d1329ca8f635c978a2384762a7447f4975ff9b4c1ec866d794fc59d541a",
-      "bytes": 4126,
+      "sha256": "7f4a40c5286f7b0dc336d101f3cb0aa22239439a73aa98fb34403764a964fc09",
+      "bytes": 4024,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-feature-toggles-0.1.1.tgz",
-          "bytes": 4126,
-          "sha256": "a79d3d1329ca8f635c978a2384762a7447f4975ff9b4c1ec866d794fc59d541a"
+          "bytes": 4024,
+          "sha256": "7f4a40c5286f7b0dc336d101f3cb0aa22239439a73aa98fb34403764a964fc09"
         }
       ]
     },
@@ -1117,14 +1117,14 @@
         "eac"
       ],
       "file": "dsh-file-drop-eac-0.1.0.tgz",
-      "sha256": "2131d2adc3a150c78934904b4ccc4825c7d5d5d5e1fc4f913fee9788797bb188",
-      "bytes": 8267,
+      "sha256": "8d0cc8bda8b4e25b330c01c3f55e59f7239a046a9292818da7c0450e0bb7a67b",
+      "bytes": 8049,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-file-drop-eac-0.1.0.tgz",
-          "bytes": 8267,
-          "sha256": "2131d2adc3a150c78934904b4ccc4825c7d5d5d5e1fc4f913fee9788797bb188"
+          "bytes": 8049,
+          "sha256": "8d0cc8bda8b4e25b330c01c3f55e59f7239a046a9292818da7c0450e0bb7a67b"
         }
       ]
     },
@@ -1155,14 +1155,14 @@
         "eac"
       ],
       "file": "dsh-font-custom-0.1.0.tgz",
-      "sha256": "b81f785f829adea4f438eaaa1331602279531f2c08c15a753aaaee7603d1286c",
-      "bytes": 8957,
+      "sha256": "5154a08d5b0a4ca65e9af12cdc496b5252301b186e24577d8968612b5d169f73",
+      "bytes": 8777,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-font-custom-0.1.0.tgz",
-          "bytes": 8957,
-          "sha256": "b81f785f829adea4f438eaaa1331602279531f2c08c15a753aaaee7603d1286c"
+          "bytes": 8777,
+          "sha256": "5154a08d5b0a4ca65e9af12cdc496b5252301b186e24577d8968612b5d169f73"
         }
       ]
     },
@@ -1174,14 +1174,14 @@
         "eac"
       ],
       "file": "dsh-image-paste-0.1.0.tgz",
-      "sha256": "c9c13cf10fed1b318144fe36ff37ebfc8a6c5b3a99821aa292f519655b06e559",
-      "bytes": 4621,
+      "sha256": "cd8e1edf6bbd2e036364356824c3486837b4905e3f40899d19427866d1cb451c",
+      "bytes": 4489,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-image-paste-0.1.0.tgz",
-          "bytes": 4621,
-          "sha256": "c9c13cf10fed1b318144fe36ff37ebfc8a6c5b3a99821aa292f519655b06e559"
+          "bytes": 4489,
+          "sha256": "cd8e1edf6bbd2e036364356824c3486837b4905e3f40899d19427866d1cb451c"
         }
       ]
     },
@@ -1212,14 +1212,14 @@
         "eac"
       ],
       "file": "dsh-message-rewind-0.1.0.tgz",
-      "sha256": "f2a5a5d968a1a8500840fde9453b2e1d85b969648811a3935cad199bd1b65468",
-      "bytes": 8558,
+      "sha256": "08bcc3bf4f05d3cca06567dd27523f5c5cebf899a3bfb15195e6159265587768",
+      "bytes": 8542,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-message-rewind-0.1.0.tgz",
-          "bytes": 8558,
-          "sha256": "f2a5a5d968a1a8500840fde9453b2e1d85b969648811a3935cad199bd1b65468"
+          "bytes": 8542,
+          "sha256": "08bcc3bf4f05d3cca06567dd27523f5c5cebf899a3bfb15195e6159265587768"
         }
       ]
     },
@@ -1231,14 +1231,14 @@
         "eac"
       ],
       "file": "dsh-offpeak-9.9.9.tgz",
-      "sha256": "f8e4b495d6679ad32b93402d76ac60d439d0a2260fc33efc6b2342ddc7c064ed",
-      "bytes": 22825,
+      "sha256": "760a15bfdaa64d4fe1c3ee056ee41230558527c7a566bdf4217ad4a1cd0e79a4",
+      "bytes": 22018,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-offpeak-9.9.9.tgz",
-          "bytes": 22825,
-          "sha256": "f8e4b495d6679ad32b93402d76ac60d439d0a2260fc33efc6b2342ddc7c064ed"
+          "bytes": 22018,
+          "sha256": "760a15bfdaa64d4fe1c3ee056ee41230558527c7a566bdf4217ad4a1cd0e79a4"
         }
       ]
     },
@@ -1293,14 +1293,14 @@
         "eac"
       ],
       "file": "dsh-pet-settings-0.1.0.tgz",
-      "sha256": "d556c6300489e98e1ed6870262cbabe1bbb56dc3a136e86c0d882764bb2301c9",
-      "bytes": 4344,
+      "sha256": "287fed4b4f5047bcb2d661a6925df9025d7cadca4605e0479f19cd57a050e1dd",
+      "bytes": 4237,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-pet-settings-0.1.0.tgz",
-          "bytes": 4344,
-          "sha256": "d556c6300489e98e1ed6870262cbabe1bbb56dc3a136e86c0d882764bb2301c9"
+          "bytes": 4237,
+          "sha256": "287fed4b4f5047bcb2d661a6925df9025d7cadca4605e0479f19cd57a050e1dd"
         }
       ]
     },
@@ -1332,14 +1332,14 @@
         "eac"
       ],
       "file": "dsh-plugin-shield-0.1.0.tgz",
-      "sha256": "8172c09d72aaa069db49bd9f8522630575e3be969b5d10c2f63881ad9bd534f9",
-      "bytes": 5929,
+      "sha256": "8e02175f7da6429952843f9502346d5dd748886562141babd7c3a5b03e871b28",
+      "bytes": 5826,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-plugin-shield-0.1.0.tgz",
-          "bytes": 5929,
-          "sha256": "8172c09d72aaa069db49bd9f8522630575e3be969b5d10c2f63881ad9bd534f9"
+          "bytes": 5826,
+          "sha256": "8e02175f7da6429952843f9502346d5dd748886562141babd7c3a5b03e871b28"
         }
       ]
     },
@@ -1372,14 +1372,14 @@
         "eac"
       ],
       "file": "dsh-raw-html-0.6.2.tgz",
-      "sha256": "a320245871e4b471da2c0397e1051518ab57100c5c75b841a83c682bc3d36e19",
-      "bytes": 9104769,
+      "sha256": "748602685f0f6e4029bb4f2659fc897ed8d640819676ed8fc8f007bad7a4f244",
+      "bytes": 9104718,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-raw-html-0.6.2.tgz",
-          "bytes": 9104769,
-          "sha256": "a320245871e4b471da2c0397e1051518ab57100c5c75b841a83c682bc3d36e19"
+          "bytes": 9104718,
+          "sha256": "748602685f0f6e4029bb4f2659fc897ed8d640819676ed8fc8f007bad7a4f244"
         }
       ]
     },
@@ -1410,16 +1410,16 @@
         "eac"
       ],
       "file": "dsh-settings-groups-0.1.0.tgz",
-      "sha256": "7cbe1cb485c2138794fd35a98e438371f442d2cb3f0677f94a20d79b429ed457",
-      "bytes": 5887,
+      "sha256": "722360f08b3bd6fff5b3c3f23b030303551af5761a7c0b339a9abeeee63d2845",
+      "bytes": 5896,
       "source": "eac-tag",
       "locallyRepacked": true,
       "repackNote": "General-settings collapser: real rows are the slot wrapper children, not the wrapper itself (the whole page used to be hidden as a single \"advanced\" row).",
       "parts": [
         {
           "file": "dsh-settings-groups-0.1.0.tgz",
-          "bytes": 5887,
-          "sha256": "7cbe1cb485c2138794fd35a98e438371f442d2cb3f0677f94a20d79b429ed457"
+          "bytes": 5896,
+          "sha256": "722360f08b3bd6fff5b3c3f23b030303551af5761a7c0b339a9abeeee63d2845"
         }
       ]
     },
@@ -1431,14 +1431,14 @@
         "eac"
       ],
       "file": "dsh-settings-scroll-fix-2.0.2.tgz",
-      "sha256": "39711cadbe8143803ac4b18d6e248793ead1bae06463e8279fe1cb66a759b847",
-      "bytes": 9772,
+      "sha256": "037221c05a880760cdb62e6400e607e476ac2d587e5e107a547d6bfb9a409057",
+      "bytes": 9754,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-settings-scroll-fix-2.0.2.tgz",
-          "bytes": 9772,
-          "sha256": "39711cadbe8143803ac4b18d6e248793ead1bae06463e8279fe1cb66a759b847"
+          "bytes": 9754,
+          "sha256": "037221c05a880760cdb62e6400e607e476ac2d587e5e107a547d6bfb9a409057"
         }
       ]
     },
@@ -1527,14 +1527,14 @@
         "eac"
       ],
       "file": "dsh-undo-savepoint-0.3.4.tgz",
-      "sha256": "798b1ef39e8fc04e50ca0d3da335246d471aab59977ac60c2315ccc56e250d5a",
-      "bytes": 42722,
+      "sha256": "49d6dcf3e9a87282e3814f643ab298d819c03c811fb4d3cf0b8f75aa575e052b",
+      "bytes": 42702,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-undo-savepoint-0.3.4.tgz",
-          "bytes": 42722,
-          "sha256": "798b1ef39e8fc04e50ca0d3da335246d471aab59977ac60c2315ccc56e250d5a"
+          "bytes": 42702,
+          "sha256": "49d6dcf3e9a87282e3814f643ab298d819c03c811fb4d3cf0b8f75aa575e052b"
         }
       ]
     },
@@ -1565,14 +1565,14 @@
         "eac"
       ],
       "file": "dsh-viewport-lock-1.0.1.tgz",
-      "sha256": "b523935cd0fb85444441a8995743b2e9fa3fe52e9fc8c287637817fcc3638a05",
-      "bytes": 5001,
+      "sha256": "35b97fa4edd1086979ea53232d43252dcb04ad4f9e0afb0b6de79facef905690",
+      "bytes": 4879,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-viewport-lock-1.0.1.tgz",
-          "bytes": 5001,
-          "sha256": "b523935cd0fb85444441a8995743b2e9fa3fe52e9fc8c287637817fcc3638a05"
+          "bytes": 4879,
+          "sha256": "35b97fa4edd1086979ea53232d43252dcb04ad4f9e0afb0b6de79facef905690"
         }
       ]
     },
@@ -1603,14 +1603,14 @@
         "eac"
       ],
       "file": "dsh-webui-prompt-optimizer-0.1.0.tgz",
-      "sha256": "ffbeaffe931964b04f0881a08ccd7cd01c34679197e01760fbcaed90d444a1b3",
-      "bytes": 36625,
+      "sha256": "84ee46021b78d88b466a79726361603284456dc503db9cb23bb9b1bf2bef6873",
+      "bytes": 36601,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-webui-prompt-optimizer-0.1.0.tgz",
-          "bytes": 36625,
-          "sha256": "ffbeaffe931964b04f0881a08ccd7cd01c34679197e01760fbcaed90d444a1b3"
+          "bytes": 36601,
+          "sha256": "84ee46021b78d88b466a79726361603284456dc503db9cb23bb9b1bf2bef6873"
         }
       ]
     },

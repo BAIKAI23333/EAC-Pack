@@ -71,14 +71,8 @@ test('每张源映射表的包名都能在 catalog 里找到（防孤儿映射�
  * 加条目必须写明为什么现在不能修 + 跟踪去向。空表表示「一个都不许漏」。
  */
 const KNOWN_MISSING_SOURCE_MAP = {
-  // catalog 记 source=github-repo 且 spec=file:dist/dsh-our-free-model-2.0.0.tgz，
-  // 但 GH_SOURCES 无该包映射 → 全量 repack 走到它必 die。而且它锁定的 2.0.0
-  // 上游已不可得（仓库 main 现为 2.5.6，release 资产也没留 2.0.0），本地 tgz 亦
-  // 已丢失，无法在不改变分发版本的前提下补齐。
-  // 不阻塞日常：dist/ 被 gitignore，平时按 --only 局部重建；已提交的
-  // bootstrap.json 条目完好。修它需要单独立项（要么补 2.0.0 的历史资产，
-  // 要么随 OFM 升版一起改 catalog + 映射）。
-  'dsh-our-free-model': 'github-repo 无 GH_SOURCES 映射；2.0.0 上游与本地 tgz 均已不可得',
+  // 此前豁免的 dsh-our-free-model 已随 catalog 升版到 2.5.6 并补上
+  // GH_TGZ_SOURCES 映射（source=github-tgz），问题已解决，豁免随之移除。
 }
 
 test('catalog 声明 github / github-repo / github-tgz 的包都有对应映射（防构建期 die）', () => {
