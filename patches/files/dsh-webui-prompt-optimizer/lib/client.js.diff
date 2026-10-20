@@ -1,0 +1,22 @@
+diff --git a/lib/client.js b/lib/client.js
+index 7d80c04..d1bc287 100644
+--- a/lib/client.js
++++ b/lib/client.js
+@@ -532,7 +532,7 @@ window.__ModuleLoader__.load({
+ 						onClick: () => {
+ 							optimize();
+ 						},
+-						children: busy ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconLoadingOutline16, { className: css.busy }) : /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconSparkle16, {})
++						children: busy ? /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconLoadingOutlineMedium, { className: css.busy }) : /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconSparkleMedium, {})
+ 					}),
+ 					phase !== "multi" && /* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+ 						className: panelVisible ? `${css.panel} ${css.panelOpen}` : css.panel,
+@@ -607,7 +607,7 @@ window.__ModuleLoader__.load({
+ 							}),
+ 							/* @__PURE__ */ (0, react_jsx_runtime.jsxs)("div", {
+ 								className: classNames(css.status, statusClass),
+-								children: [phase === "optimizing" && /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconLoadingOutline16, { className: css.busy }), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", { children: phase === "idle" ? multiRound ? "点击生成多个候选" : "点击用当前模型优化" : detail })]
++								children: [phase === "optimizing" && /* @__PURE__ */ (0, react_jsx_runtime.jsx)(_deepseek_ai_dsh_client_ui_primitives.IconLoadingOutlineMedium, { className: css.busy }), /* @__PURE__ */ (0, react_jsx_runtime.jsx)("span", { children: phase === "idle" ? multiRound ? "点击生成多个候选" : "点击用当前模型优化" : detail })]
+ 							}),
+ 							busy && /* @__PURE__ */ (0, react_jsx_runtime.jsx)("button", {
+ 								type: "button",

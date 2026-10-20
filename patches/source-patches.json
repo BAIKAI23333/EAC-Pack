@@ -224,6 +224,36 @@
           "note": "Self-contained 0.1.x-compatible shim for the retired @deepseek-ai/dsh-settings userland (settingsNamespace / installSettingsSection) plus a createSettingsScope helper that rebuilds the retired ctx.settings.register() surface on top of the 0.2.x describe()/update() API. EAC plugins ship self-contained and do not resolve through the kernel package graph, so this file travels with the plugin."
         }
       ]
+    },
+    {
+      "name": "dsh-session-manager",
+      "version": "0.1.0",
+      "source": "npm",
+      "summary": "session-manager 的客户端引用了 primitives 的两个图标旧名 IconArchiveOutline20 / IconWarningOutline16；0.2.x 已改名为去后缀的 IconArchiveOutline / IconWarningOutline（尺寸由 size prop 控制，本就传了）。不改则 h(undefined) → React #130，sidebar.footer.action 槽位整个消失。",
+      "files": [
+        {
+          "path": "lib/client.js",
+          "diff": "files/dsh-session-manager/lib/client.js.diff",
+          "inputSha256": "02c03c8249922c2e416647dd6d3cf14e5f192ec061201dcbbf7b3c078bfbcefb",
+          "outputSha256": "be7bf154a69dc81d62e7de298c81cee31bfde5c7dce484fed8818736e91c61d1",
+          "note": "The client referenced two primitives icons by their old size-suffixed names (IconArchiveOutline20, IconWarningOutline16). 0.2.x renamed them to IconArchiveOutline / IconWarningOutline and drives size via the size prop (already passed). With the old names P.<icon> is undefined, so h(undefined) throws React #130 and the whole sidebar.footer.action seat disappears."
+        }
+      ]
+    },
+    {
+      "name": "dsh-webui-prompt-optimizer",
+      "version": "0.1.0",
+      "source": "eac-tag",
+      "summary": "prompt-optimizer 的客户端引用了 primitives 的两个旧图标名 IconLoadingOutline16 / IconSparkle16；0.2.x 只导出 <Name>Regular / <Name>Medium 两种变体。不改则 jsx(undefined) → React #130，conversation.input.right 槽位条目崩掉。",
+      "files": [
+        {
+          "path": "lib/client.js",
+          "diff": "files/dsh-webui-prompt-optimizer/lib/client.js.diff",
+          "inputSha256": "e912eda5758853362b0ccd05f072aa2c2b0e832d73a48561dff9ecdc606005c7",
+          "outputSha256": "8d423833d9b362a7735b63a04f4e0e10d3519fb0f97af6be165aa5aeec048583",
+          "note": "The client referenced two primitives icons by old size-suffixed names (IconLoadingOutline16 / IconSparkle16). 0.2.x exports only <Name>Regular and <Name>Medium variants, so those lookups are undefined and jsx(undefined) throws React #130, crashing the conversation.input.right seat."
+        }
+      ]
     }
   ]
 }

@@ -1401,16 +1401,18 @@
         "eac"
       ],
       "file": "dsh-session-manager-0.1.0.tgz",
-      "sha256": "f9b588bca237f56f5e8989d6da7e3fd598724fad18a12c9c2f8c8707768a458c",
-      "bytes": 12462,
+      "sha256": "a6a28293467894eed1094dc7ec077601be1aa4b884a6a0a0eadfcc25eca786d6",
+      "bytes": 12472,
       "source": "npm",
       "parts": [
         {
           "file": "dsh-session-manager-0.1.0.tgz",
-          "bytes": 12462,
-          "sha256": "f9b588bca237f56f5e8989d6da7e3fd598724fad18a12c9c2f8c8707768a458c"
+          "bytes": 12472,
+          "sha256": "a6a28293467894eed1094dc7ec077601be1aa4b884a6a0a0eadfcc25eca786d6"
         }
-      ]
+      ],
+      "locallyRepacked": true,
+      "repackNote": "session-manager 的客户端引用了 primitives 的两个图标旧名 IconArchiveOutline20 / IconWarningOutline16；0.2.x 已改名为去后缀的 IconArchiveOutline / IconWarningOutline（尺寸由 size prop 控制，本就传了）。不改则 h(undefined) → React #130，sidebar.footer.action 槽位整个消失。"
     },
     {
       "id": "settings-groups",
@@ -1613,16 +1615,18 @@
         "eac"
       ],
       "file": "dsh-webui-prompt-optimizer-0.1.0.tgz",
-      "sha256": "84ee46021b78d88b466a79726361603284456dc503db9cb23bb9b1bf2bef6873",
-      "bytes": 36601,
+      "sha256": "7c999aa14522a57b1f0dd5c6d92280fe0730b90bc46adea600622e26d06ddcc4",
+      "bytes": 36605,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-webui-prompt-optimizer-0.1.0.tgz",
-          "bytes": 36601,
-          "sha256": "84ee46021b78d88b466a79726361603284456dc503db9cb23bb9b1bf2bef6873"
+          "bytes": 36605,
+          "sha256": "7c999aa14522a57b1f0dd5c6d92280fe0730b90bc46adea600622e26d06ddcc4"
         }
-      ]
+      ],
+      "locallyRepacked": true,
+      "repackNote": "prompt-optimizer 的客户端引用了 primitives 的两个旧图标名 IconLoadingOutline16 / IconSparkle16；0.2.x 只导出 <Name>Regular / <Name>Medium 两种变体。不改则 jsx(undefined) → React #130，conversation.input.right 槽位条目崩掉。"
     },
     {
       "id": "whale-widget",
