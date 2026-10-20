@@ -827,16 +827,16 @@
         "eac"
       ],
       "file": "computer-user-0.3.7.tgz",
-      "sha256": "0eff8db930fadce9cbdfcaede43eddddfc5f6fdd08959fabac19145f0a3c53a2",
-      "bytes": 44461,
+      "sha256": "f07cd2ad42e120cc33ce0c9c682c0a11fd0ffac385e8dced425ece1c374cebd6",
+      "bytes": 44585,
       "source": "npm",
       "locallyRepacked": true,
-      "repackNote": "Export the Config schema, mark its fields volatile, and swap the retired settingsScope inject for a dual-generation transport probe (configForms on 0.2.x, settingsScope.bind on 0.1.x). Upstream 0.3.7 is maintained but targets the 0.1.3 kernel; drop these patches once it ships a 0.2.x-compatible release.",
+      "repackNote": "Expose Config on the default export (the loader unwraps to default, so a named export alone is dropped), mark its fields volatile, and swap the retired settingsScope inject for a dual-generation configForms probe. Upstream 0.3.7 is maintained but targets the 0.1.3 kernel; drop these patches once it ships a 0.2.x release.",
       "parts": [
         {
           "file": "computer-user-0.3.7.tgz",
-          "bytes": 44461,
-          "sha256": "0eff8db930fadce9cbdfcaede43eddddfc5f6fdd08959fabac19145f0a3c53a2"
+          "bytes": 44585,
+          "sha256": "f07cd2ad42e120cc33ce0c9c682c0a11fd0ffac385e8dced425ece1c374cebd6"
         }
       ]
     },
