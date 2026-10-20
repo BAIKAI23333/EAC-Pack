@@ -738,16 +738,18 @@
         "eac"
       ],
       "file": "@nanmicoder_dsh-agent-teams-0.1.13-eac.3.tgz",
-      "sha256": "6ffd6a596a12cf1766bad2bbe50e118c720f237d85fbecce55e5523b86dcecbd",
-      "bytes": 1809854,
+      "sha256": "be4366c86e29f88ed1429ee6b9ef8cb90098b65e69cb6f246ab2d49bbcfbb956",
+      "bytes": 1810632,
       "source": "eac-tag",
       "parts": [
         {
           "file": "@nanmicoder_dsh-agent-teams-0.1.13-eac.3.tgz",
-          "bytes": 1809854,
-          "sha256": "6ffd6a596a12cf1766bad2bbe50e118c720f237d85fbecce55e5523b86dcecbd"
+          "bytes": 1810632,
+          "sha256": "be4366c86e29f88ed1429ee6b9ef8cb90098b65e69cb6f246ab2d49bbcfbb956"
         }
-      ]
+      ],
+      "locallyRepacked": true,
+      "repackNote": "agent-teams 在 0.2.x 上因 ctx.subagents.registerContinuableSetup 被退役（改 provider 模式）而在 apply 期抛 TypeError，整个插件不激活、8 个 agent_teams_* 工具全丢。本补丁改为存在性探测 + 降级：缺该钩子时成员模型选择的持久化/冷恢复降级，建队/任务 DAG/派活/消息/状态照常可用。"
     },
     {
       "id": "deep-whale-manager",
