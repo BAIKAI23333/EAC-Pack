@@ -1,13 +1,53 @@
 diff --git a/lib/index.js b/lib/index.js
-index 4d33fdd..a134af1 100644
+index 4d33fdd..f8f354a 100644
 --- a/lib/index.js
 +++ b/lib/index.js
 @@ -1,5 +1,7 @@
  import Schema from '@deepseek-ai/schemastery'
 -import { settingsNamespace } from '@deepseek-ai/dsh-settings'
-+// 0.2.x 移除了 settingsNamespace 具名导出；改指随插件自包含分发的兼容垫片。
-+// （具名 import 在 ESM 链接期解析，缺失导出会让整棵插件树 SyntaxError。）
-+import { settingsNamespace } from './settings-compat.js'
++// 0.2.x 移除了 settingsNamespace 具名导出（链接期 SyntaxError 拖垮整棵插件树），
++// ctx.settings.register 也已不存在。改指随插件自包含分发的兼容垫片。
++import { settingsNamespace, createSettingsScope } from './settings-compat.js'
  import {
    DEFAULT_CONFIG,
    compactStatus,
+@@ -26,7 +28,11 @@ const ModelPolicy = Schema.object({
+   retryTransientBadRequest: Schema.boolean(),
+ })
+ 
+-export const Config = Schema.object({
++// 0.2.x 的设置表单由导出的 Config schema 派生，volatileForm() 只保留「最近的
++// volatile 祖先被标记」的字段；未标记的 schema 投影为 undefined → 表单不生成 →
++// 客户端 configForms.get() 回 unavailable、卡片空白。根 schema 标 volatile 即可
++// 让 volatileForm() 直接返回整张表单（见 dsh-settings 的 volatileForm 实现）。
++const BaseConfig = Schema.object({
+   enabled: Schema.boolean().default(DEFAULT_CONFIG.enabled).description('启用请求前自动压缩'),
+   thresholdRatio: Schema.number().min(0.5).max(0.95).step(0.01)
+     .default(DEFAULT_CONFIG.thresholdRatio).role('slider').description('自动压缩触发比例'),
+@@ -40,6 +46,9 @@ export const Config = Schema.object({
+     .description('非溢出的 400 瞬态错误（会话此前成功过）自动重试一次'),
+   modelPolicies: Schema.array(ModelPolicy).default([]).description('provider/model 专属策略'),
+ }).description('DSH 请求路径上下文压缩')
++// 根 schema 标 volatile：volatileForm() 见到就返回整张表单。
++// 用 typeof 探测，避免 schemastery 无此方法时在导入期就抛。
++export const Config = typeof BaseConfig.volatile === 'function' ? BaseConfig.volatile() : BaseConfig
+ 
+ function jsonResponse(res, status, body) {
+   const payload = JSON.stringify(body)
+@@ -144,13 +153,11 @@ export function createCompactNowHandler(ctx) {
+ }
+ 
+ export function apply(ctx, config = {}) {
++  // 0.2.x 没有 ctx.settings.register；用垫片在 describe()/update() 之上重建同形 scope。
+   let scope
+   try {
+-    scope = ctx.settings.register(NS, Config, {
+-      base: sanitizeConfig(config),
+-      applies: 'live',
+-      validate: sanitizeConfig,
+-    })
++    scope = createSettingsScope(ctx, NS, Config, sanitizeConfig(config))
++    if (scope === null) throw new Error('no settings transport on this kernel') 
+   } catch (error) {
+     ctx.logger?.warn?.(
+       `dsh-compact settings unavailable: ${error instanceof Error ? error.message : String(error)}; using defaults`,

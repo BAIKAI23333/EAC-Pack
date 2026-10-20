@@ -1,5 +1,5 @@
 diff --git a/lib/index.js b/lib/index.js
-index 5cc368e..f376e25 100644
+index 5cc368e..2ce3cc9 100644
 --- a/lib/index.js
 +++ b/lib/index.js
 @@ -8,7 +8,11 @@ import { once } from "node:events";
@@ -7,11 +7,22 @@ index 5cc368e..f376e25 100644
  import { fileURLToPath } from "node:url";
  import { spawn } from "node:child_process";
 -import { SettingsConflictError, settingsNamespace } from "@deepseek-ai/dsh-settings";
-+// 0.2.x 移除了 settingsNamespace 具名导出（SettingsConflictError 仍在）。
-+// 具名 import 在 ESM 链接期解析，缺失导出会让整棵插件树 SyntaxError ——
-+// 故 settingsNamespace 改指随插件自包含分发的兼容垫片，另一个符号留在原包。
++// 0.2.x 移除了 settingsNamespace 具名导出（SettingsConflictError 仍在），且
++// ctx.settings.register 已不存在。具名 import 在 ESM 链接期解析，缺失导出会让
++// 整棵插件树 SyntaxError —— 故前两个符号改指自包含垫片。
 +import { SettingsConflictError } from "@deepseek-ai/dsh-settings";
-+import { settingsNamespace } from "./settings-compat.js";
++import { settingsNamespace, createSettingsScope } from "./settings-compat.js";
  import { homedir, userInfo } from "node:os";
  import { defineTool } from "@deepseek-ai/dsh-tools";
  import { createUserMessage } from "@deepseek-ai/dsh-llm";
+@@ -3558,7 +3562,9 @@ function apply(ctx, config) {
+ 	};
+ 	ctx.inject(["settings"], (sctx) => {
+ 		const ns = settingsNamespace(SIDEBAR_PREFS_NS);
+-		const scope = sctx.settings.register(ns, PrefsSchema);
++		// 0.2.x 没有 register；用垫片重建同形 scope（describe 读 + update 写）。
++		const scope = createSettingsScope(sctx, ns, PrefsSchema, {});
++		if (scope === null) { console.warn("[dsh-better-sidebar] no settings transport on this kernel — prefs card not registered"); return; }
+ 		const viewOf = () => {
+ 			const descriptor = sctx.settings.describe({ redactSecrets: true }).find((candidate) => candidate.ns === ns);
+ 			return descriptor === void 0 ? {

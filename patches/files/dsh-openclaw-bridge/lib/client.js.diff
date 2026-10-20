@@ -1,8 +1,8 @@
 diff --git a/lib/client.js b/lib/client.js
-index 720ec76..f36d230 100644
+index 720ec76..ec4d798 100644
 --- a/lib/client.js
 +++ b/lib/client.js
-@@ -2677,8 +2677,62 @@ window.__ModuleLoader__.load({
+@@ -2677,8 +2677,61 @@ window.__ModuleLoader__.load({
  			});
  		}
  
@@ -59,14 +59,13 @@ index 720ec76..f36d230 100644
 -			const scope = ctx.settingsScope.bind({ namespace: NS });
 +			const scope = selectScope(ctx);
 +			if (scope === null) {
-+				// 两代设置传输都缺失：不装死卡片，桥接路由与微信区块照常。
 +				console.warn("[dsh-openclaw-bridge] no settings transport (settingsScope / configForms) — settings section not registered");
 +				return;
 +			}
  			const useScope = bindSnapshotSelector(scope);
  			const injected = () => ({ useScope, scope });
  			ctx.slots.inject("settings.section", () => ctx.slots.register({
-@@ -2690,7 +2744,7 @@ window.__ModuleLoader__.load({
+@@ -2690,7 +2743,7 @@ window.__ModuleLoader__.load({
  			}, ClawBotCard), "dsh-openclaw-bridge: settings section entry");
  		}
  

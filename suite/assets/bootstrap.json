@@ -312,16 +312,16 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-conversation-tweaks-0.1.0.tgz",
-      "sha256": "26c262b67cd6a8bd2f9e16a05d3439bff99c144e725e09234cce6f98dc4b0716",
-      "bytes": 7351,
+      "sha256": "ab71475d89791d08ecd7725b2d1e94901e0190073cb7f3b21ca0223999fa8604",
+      "bytes": 8741,
       "source": "eac-tag",
       "locallyRepacked": true,
-      "repackNote": "0.2.x 内核移除了 @deepseek-ai/dsh-settings 的 settingsNamespace / installSettingsSection 与 settingsScope 服务：前者让服务端在 ESM 链接期抛 SyntaxError、整棵插件树无法激活；后者让客户端 fiber 永久停在 waitingFor、设置项静默消失。本补丁改指随插件分发的兼容垫片，并把客户端改为 configForms（0.2.x）优先 / settingsScope（0.1.x）兜底的运行时探测。",
+      "repackNote": "conversation-tweaks: 0.2.x 退役了 dsh-settings 的 settingsNamespace/installSettingsSection 具名导出与 settingsScope 服务，并把设置表单改为由导出的 Config schema 派生（需 volatile() 标记）。本补丁补齐三处：自包含垫片、createSettingsScope 重建读写面、客户端运行时探测。",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-conversation-tweaks-0.1.0.tgz",
-          "bytes": 7351,
-          "sha256": "26c262b67cd6a8bd2f9e16a05d3439bff99c144e725e09234cce6f98dc4b0716"
+          "bytes": 8741,
+          "sha256": "ab71475d89791d08ecd7725b2d1e94901e0190073cb7f3b21ca0223999fa8604"
         }
       ]
     },
@@ -390,16 +390,16 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-openclaw-bridge-0.7.0.tgz",
-      "sha256": "476121daaacccae837ea842ebd601e8140103e4e465c15d052907695fb4ba298",
-      "bytes": 46151,
+      "sha256": "a560afd3e8834724be52ec537a2798a8f0b1f4d88f0015ad8e383d5fb15bd7dc",
+      "bytes": 47539,
       "source": "eac-tag",
       "locallyRepacked": true,
-      "repackNote": "0.2.x 内核移除了 @deepseek-ai/dsh-settings 的 settingsNamespace / installSettingsSection 与 settingsScope 服务。前者让服务端在 ESM 链接期抛 SyntaxError，整棵插件树（含桥接路由）无法激活；后者让客户端 fiber 永久 waitingFor。本补丁改指随插件分发的兼容垫片并改为运行时探测。",
+      "repackNote": "openclaw-bridge: settingsNamespace/installSettingsSection 具名导出与 settingsScope 服务在 0.2.x 均退役，且设置表单改由 Config schema 派生。本补丁补齐三处；桥接路由与微信区块不受影响。",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-openclaw-bridge-0.7.0.tgz",
-          "bytes": 46151,
-          "sha256": "476121daaacccae837ea842ebd601e8140103e4e465c15d052907695fb4ba298"
+          "bytes": 47539,
+          "sha256": "a560afd3e8834724be52ec537a2798a8f0b1f4d88f0015ad8e383d5fb15bd7dc"
         }
       ]
     },
@@ -431,16 +431,16 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-prompt-custom-0.1.0.tgz",
-      "sha256": "f5e04c87bf18e2596b948458f4cedbaf4d2f81170f00e86e136d6766ec1426c5",
-      "bytes": 8972,
+      "sha256": "1e8fada60909972bfae5bf6c970fefa7dd9621291af47e98907cb8f1378dcc0c",
+      "bytes": 10273,
       "source": "eac-tag",
       "locallyRepacked": true,
-      "repackNote": "0.2.x 内核移除了 @deepseek-ai/dsh-settings 的 settingsNamespace / installSettingsSection 与 settingsScope 服务（服务端链接期 SyntaxError、客户端 fiber 永久 waitingFor），并把人格分段常量 PERSONA_SECTION / PERSONA_ORDER 改名为 PERSONA_PREFIX_SECTION / PERSONA_SUFFIX_SECTION。本补丁三处一并适配，保持原有分段顺序。",
+      "repackNote": "prompt-custom: 同族的 settingsNamespace/installSettingsSection/settingsScope 退役，外加 PERSONA_SECTION/PERSONA_ORDER 改名为 PREFIX/SUFFIX。本补丁四类改动一并适配，保持原有分段顺序。",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-prompt-custom-0.1.0.tgz",
-          "bytes": 8972,
-          "sha256": "f5e04c87bf18e2596b948458f4cedbaf4d2f81170f00e86e136d6766ec1426c5"
+          "bytes": 10273,
+          "sha256": "1e8fada60909972bfae5bf6c970fefa7dd9621291af47e98907cb8f1378dcc0c"
         }
       ]
     },
@@ -893,16 +893,16 @@
         "eac"
       ],
       "file": "dsh-better-sidebar-0.15.3-eac.1.tgz",
-      "sha256": "a9556343af1646c76674f7f8af6c6ed5ccb95b31763d5aa33ac93eb4d535af3c",
-      "bytes": 2476253,
+      "sha256": "753dbd4c1f97d75fdb810751b154710c187fceec74ea43d46606c432ab022445",
+      "bytes": 2477561,
       "source": "eac-tag",
       "locallyRepacked": true,
-      "repackNote": "0.2.x 内核移除了 @deepseek-ai/dsh-settings 的 settingsNamespace 具名导出（SettingsConflictError 仍在）。具名 import 在 ESM 链接期解析，缺失导出让服务端整棵插件树 SyntaxError、侧栏永不激活。本补丁把该符号改指随插件分发的兼容垫片。",
+      "repackNote": "better-sidebar: settingsNamespace 具名导出与 ctx.settings.register 在 0.2.x 均不存在。本补丁改指自包含垫片并重建设置 scope。注意：该包另需内核包可解析（dsh-tools/dsh-llm/dsh-subagent），属装配层缺陷，不在本补丁范围。",
       "parts": [
         {
           "file": "dsh-better-sidebar-0.15.3-eac.1.tgz",
-          "bytes": 2476253,
-          "sha256": "a9556343af1646c76674f7f8af6c6ed5ccb95b31763d5aa33ac93eb4d535af3c"
+          "bytes": 2477561,
+          "sha256": "753dbd4c1f97d75fdb810751b154710c187fceec74ea43d46606c432ab022445"
         }
       ]
     },
@@ -952,16 +952,16 @@
         "eac"
       ],
       "file": "dsh-compact-1.0.1.tgz",
-      "sha256": "0ab31301c9f400bf6c8363f062a2b08619af55a82c70763e534e4d09dd95e49f",
-      "bytes": 16912,
+      "sha256": "a5b310d9257bd4e757e2bccd66a18283bb3f672c68aa3d75b5968048bffaf33e",
+      "bytes": 18340,
       "source": "eac-tag",
       "locallyRepacked": true,
-      "repackNote": "0.2.x 内核移除了 @deepseek-ai/dsh-settings 的 settingsNamespace 与 settingsScope 服务。前者让服务端在 ESM 链接期抛 SyntaxError、整棵插件树无法激活；后者让客户端 fiber 永久 waitingFor。本补丁改指随插件分发的兼容垫片并改为运行时探测。",
+      "repackNote": "dsh-compact: settingsNamespace 具名导出与 settingsScope 服务在 0.2.x 均退役，ctx.settings.register 也不存在了。本补丁补齐三处并给 schema 标 volatile()。",
       "parts": [
         {
           "file": "dsh-compact-1.0.1.tgz",
-          "bytes": 16912,
-          "sha256": "0ab31301c9f400bf6c8363f062a2b08619af55a82c70763e534e4d09dd95e49f"
+          "bytes": 18340,
+          "sha256": "a5b310d9257bd4e757e2bccd66a18283bb3f672c68aa3d75b5968048bffaf33e"
         }
       ]
     },

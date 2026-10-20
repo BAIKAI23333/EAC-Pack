@@ -1,8 +1,8 @@
 diff --git a/lib/client.js b/lib/client.js
-index 1b6a007..d58b92d 100644
+index 1b6a007..54d773d 100644
 --- a/lib/client.js
 +++ b/lib/client.js
-@@ -255,8 +255,62 @@ window.__ModuleLoader__.load({
+@@ -255,8 +255,61 @@ window.__ModuleLoader__.load({
  			});
  		}
  
@@ -59,14 +59,13 @@ index 1b6a007..d58b92d 100644
 -			const scope = ctx.settingsScope.bind({ namespace: NS });
 +			const scope = selectScope(ctx);
 +			if (scope === null) {
-+				// 两代设置传输都缺失：不装死卡片，其余功能照常。
 +				console.warn("[dsh-prompt-custom] no settings transport (settingsScope / configForms) — card not registered");
 +				return;
 +			}
  			const useScope = bindSnapshotSelector(scope);
  			const injected = () => ({ useScope, scope });
  			ctx.slots.inject("settings.section", () => ctx.slots.register({
-@@ -268,7 +322,7 @@ window.__ModuleLoader__.load({
+@@ -268,7 +321,7 @@ window.__ModuleLoader__.load({
  			}, PromptCustomCard), "dsh-prompt-custom: settings section entry");
  		}
  
