@@ -60,8 +60,8 @@
           "path": "src/index.js",
           "diff": "files/computer-user/src/index.js.diff",
           "inputSha256": "40a7e7f1b2694076155b7122debf74e85ce84d454e2e35722d357b1f1f44f896",
-          "outputSha256": "de5d8ec8097e0ae68c952a0867202da1e659455a9dd8c33767a0bea938bde4be",
-          "note": "Export the settings schema. On a 0.2.x kernel SettingsForms.schema(entry) reads entry.fiber.runtime.Config (the namespace-registration model was retired and replaced by schema-derived configForms forms), but upstream 0.3.7 keeps Config module-private: it is imported only to feed the now-dead settings.register call, so the entry exports no schema, volatileForm() projects nothing, describe() omits the namespace and the browser configForms.get('computer-user') answers status:'unavailable'. A real ESM named export restores the form."
+          "outputSha256": "aea2598bc627ab7a4a14e089430c0752825644ec0024a11117109e6896eeb0e4",
+          "note": "Export the settings schema AND keep it on the default export. On a 0.2.x kernel SettingsForms.schema(entry) reads entry.fiber.runtime.Config (the namespace-registration model was retired and replaced by schema-derived configForms forms). Two separate gates then apply, and a named export alone fails the first: cordis-plugin-loader unwrapExports() collapses the module to its default export before cordis reads plugin.Config (\u001bxports = exports.default ?? exports), so with both a named Config and a default object the schema is discarded and describe() omits the namespace. Adding Config to the default object is what actually restores the form; the named binding is kept for tooling."
         },
         {
           "path": "src/config.js",
@@ -78,7 +78,7 @@
           "note": "Drop the retired settingsScope inject and probe both transport generations instead. Declaring a service no kernel provides parks the client fiber forever in waitingFor, so the whole card vanishes with no error. Now: configForms.get(entryId) on 0.2.x (ConfigFormController already carries the same getSnapshot/subscribe/set/unset surface the Section component uses), settingsScope.bind() on 0.1.x, and no section registered at all when neither exists. Upstream 0.3.7 targets the 0.1.3 kernel, so its browser half still carries this 0.1.x-only inject; this patch supplies the 0.2.x adaptation locally and can be dropped once upstream ships a 0.2.x-compatible client."
         }
       ],
-      "summary": "Export the Config schema, mark its fields volatile, and swap the retired settingsScope inject for a dual-generation transport probe (configForms on 0.2.x, settingsScope.bind on 0.1.x). Upstream 0.3.7 is maintained but targets the 0.1.3 kernel; drop these patches once it ships a 0.2.x-compatible release."
+      "summary": "Expose Config on the default export (the loader unwraps to default, so a named export alone is dropped), mark its fields volatile, and swap the retired settingsScope inject for a dual-generation configForms probe. Upstream 0.3.7 is maintained but targets the 0.1.3 kernel; drop these patches once it ships a 0.2.x release."
     }
   ]
 }
