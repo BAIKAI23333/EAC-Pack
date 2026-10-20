@@ -110,7 +110,10 @@ export function applySourcePatches(entry, staging, log = console.log) {
       }
       fs.writeFileSync(target, after);
 
-      applied.push({ path: file.path, sha256: afterSha, note: file.note });
+      // `summary` 是包级字段（patch.summary），不是 per-file；带在每条 applied
+      // 记录上，让调用方（repack.mjs 的 repackNote）能优先取它。多文件补丁的
+      // per-file note 拼起来可达上千字符，会把 dist/index.json 撑大。
+      applied.push({ path: file.path, sha256: afterSha, note: file.note, summary: patch.summary });
       log(`  source-patch ${entry.name}: ${file.path} -> ${afterSha.slice(0, 12)}`);
     }
   } finally {

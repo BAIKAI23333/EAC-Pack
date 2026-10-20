@@ -77,7 +77,8 @@
           "outputSha256": "ca51b6665351668ec452f1ba08150ed9058224f22cc17b057ec74a00880e88c9",
           "note": "Drop the retired settingsScope inject and probe both transport generations instead. Declaring a service no kernel provides parks the client fiber forever in waitingFor, so the whole card vanishes with no error. Now: configForms.get(entryId) on 0.2.x (ConfigFormController already carries the same getSnapshot/subscribe/set/unset surface the Section component uses), settingsScope.bind() on 0.1.x, and no section registered at all when neither exists. Upstream 0.3.7 client.js is byte-identical to 0.3.6 (modulo CRLF), i.e. the browser half was never adapted."
         }
-      ]
+      ],
+      "summary": "Export the Config schema, mark its fields volatile, and replace the retired settingsScope inject with a dual-generation transport probe (configForms on 0.2.x, settingsScope.bind on 0.1.x). Upstream 0.3.7 fixes only the host-side settingsNamespace import; its client.js is byte-identical to 0.3.6."
     }
   ]
 }
