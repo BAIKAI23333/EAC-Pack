@@ -109,6 +109,58 @@ test('分发归属守卫自身能识别 builtin 冲突（反向自测）', (t) =
 });
 
 /**
+ * seed 的 `dsh.profile.bundles` 不应包含 `compat` 条目（信息性）。
+ *
+ * 背景：`compat: 'eac-fork'` 的包依赖 EAC 分叉内核专有服务，在官方 0.2.x 上
+ * 激活期永久挂起；而 0.2.x 的 web boot 对「entry 未激活」是 fail-loud 的 ——
+ * 一个挂起就整体拒绝渲染（`Failed to load plugins`）。
+ *
+ * 实测 2026-10-21：seed 的 63 个 bundle 里曾含 2 个 compat 条目
+ *   @ha-na-bi/dsh-client-ui-custom (aio)
+ *   @dsh-external/dsh-side-session (eac)
+ * 它们让全新 full 实例的 GUI 完全起不来（宿主侧 RPC 全绿，只有截图能看出）。
+ *
+ * 已有两层防护：
+ *   1. `EAC-Full-Build-20261004/prepare-composition.mjs` 生成 seed 时 `if (cat.compat) continue`
+ *      —— 但那个脚本在**未入库的构建工作区**，不受版本控制保护；
+ *   2. `dsh-desktop/lib/desktop/companion-sync.ts` 的
+ *      `stripIncompatibleProfileBundles()` 启动时从 profile 剥离 compat 条目
+ *      —— 这层是运行时兜底，已实测幂等有效。
+ *
+ * 所以本条**不判失败**（seed 是构建产物，且已由运行时兜底覆盖），只把残留
+ * 报出来，让「生成端规则丢失」这件事可见 —— 否则它会悄无声息地回来。
+ */
+test('seed bundles 不含 compat 条目（信息性；有运行时兜底）', (t) => {
+  const seedManifest = path.join(ROOT, '..', 'EAC-Desktop', 'dsh-desktop', 'assets', 'full-pack', 'profile-seed', 'package.json');
+  if (!fs.existsSync(seedManifest)) return t.skip('full-pack seed 不存在（未装配）');
+
+  const seed = readJson(seedManifest);
+  const bundles = new Set(seed.dsh?.profile?.bundles ?? []);
+  const nameToId = catalogNameToId();
+  const idToName = new Map([...nameToId].map(([name, id]) => [id, name]));
+
+  const compatNames = new Set();
+  for (const pack of ['eac', 'aio', 'skins', 'community']) {
+    const f = path.join(ROOT, 'catalog', `${pack}.json`);
+    if (!fs.existsSync(f)) continue;
+    const data = readJson(f);
+    const rows = Array.isArray(data) ? data : (data.plugins ?? []);
+    for (const e of rows) if (e && e.compat && typeof e.name === 'string') compatNames.add(e.name);
+  }
+
+  const offenders = [...compatNames].filter((n) => bundles.has(n));
+  if (offenders.length) {
+    console.log('[distribution-boundary] seed 里仍含 compat 条目（运行时会被 companion-sync 剥离）:');
+    for (const o of offenders) {
+      const id = nameToId.get(o);
+      console.log(`  ${o}${id ? ` (id=${id})` : ''}`);
+    }
+    console.log('  → 生成端规则在 EAC-Full-Build-20261004/prepare-composition.mjs，该脚本未入库。');
+  }
+  assert.ok(Array.isArray(offenders), 'offenders 必须可枚举');
+});
+
+/**
  * builtin 包的「版本双轨」告警（非阻断）。
  *
  * 同一批 builtin 包在 Desktop 的 `assets/plugins/<dir>` 与 Pack 的 `dist/` 各有一份，
