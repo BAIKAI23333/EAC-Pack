@@ -49,7 +49,6 @@
  *   node scripts/repack/kernel-compat.mjs --allowlist   # 打印当前已知豁免
  * 退出码：0 = 通过；1 = 命中不兼容；2 = 环境不满足（内核或 dist 缺失）。
  */
-import crypto from 'node:crypto'
 import fs from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import path from 'node:path'
@@ -176,7 +175,7 @@ export function collectKernelExports(kernelRoot, packageNames) {
  * ------------------------------------------------------------------ */
 
 /** 把一个 tgz 解到临时目录（相对路径 + cwd，避免 GNU tar 把 "D:" 当远程主机）。 */
-function extractTgz(tgzFile, dest, index) {
+function extractTgz(tgzFile, dest) {
   fs.mkdirSync(dest, { recursive: true })
   const file = path.basename(tgzFile)
   // 单个 tgz 可能含大量文件，用系统 tar 一次展开比逐条 -xO 快得多。
@@ -281,7 +280,7 @@ export function checkKernelCompat(opts = {}) {
       const dest = path.join(scratchRoot, entry.name.replace(/[/@]/g, '_'))
       let pluginDir
       try {
-        pluginDir = extractTgz(tgz, dest, entry)
+        pluginDir = extractTgz(tgz, dest)
       } catch (err) {
         skipped.push({ plugin: entry.name, reason: `tar-failed: ${err.message.split('\n')[0]}` })
         continue
@@ -394,7 +393,7 @@ export function main(argv = process.argv.slice(2)) {
   return result.ok ? 0 : 1
 }
 
+// 直接执行时跑门禁；被 test/verify import 时不执行（那些方只拿导出函数）。
 const invokedDirectly = process.argv[1] !== undefined
-  && crypto.createHash('sha256') // 仅用于稳定导入避免摇树告警
   && path.resolve(process.argv[1]) === path.resolve(import.meta.filename)
 if (invokedDirectly) process.exitCode = main()
