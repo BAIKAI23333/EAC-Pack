@@ -137,12 +137,69 @@ test('picturereader 钉在 3.5.0 的 commit，且 catalog 版本一致', () => {
     'picturereader 必须钉 ref=ebbb2f098ecf3fe18a47eaaa361ae157d31272cc（3.5.0）')
 })
 
-test('picturereader 3.5.0 的 catalog 条目声明了 v3.5.0 的运行时依赖', () => {
-  // 3.5.0 比 3.3.1 多一个 webp-wasm；装机时 pnpm 会按 tgz 的 dependencies 安装，
-  // 但 catalog 的 spec 必须指向本地 tgz 而不是 npm 版本号。
+test('picturereader 3.5.0 的 catalog spec 遵循 github 源惯例', () => {
+  // docs/DISTRIBUTION.md 规定：source=github 的 spec 必须是 `git+https://…`，
+  // 而 source=github-repo / github-tgz 才是 `file:dist/<tgz>`。picturereader 走
+  // github（要钉 ref），所以 spec 也必须是 git+https，并在 fragment 里带上同一个
+  // commit —— 否则 catalog 记的和 repack 实际克隆的可能不是同一个东西。
   const entry = catalog.find((e) => e.name === 'picturereader')
-  assert.match(entry.spec, /^file:dist\/picturereader-3\.5\.0\.tgz$/,
-    `catalog spec 应指向本地重打包产物，实际 ${entry.spec}`)
+  assert.equal(entry.source, 'github')
+  assert.match(entry.spec, /^git\+https:\/\/github\.com\/jing-hy\/picturereader\.git(#.+)?$/,
+    `source=github 的 spec 应为 git+https://…，实际 ${entry.spec}`)
+  assert.match(entry.spec, /#ebbb2f098ecf3fe18a47eaaa361ae157d31272cc$/,
+    `spec 的 fragment 应与 GH_SOURCES 的 ref 一致，实际 ${entry.spec}`)
+})
+
+/**
+ * 既有的 source/spec 形态不一致（不是本 PR 引入的）。
+ *
+ * 背景：docs/DISTRIBUTION.md 规定 source=npm 的 spec 为 `name@version`，但实测有
+ * 11 个条目写成 `file:dist/<tgz>`。它们是历史上把「npm 取源」与「本地重打包产物」
+ * 混用留下的，运行期无害：suite/index.js 的 resolvePluginSource 先按 distIndex 命中
+ * file，spec 只是找不到时的回退值。
+ *
+ * 这里显式列出而不是放宽断言，是为了让「新条目写错」立刻变红（新条目不会自动进这
+ * 张表），同时不把历史债混进本次改动的判定。
+ */
+const KNOWN_SPEC_DRIFT = new Set([
+  'dsh-session-manager',
+  'dsh-plugin-wallpaper-engine',
+  '@linxin666/dsh-client-ui-skin-blue-fantasy',
+  '@linxin666/dsh-client-ui-skin-dragon-heir',
+  '@linxin666/dsh-client-ui-skin-miku',
+  '@linxin666/dsh-client-ui-skin-minecraft',
+  '@linxin666/dsh-client-ui-skin-qq98',
+  '@linxin666/dsh-client-ui-skin-ths',
+  '@linxin666/dsh-client-ui-skin-trading',
+  '@linxin666/dsh-client-ui-skin-whale-song',
+  '@linxin666/dsh-client-ui-skin-xp',
+])
+
+test('每条 catalog 的 spec 形态与其 source 匹配（防字段错配）', () => {
+  const problems = []
+  for (const entry of catalog) {
+    if (KNOWN_SPEC_DRIFT.has(entry.name)) continue
+    const spec = String(entry.spec ?? '')
+    if (entry.source === 'github') {
+      if (!spec.startsWith('git+')) problems.push(`${entry.name}: source=github 但 spec=${spec}`)
+    } else if (entry.source === 'npm') {
+      if (!spec.startsWith(`${entry.name}@`)) problems.push(`${entry.name}: source=npm 但 spec=${spec}`)
+    } else if (entry.source === 'github-tgz' || entry.source === 'eac-tag') {
+      if (!spec.startsWith('file:dist/')) problems.push(`${entry.name}: source=${entry.source} 但 spec=${spec}`)
+    }
+  }
+  assert.deepEqual(problems, [], `source/spec 形态不符：\n  ${problems.join('\n  ')}`)
+})
+
+test('已知 spec 漂移表不会无意义地膨胀（条目必须仍在 catalog 且仍真的不一致）', () => {
+  for (const name of KNOWN_SPEC_DRIFT) {
+    const entry = catalog.find((e) => e.name === name)
+    assert.ok(entry, `${name} 已不在 catalog（或已退役）—— 请从 KNOWN_SPEC_DRIFT 删除`)
+    const spec = String(entry.spec ?? '')
+    const consistent = entry.source === 'npm' ? spec.startsWith(`${entry.name}@`) : true
+    assert.equal(consistent, false,
+      `${name} 的 spec 已修正为 name@version —— 请从 KNOWN_SPEC_DRIFT 删除该条目`)
+  }
 })
 
 test('两个 catalog 副本对同一包给出一致的 version/source/spec', () => {

@@ -257,7 +257,7 @@
     "name": "picturereader",
     "version": "3.5.0",
     "source": "github",
-    "spec": "file:dist/picturereader-3.5.0.tgz",
+    "spec": "git+https://github.com/jing-hy/picturereader.git#ebbb2f098ecf3fe18a47eaaa361ae157d31272cc",
     "packs": [
       "eac"
     ],
