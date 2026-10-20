@@ -831,7 +831,7 @@
       "bytes": 44461,
       "source": "npm",
       "locallyRepacked": true,
-      "repackNote": "Export the Config schema, mark its fields volatile, and replace the retired settingsScope inject with a dual-generation transport probe (configForms on 0.2.x, settingsScope.bind on 0.1.x). Upstream 0.3.7 fixes only the host-side settingsNamespace import; its client.js is byte-identical to 0.3.6.",
+      "repackNote": "Export the Config schema, mark its fields volatile, and swap the retired settingsScope inject for a dual-generation transport probe (configForms on 0.2.x, settingsScope.bind on 0.1.x). Upstream 0.3.7 is maintained but targets the 0.1.3 kernel; drop these patches once it ships a 0.2.x-compatible release.",
       "parts": [
         {
           "file": "computer-user-0.3.7.tgz",

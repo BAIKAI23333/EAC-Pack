@@ -288,7 +288,7 @@
     "descEn": "Codex-style computer use: read the screen and drive mouse & keyboard, pairing with picturereader for the look-act-verify loop (Windows).",
     "license": "MIT",
     "upstream": "https://github.com/jing-hy/computer-user",
-    "notes": "npm 锁定 0.3.7。重资源/系统级自动化（Windows）。0.3.7 相比 0.3.6 修复了宿主半的 settingsNamespace 导入（改走内嵌 src/settings-compat.js 垫片，内核 0.1.3 起 dsh-settings 不再导出该品牌函数）、scope 写回改用 update、手动批准判定改为会话标识集合，并对 settings 注册失败做降级。但 0.3.7 仍未适配 0.2.x 的两处面：① 宿主入口没有 re-export Config schema，而 0.2.x 的 configForms 表单由 entry.fiber.runtime.Config 派生 → 设置卡拿不到表单；② 客户端 client.js 仍 inject 'settingsScope' 并调用 ctx.settingsScope.bind()，该服务在 0.1.7-rc.2 已移除 → 客户端 fiber 永久停在 waitingFor。本仓以 patches/ 三处补丁补齐，见 patches/source-patches.json。上游 0.3.7 是当前 npm latest，客户端半边上游从未修过（其 client.js 与 0.3.6 内容逐字节一致，仅行尾不同）。"
+    "notes": "npm 锁定 0.3.7（上游仍在维护，0.3.7 发布于 2026-10-01，npm 未弃用）。重资源/系统级自动化（Windows）。0.3.7 相对 0.3.6 修复了宿主半的 settingsNamespace 导入（改走内嵌 src/settings-compat.js 垫片，内核 0.1.3 起 dsh-settings 不再导出该品牌函数）、scope 写回改用 update、手动批准判定改为会话标识集合，并对 settings 注册失败做降级 —— 但该版仍针对 0.1.x 设定；EAC 内核已到 0.2.0-rc.2，0.2.x 上还有两处面未适配：① 宿主入口未 re-export Config schema，而 0.2.x 的 configForms 表单由 entry.fiber.runtime.Config 派生 → 设置卡拿不到表单；② 客户端 client.js 仍 inject 'settingsScope' 并调用 ctx.settingsScope.bind()，该服务在 0.1.7-rc.2 已移除 → 客户端 fiber 永久停在 waitingFor。本仓以 patches/ 三处补丁补齐 0.2.x 适配（见 patches/source-patches.json），后续上游发布 0.2.x 适配版时可撤补丁直升。"
   },
   {
     "id": "soul-md",

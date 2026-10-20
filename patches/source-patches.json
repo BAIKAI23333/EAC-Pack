@@ -61,7 +61,7 @@
           "diff": "files/computer-user/src/index.js.diff",
           "inputSha256": "40a7e7f1b2694076155b7122debf74e85ce84d454e2e35722d357b1f1f44f896",
           "outputSha256": "de5d8ec8097e0ae68c952a0867202da1e659455a9dd8c33767a0bea938bde4be",
-          "note": "Export the settings schema. SettingsForms.schema(entry) reads entry.fiber.runtime.Config on a 0.2.x kernel (configForms was retired alongside the namespace-registration model), but upstream 0.3.7 keeps Config module-private: it is imported only to feed the now-dead settings.register call, so the entry exports no schema, volatileForm() projects nothing, describe() omits the namespace and the browser configForms.get('computer-user') answers status:'unavailable'. A real ESM named export restores the form."
+          "note": "Export the settings schema. On a 0.2.x kernel SettingsForms.schema(entry) reads entry.fiber.runtime.Config (the namespace-registration model was retired and replaced by schema-derived configForms forms), but upstream 0.3.7 keeps Config module-private: it is imported only to feed the now-dead settings.register call, so the entry exports no schema, volatileForm() projects nothing, describe() omits the namespace and the browser configForms.get('computer-user') answers status:'unavailable'. A real ESM named export restores the form."
         },
         {
           "path": "src/config.js",
@@ -75,10 +75,10 @@
           "diff": "files/computer-user/client.js.diff",
           "inputSha256": "7f6b6988cbb230a1515dbbe2d212411df60374fa77fcbcc7a26c9d3a9dd4527a",
           "outputSha256": "ca51b6665351668ec452f1ba08150ed9058224f22cc17b057ec74a00880e88c9",
-          "note": "Drop the retired settingsScope inject and probe both transport generations instead. Declaring a service no kernel provides parks the client fiber forever in waitingFor, so the whole card vanishes with no error. Now: configForms.get(entryId) on 0.2.x (ConfigFormController already carries the same getSnapshot/subscribe/set/unset surface the Section component uses), settingsScope.bind() on 0.1.x, and no section registered at all when neither exists. Upstream 0.3.7 client.js is byte-identical to 0.3.6 (modulo CRLF), i.e. the browser half was never adapted."
+          "note": "Drop the retired settingsScope inject and probe both transport generations instead. Declaring a service no kernel provides parks the client fiber forever in waitingFor, so the whole card vanishes with no error. Now: configForms.get(entryId) on 0.2.x (ConfigFormController already carries the same getSnapshot/subscribe/set/unset surface the Section component uses), settingsScope.bind() on 0.1.x, and no section registered at all when neither exists. Upstream 0.3.7 targets the 0.1.3 kernel, so its browser half still carries this 0.1.x-only inject; this patch supplies the 0.2.x adaptation locally and can be dropped once upstream ships a 0.2.x-compatible client."
         }
       ],
-      "summary": "Export the Config schema, mark its fields volatile, and replace the retired settingsScope inject with a dual-generation transport probe (configForms on 0.2.x, settingsScope.bind on 0.1.x). Upstream 0.3.7 fixes only the host-side settingsNamespace import; its client.js is byte-identical to 0.3.6."
+      "summary": "Export the Config schema, mark its fields volatile, and swap the retired settingsScope inject for a dual-generation transport probe (configForms on 0.2.x, settingsScope.bind on 0.1.x). Upstream 0.3.7 is maintained but targets the 0.1.3 kernel; drop these patches once it ships a 0.2.x-compatible release."
     }
   ]
 }
