@@ -107,3 +107,64 @@ test('分发归属守卫自身能识别 builtin 冲突（反向自测）', (t) =
   assert.ok(sidebar, 'distribution 里应有 better-sidebar 条目');
   assert.equal(isConflict(sidebar), false, 'better-sidebar 不应被判为冲突');
 });
+
+/**
+ * builtin 包的「版本双轨」告警（非阻断）。
+ *
+ * 同一批 builtin 包在 Desktop 的 `assets/plugins/<dir>` 与 Pack 的 `dist/` 各有一份，
+ * 运行时 Desktop 内置版优先。两份版本号不同时，Pack 那份就是**永远不会被用到的
+ * 冗余产物**，而且掩盖真实状态 —— compact 就是这样：Pack 标 1.0.1（由 OVERRIDES
+ * 硬抬高，源目录其实是 1.0.0），Desktop 是 1.0.0，实际生效的永远是后者。
+ *
+ * 实测 2026-10-21 的四条：
+ *   plugin-shield        Desktop 0.1.2 > Pack 0.1.0   ← Pack 陈旧
+ *   settings-scroll-fix  Desktop 2.0.3 > Pack 2.0.2   ← Pack 陈旧
+ *   compact              Desktop 1.0.0 vs Pack 1.0.1  ← Pack 是虚拟抬版
+ *   unified-market       Desktop 0.4.0 < Pack 0.4.1   ← Pack 更新但不会被用
+ *
+ * 这条**不判失败**（不阻断合并：它是分发策略问题，需维护者裁决哪边为准），
+ * 只把差异打进测试输出，避免它再次悄无声息地累积。
+ */
+test('builtin 包在 Desktop 与 Pack 的版本双轨（信息性）', (t) => {
+  if (!fs.existsSync(DESKTOP_DISTRIBUTION)) return t.skip('Desktop 仓不在同一 checkout');
+  const desktopPluginsDir = path.join(ROOT, '..', 'EAC-Desktop', 'dsh-desktop', 'assets', 'plugins');
+  if (!fs.existsSync(desktopPluginsDir)) return t.skip('Desktop assets/plugins 不存在');
+
+  const manifest = readJson(path.join(ROOT, 'patches', 'source-patches.json'));
+  const distribution = readJson(DESKTOP_DISTRIBUTION);
+  const byId = new Map((distribution.plugins ?? []).map((x) => [x.id, x]));
+  const nameToId = catalogNameToId();
+
+  const drift = [];
+  for (const [name, id] of nameToId) {
+    const entry = byId.get(id);
+    if (entry === undefined) continue;
+    if (entry.distributionClass !== 'builtin' && entry.delivery !== 'bundled') continue;
+    // Desktop 内置目录：优先 dsh-<id>，其次 <id>
+    let desktopVersion = null;
+    for (const dir of [`dsh-${id}`, id]) {
+      const p = path.join(desktopPluginsDir, dir, 'package.json');
+      if (fs.existsSync(p)) { desktopVersion = readJson(p).version; break; }
+    }
+    if (desktopVersion === null) continue;
+    // Pack 侧版本：catalog（repack 的真相源）
+    let packVersion = null;
+    for (const pack of ['eac', 'aio', 'skins', 'community']) {
+      const f = path.join(ROOT, 'catalog', `${pack}.json`);
+      if (!fs.existsSync(f)) continue;
+      const data = readJson(f);
+      const rows = Array.isArray(data) ? data : (data.plugins ?? []);
+      const hit = rows.find((e) => e && e.name === name);
+      if (hit) { packVersion = hit.version; break; }
+    }
+    if (packVersion === null || packVersion === desktopVersion) continue;
+    drift.push(`${name}: desktop=${desktopVersion} pack=${packVersion}`);
+  }
+
+  if (drift.length) {
+    // 用 console 而非 assert：这里是信息，不是门禁
+    console.log('[distribution-boundary] builtin 包版本双轨（Desktop 内置版优先，Pack 那份不会被用到）:');
+    for (const d of drift) console.log('  ' + d);
+  }
+  assert.ok(Array.isArray(drift), 'drift 列表必须可枚举');
+});
