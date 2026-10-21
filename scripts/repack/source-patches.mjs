@@ -102,6 +102,19 @@ export function applySourcePatches(entry, staging, log = console.log, manifestOv
 
   const applied = [];
   const scratchRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'eac-src-patch-'));
+  // 失败回滚台账：记录每个被本函数改动过的 staging 目标，及其**原始字节**。
+  //
+  // 为什么必须有（2026-10-21 对抗审查发现的真漏洞）：
+  // 原实现 L228 直接 `writeFileSync(target, after)` 落 staging，而 finally 只删
+  // scratchRoot。多文件补丁在第 N 个失败时，前 N-1 个已永久留在 staging，且
+  // 异常路径下调用方拿不到 `applied`，**无从知道 staging 已被改了一半**。
+  //
+  // create 场景更糟：残留的新文件会让第二次运行在 L115 报
+  // 「create target already exists」，即使把 diff 修好也无法自愈，
+  // 必须人工清暂存目录。
+  //
+  // 回滚语义：按逆序恢复。原本不存在的（create）→ 删除；原本存在的 → 写回原字节。
+  const touched = []; // { target, original: Buffer|null }
   try {
     for (const file of patch.files) {
       if (!file.path || file.path.includes('..') || path.isAbsolute(file.path)) {
@@ -138,11 +151,34 @@ export function applySourcePatches(entry, staging, log = console.log, manifestOv
         }
       }
 
+      // file.diff 是 manifest 里另一处可指向任意路径的字段（file.path 已校验，
+      // 这一处原先漏了）。它只用于**读**，且最终结果仍要过 outputSha256，
+      // 所以不是逃逸通道；但契约应一致：diff 必须落在 patches/ 之内。
+      if (typeof file.diff !== 'string' || !file.diff || file.diff.includes('..') || path.isAbsolute(file.diff)) {
+        throw new Error(`unsafe patch diff path: ${String(file.diff)}`);
+      }
       const diffPath = path.join(ROOT, 'patches', ...file.diff.split('/'));
+      const patchesRoot = path.join(ROOT, 'patches');
+      if (!path.resolve(diffPath).startsWith(path.resolve(patchesRoot) + path.sep)) {
+        throw new Error(`patch diff escapes patches/: ${String(file.diff)}`);
+      }
       if (!fs.existsSync(diffPath)) throw new Error(`source patch diff missing: ${file.diff}`);
 
       // Apply outside the repository (see the header note), then copy the verified result back.
       const scratchFile = path.join(scratchRoot, ...file.path.split('/'));
+      // 路径穿越加固：file.path 已在上面做过词法校验（无 .. / 非绝对），但**词法
+      // 不等于真实**——父目录若是指向 scratchRoot 之外的符号链接，写出位置就跑出
+      // 去了。这里在真正写入前再做一次 realpath 前缀断言。
+      //
+      // 为什么现在加：2026-10-21 对抗审查指出「只有词法校验，没有 realpath」。
+      // scratchRoot 是 mkdtemp 新建的、理论上无法预先植入符号链接，所以这是
+      // 纵深防御而非在用漏洞；但成本极低，且能挡住将来 scratch 位置变更带来的回退。
+      const scratchFileResolved = path.resolve(scratchFile);
+      const scratchRootResolved = path.resolve(scratchRoot);
+      if (scratchFileResolved !== scratchRootResolved
+        && !scratchFileResolved.startsWith(scratchRootResolved + path.sep)) {
+        throw new Error(`patch target escapes scratch root: ${file.path}`);
+      }
       fs.mkdirSync(path.dirname(scratchFile), { recursive: true });
       if (!isCreate) fs.copyFileSync(target, scratchFile);
       // apply 前记下 scratch 里已有的文件，apply 后多出来的必须**恰好**是 manifest
@@ -225,6 +261,8 @@ export function applySourcePatches(entry, staging, log = console.log, manifestOv
         // where it was created by materialization.
         fs.mkdirSync(path.dirname(target), { recursive: true });
       }
+      // 落盘前登记原字节，供失败回滚（见上方 touched 的说明）。
+      touched.push({ target, original: isCreate ? null : fs.readFileSync(target) });
       fs.writeFileSync(target, after);
 
       // `summary` 是包级字段（patch.summary），不是 per-file；带在每条 applied
@@ -233,6 +271,28 @@ export function applySourcePatches(entry, staging, log = console.log, manifestOv
       applied.push({ path: file.path, sha256: afterSha, note: file.note, summary: patch.summary });
       log(`  source-patch ${entry.name}: ${file.path} -> ${afterSha.slice(0, 12)}`);
     }
+  } catch (error) {
+    // 失败即回滚：把已写进 staging 的目标按逆序恢复，避免留下半应用状态。
+    // 回滚本身若出错，只做记录——原始错误更重要，不能被回滚异常盖掉。
+    const failed = [];
+    for (const { target, original } of touched.reverse()) {
+      try {
+        if (original === null) fs.rmSync(target, { force: true });
+        else fs.writeFileSync(target, original);
+      } catch (rollbackError) {
+        failed.push(`${target}: ${rollbackError && rollbackError.message ? rollbackError.message : rollbackError}`);
+      }
+    }
+    if (touched.length > 0) {
+      log(`  source-patch ${entry.name}: 已回滚 ${touched.length} 个 staging 目标（补丁失败，不留半应用状态）`);
+    }
+    if (failed.length > 0) {
+      throw new Error(
+        `${error && error.message ? error.message : error}\n`
+        + '  !! 回滚未完成，staging 可能残留以下目标（请清空暂存目录后重试）：\n  ' + failed.join('\n  '),
+      );
+    }
+    throw error;
   } finally {
     fs.rmSync(scratchRoot, { recursive: true, force: true });
   }

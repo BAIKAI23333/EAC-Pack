@@ -197,10 +197,22 @@ test('our-free-model ships default-enabled without a managed distribution config
   // Overlay rows are only emitted for default-disabled entries, so an enabled OFM
   // must not carry a config at all (the pipeline's passthrough gate rejects it).
   assert.ok(!('config' in ofm), 'OFM must not carry a config: overlay rows only exist for default-disabled entries')
-  assert.notEqual(ofm.config?.distribution, 'managed', 'OFM must not declare a managed distribution')
   const suiteItems = asArray(readJson(path.join(ROOT, 'suite/catalog/eac.json')))
   const ofmSuite = suiteItems.find((e) => e.id === 'our-free-model')
-  assert.ok(ofmSuite && ofmSuite.defaultEnabled === true, 'suite catalog must mirror the OFM default-enabled state')
+  assert.ok(ofmSuite, 'our-free-model missing from suite/catalog/eac.json')
+  assert.equal(ofmSuite.defaultEnabled, true, 'suite catalog must mirror the OFM default-enabled state')
+  // 原先这里是 `assert.notEqual(ofm.config?.distribution, 'managed')` —— 但那行**恒真**：
+  // 上一行已断言 ofm 根本没有 config，可选链必然得到 undefined。它守不住任何东西。
+  //
+  // 真正要守的是「两个 catalog 都不得声明 managed 分发」：一旦有人给 OFM 补上
+  // config（尤其在 suite catalog 那份里），上面的 `!('config' in ofm)` 只覆盖
+  // catalog/eac.json，suite 那份会漏网。所以这里对**两份**都做显式检查。
+  for (const [label, entry] of [['catalog/eac.json', ofm], ['suite/catalog/eac.json', ofmSuite]]) {
+    assert.ok(
+      !entry.config || entry.config.distribution !== 'managed',
+      `${label}: OFM must not declare a managed distribution (overlay rows only exist for default-disabled entries)`,
+    )
+  }
 })
 
 test('bootstrap manifest covers the catalog and pins the patched hashes', (t) => {
@@ -225,5 +237,87 @@ test('bootstrap manifest covers the catalog and pins the patched hashes', (t) =>
       assert.equal(item.sha256, entry.sha256, `${patch.name}: manifest hash must match dist`)
       assert.equal(item.bytes, entry.bytes, `${patch.name}: manifest bytes must match dist`)
     }
+  }
+})
+
+/**
+ * 多文件补丁失败必须回滚已写入的 staging 目标。
+ *
+ * 为什么需要这条（2026-10-21 对抗审查发现的真漏洞）
+ * --------------------------------------------------
+ * 原实现直接 `writeFileSync(target, after)` 落 staging，而 `finally` 只删 scratchRoot。
+ * 多文件补丁在第 N 个失败时，前 N-1 个已永久留在 staging，且异常路径下调用方拿不到
+ * `applied`，**无从知道 staging 已被改了一半** —— 构建随即用半应用的包去打 tgz。
+ *
+ * create 场景更糟：残留的新文件会让第二次运行报「create target already exists」，
+ * 即使把 diff 修好也无法自愈，必须人工清暂存目录。
+ *
+ * 这条测试用真实 applySourcePatches + 注入式 staging，在干净 clone 上也能跑。
+ */
+test('multi-file patch failure rolls back every already-written staging file', async () => {
+  const { applySourcePatches } = await import('../../scripts/repack/source-patches.mjs')
+  const os = await import('node:os')
+
+  const staging = fs.mkdtempSync(path.join(os.tmpdir(), 'eac-rollback-stage-'))
+  const shipped = fs.readFileSync(path.join(ROOT, 'patches', 'files', '_shared', 'settings-compat.js'))
+  const shippedSha = sha256(shipped)
+
+  // 造一个已存在的目标文件，模拟「modify 模式下补丁前的内容」。
+  fs.mkdirSync(path.join(staging, 'lib'), { recursive: true })
+  const victim = path.join(staging, 'lib', 'victim.js')
+  const originalBytes = Buffer.from('// original content before patching\n', 'utf8')
+  fs.writeFileSync(victim, originalBytes)
+
+  // 两条目：第 1 条 create（会成功写入），第 2 条 modify 但 inputSha256 故意写错 → 必失败。
+  // 失败点在第 2 条，此时第 1 条已落盘，正好检验回滚。
+  const manifest = {
+    schemaVersion: 1,
+    patches: [
+      {
+        name: 'rollback-probe',
+        version: '1.0.0',
+        source: 'eac-tag',
+        files: [
+          {
+            path: 'lib/settings-compat.js',
+            diff: 'files/dsh-conversation-tweaks/lib/settings-compat.js.diff',
+            create: true,
+            outputSha256: shippedSha,
+            note: 'in-memory probe entry (create, succeeds first)',
+          },
+          {
+            path: 'lib/victim.js',
+            diff: 'files/dsh-conversation-tweaks/lib/settings-compat.js.diff',
+            inputSha256: '0'.repeat(64),
+            outputSha256: shippedSha,
+            note: 'in-memory probe entry (modify, must fail on input hash)',
+          },
+        ],
+      },
+    ],
+  }
+
+  try {
+    // 记录失败前的目录快照
+    const before = fs.existsSync(path.join(staging, 'lib', 'settings-compat.js'))
+
+    assert.throws(
+      () => applySourcePatches({ name: 'rollback-probe', version: '1.0.0' }, staging, () => {}, manifest),
+      /input mismatch/,
+      '第二个文件的 inputSha256 不符必须抛错',
+    )
+
+    // ① create 成功的那个文件必须被删除（回滚），不能残留
+    assert.equal(
+      fs.existsSync(path.join(staging, 'lib', 'settings-compat.js')), before,
+      '回滚必须删除本函数 create 出来的文件，否则下次运行会误报 "create target already exists"',
+    )
+    // ② modify 目标必须保持原字节（本例它在失败前未被改动，作为一致性断言）
+    assert.equal(
+      fs.readFileSync(victim, 'utf8'), originalBytes.toString('utf8'),
+      '回滚后 modify 目标必须保持补丁前的字节',
+    )
+  } finally {
+    fs.rmSync(staging, { recursive: true, force: true })
   }
 })
