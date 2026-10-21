@@ -511,7 +511,12 @@ for (const entry of entries) {
     if (!Object.keys(pkg.scripts).length) delete pkg.scripts;
   }
   const addedFiles = ensureAttributionFiles(pkg, staging);
-  const addedPatched = ensurePatchedFiles(pkg, appliedSourcePatches);
+  // 兜底与越界必须留痕：正常情况下 addedPatched 是精确路径；若补丁路径本身
+  // 含 glob 元字符（如新建 `lib/[id].js`），精确条目在 npm 眼里无效，模块会
+  // 改用目录条目兜住并写入 warnings。越出包根的路径也会进 warnings。
+  const fileWarnings = [];
+  const addedPatched = ensurePatchedFiles(pkg, appliedSourcePatches, { warnings: fileWarnings });
+  for (const w of fileWarnings) log(`  files: ⚠ ${w}`);
   if (override || changes.length || addedFiles.length || addedPatched.length || strippedScripts.length) {
     fs.writeFileSync(pkgFile, JSON.stringify(pkg, null, 2) + '\n');
     for (const c of changes) log(`  peer: ${c}`);

@@ -140,14 +140,34 @@ test('./ 前缀的条目同样生效', () => {
 });
 
 /**
- * 字符类与 `?` 按**字面量**处理（本实现只认 `*`）。
+ * 字符类与 `?` 本实现不解析 —— 但**方向并不安全**，必须说清楚。
  *
- * npm 的 files 底层是 glob，理论上支持 `[ab]` / `?`，本实现不支持。方向是
- * 「误判未覆盖 → 多补精确路径」（无害），符合模块声明的保守契约。
- * 这条测试把这个已知限制**显式钉住**：将来若有人误以为已支持字符类，
- * 会在这里被拦住，而不是在生产里发现白名单没生效。
+ * 原先这条测试的标题写的是「已知限制，方向安全」，理由是「误判未覆盖 →
+ * 多补精确路径（无害）」。这个理由是错的：真正危险的不是「漏判」，而是
+ * 「路径本身含元字符时被判成已覆盖」。
+ *
+ * 反例（npm-packlist 实测）：files=['lib/[ab].js'] 且磁盘上真有
+ * `lib/[ab].js` 时，npm 把条目当字符类，收 `lib/a.js`，把 `lib/[ab].js`
+ * **丢弃**。旧实现在 `e === p` 处早退成 true，于是「已覆盖」→ 不补白名单
+ * → 文件无声消失。这条正是本模块存在的意义所在。
+ *
+ * 现在的行为：路径含元字符而条目不含 `*` → 一律判未覆盖，由
+ * ensurePatchedFiles 改用目录条目兜住。详细差分见
+ * `package-files-npm-parity.test.mjs`（会真的跑一遍 npm-packlist）。
  */
-test('字符类与 ? 不被当作通配（已知限制，方向安全）', () => {
+test('字符类与 ? 不被当作通配（已知限制，但危险方向已被堵住）', () => {
+  // 条目含元字符、路径不含 → 本实现不展开，判未覆盖（安全方向：多补条目）
   assert.equal(isCoveredByFilesEntry('lib/a.js', 'lib/[ab].js'), false, '当前不解析字符类');
   assert.equal(isCoveredByFilesEntry('lib/x.js', 'lib/?.js'), false, '当前不解析 ?');
+
+  // 危险方向：路径自身含元字符、条目按字面写 → 必须判未覆盖
+  assert.equal(
+    isCoveredByFilesEntry('lib/[ab].js', 'lib/[ab].js'),
+    false,
+    'npm 不会把 lib/[ab].js 打进包；判 true 会让它被静默丢弃',
+  );
+  assert.equal(isCoveredByFilesEntry('lib/?.js', 'lib/?.js'), false);
+
+  // 含 `*` 的通配条目仍能覆盖含元字符的路径
+  assert.equal(isCoveredByFilesEntry('lib/[ab].js', 'lib/*.js'), true);
 });
