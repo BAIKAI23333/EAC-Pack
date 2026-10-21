@@ -193,6 +193,39 @@ The host half points at a **self-contained** `lib/settings-compat.js` that
 travels inside each plugin — EAC plugins ship self-contained and never resolve
 through the kernel package graph, so this is not a second kernel copy.
 
+### `volatile()` availability depends on the schemastery **specifier**
+
+0.2.x derives settings forms from the plugin's exported `Config`; a form only
+materialises when the root object schema carries `meta.volatile`. Two ways to
+get there, and **which one works depends on how the plugin imports schemastery**:
+
+| import specifier | resolves to | has `.volatile()` | use |
+| --- | --- | --- | --- |
+| `@deepseek-ai/schemastery` | 3.18.4 | **yes** | `Config = Base.volatile()` |
+| bare `schemastery` | 3.18.0 | **no** | `Base.meta.volatile = true` |
+
+Measured 2026-10-21 in a full instance:
+
+```
+@deepseek-ai/schemastery  → base.volatile === 'function'            ✔
+schemastery (bare)        → base.volatile === undefined             ✘
+```
+
+So the widely-copied guard
+
+```js
+const Config = typeof BaseConfig.volatile === 'function' ? BaseConfig.volatile() : BaseConfig;
+```
+
+is **effective for the five plugins that import `@deepseek-ai/schemastery`**, and
+**silently a no-op for `dsh-better-sidebar` / `dsh-theme-endfield`, which import
+the bare name** — the ternary just falls through and no `volatile` marker is set.
+`dsh-better-sidebar` consequently had *no settings card at all* until the patch
+switched it to writing `meta.volatile = true` directly.
+
+When touching this area, check the plugin's import line first; do not copy the
+ternary on the assumption that "it worked in the other plugin".
+
 ## Adding a new file (`create` mode)
 
 Some fixes need to *add* a file the upstream package does not ship — that is what

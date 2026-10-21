@@ -177,7 +177,7 @@
           "path": "lib/index.js",
           "diff": "files/dsh-better-sidebar/lib/index.js.diff",
           "inputSha256": "91095b98550ea0989604ed1aae6cc2b5f4c83e9f979e280b0444d4d5dc0510d1",
-          "outputSha256": "c33cef2a473e24cb96a4d34ba2bf39f5f03631307dd85974312cfd00a39c80cd",
+          "outputSha256": "3e02fb4b2ee10cf52fdb7515c43809139f42b8a06352740aca8df6c79d9cf543",
           "note": "Host side stops importing the retired settingsNamespace and replaces ctx.settings.register (absent on 0.2.x) with the shim scope; SettingsConflictError is still exported there and stays."
         },
         {
