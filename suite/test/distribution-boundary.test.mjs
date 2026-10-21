@@ -121,14 +121,17 @@ test('分发归属守卫自身能识别 builtin 冲突（反向自测）', (t) =
  * 它们让全新 full 实例的 GUI 完全起不来（宿主侧 RPC 全绿，只有截图能看出）。
  *
  * 已有两层防护：
- *   1. `EAC-Full-Build-20261004/prepare-composition.mjs` 生成 seed 时 `if (cat.compat) continue`
- *      —— 但那个脚本在**未入库的构建工作区**，不受版本控制保护；
+ *   1. 生成端调用 `scripts/repack/seed-bundles.mjs` 的 `shouldSeedBundle()` 过滤
+ *      —— **规则本身已入库、有 `seed-bundles.test.mjs` 5 条单测钉着**
+ *      （第 12 轮之前，这条规则只活在未入库的
+ *      `EAC-Full-Build-20261004/prepare-composition.mjs` 里，脚本一重写就会丢，
+ *      而后果是整机 GUI 拒绝启动 —— 所以特意把它挪进了 Pack）；
  *   2. `dsh-desktop/lib/desktop/companion-sync.ts` 的
  *      `stripIncompatibleProfileBundles()` 启动时从 profile 剥离 compat 条目
  *      —— 这层是运行时兜底，已实测幂等有效。
  *
  * 所以本条**不判失败**（seed 是构建产物，且已由运行时兜底覆盖），只把残留
- * 报出来，让「生成端规则丢失」这件事可见 —— 否则它会悄无声息地回来。
+ * 报出来，让「生成端规则退化成旧版 / 有人绕过 shouldSeedBundle」这件事可见。
  */
 test('seed bundles 不含 compat 条目（信息性；有运行时兜底）', (t) => {
   const seedManifest = path.join(ROOT, '..', 'EAC-Desktop', 'dsh-desktop', 'assets', 'full-pack', 'profile-seed', 'package.json');
@@ -155,7 +158,8 @@ test('seed bundles 不含 compat 条目（信息性；有运行时兜底）', (t
       const id = nameToId.get(o);
       console.log(`  ${o}${id ? ` (id=${id})` : ''}`);
     }
-    console.log('  → 生成端规则在 EAC-Full-Build-20261004/prepare-composition.mjs，该脚本未入库。');
+    console.log('  → 生成端应调用 scripts/repack/seed-bundles.mjs 的 shouldSeedBundle()；');
+    console.log('    若它已调用却仍有残留，说明 seed 是旧的、需要重跑 prepare-composition。');
   }
   assert.ok(Array.isArray(offenders), 'offenders 必须可枚举');
 });
