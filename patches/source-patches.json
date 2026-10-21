@@ -184,7 +184,7 @@
           "path": "lib/client.js",
           "diff": "files/dsh-better-sidebar/lib/client.js.diff",
           "inputSha256": "3b571e884de8de83b004f821aa80bcb2e43927f2f625483b0dec50c314324419",
-          "outputSha256": "7d2388f5c1a77cd889a334a879e9714a0d1111ca3b0117b5c194b61fbb7d9b07",
+          "outputSha256": "0a4c57ad428efca166a16d8b86c25ba737f2bce30292111f0a30e5323b25959c",
           "note": "conversation.chat.turnTail is a list slot: 0.2.x slot validation throws \"requires options.id\" when id is missing, and that entry then crashes as React #130 so the whole sidebar \"produced files\" seat disappears from the UI. Upstream omits the field; add a stable id following the same convention visualize uses (id: \"dsh-visualize-cards\")."
         },
         {

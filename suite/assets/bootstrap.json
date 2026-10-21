@@ -895,16 +895,16 @@
         "eac"
       ],
       "file": "dsh-better-sidebar-0.15.3-eac.1.tgz",
-      "sha256": "28d8de4120ebb269aa78139f1dda5cfecb59a7f598dcfe13e71d4a2c962f358c",
-      "bytes": 2478606,
+      "sha256": "c4cda0578144e87cc1ea0e9dee4435aa73d4c5fca2829a9a81d05641e63f071a",
+      "bytes": 2478653,
       "source": "eac-tag",
       "locallyRepacked": true,
       "repackNote": "better-sidebar: 0.2.x 移除了 settingsNamespace 具名导出与 ctx.settings.register（改指自包含垫片重建 scope）；给根 Config 标 volatile()（0.2.x 的 volatileForm() 需要，否则设置卡不生成）；另补 conversation.chat.turnTail 的 options.id —— 它是 list slot，0.2.x 缺 id 直接 throw，该槽位在界面上整体消失。",
       "parts": [
         {
           "file": "dsh-better-sidebar-0.15.3-eac.1.tgz",
-          "bytes": 2478606,
-          "sha256": "28d8de4120ebb269aa78139f1dda5cfecb59a7f598dcfe13e71d4a2c962f358c"
+          "bytes": 2478653,
+          "sha256": "c4cda0578144e87cc1ea0e9dee4435aa73d4c5fca2829a9a81d05641e63f071a"
         }
       ]
     },
