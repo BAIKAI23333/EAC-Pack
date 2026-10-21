@@ -11,10 +11,10 @@ import { shouldSeedBundle, computeSeedBundles, SEED_BASE_BUNDLES, RETIRED_SEED_B
 
 test('compat 条目一律不进 bundles', () => {
   // 两个真实案例：都是 compat: eac-fork，都曾让全新 full 实例 GUI 起不来
-  assert.equal(shouldSeedBundle({ status: 'preinstalled' }, { compat: 'eac-fork' }), false);
-  assert.equal(shouldSeedBundle({ status: 'preinstalled' }, { compat: 'anything' }), false);
+  assert.equal(shouldSeedBundle({ name: 'p1', status: 'preinstalled' }, { compat: 'eac-fork' }), false);
+  assert.equal(shouldSeedBundle({ name: 'p2', status: 'preinstalled' }, { compat: 'anything' }), false);
   // 对照：没有 compat 就进
-  assert.equal(shouldSeedBundle({ status: 'preinstalled' }, { compat: undefined, packs: ['eac'] }), true);
+  assert.equal(shouldSeedBundle({ name: 'p3', status: 'preinstalled' }, { compat: undefined, packs: ['eac'] }), true);
 });
 
 test('退役清单按 name 判定，调用方必须传 name', () => {
@@ -27,28 +27,28 @@ test('退役清单按 name 判定，调用方必须传 name', () => {
   // 传了 name 但未命中 → 放行
   assert.equal(shouldSeedBundle({ status: 'preinstalled', name: 'dsh-not-retired' }, {}), true);
   // 没传 name → 退役规则不生效（这是已知的调用契约，生成端必须补 name）
-  assert.equal(shouldSeedBundle({ status: 'preinstalled' }, {}), true);
+  assert.equal(shouldSeedBundle({ name: 'p6', status: 'preinstalled' }, {}), true);
 });
 test('catalog 缺失时 fail-closed，不放行（防 compat 包混进 bundles 拖垮 GUI）', () => {
   // 曾经 catalog 为 null 时直接 return true —— 等于「不知道是不是 compat 就放行」。
   // compat 包进 bundles 会让 0.2.x web boot fail-loud、整机 GUI 拒绝渲染。
-  assert.equal(shouldSeedBundle({ status: 'preinstalled' }, null), false, 'catalog=null 必须 false');
-  assert.equal(shouldSeedBundle({ status: 'preinstalled' }, undefined), false, 'catalog=undefined 必须 false');
+  assert.equal(shouldSeedBundle({ name: 'p7', status: 'preinstalled' }, null), false, 'catalog=null 必须 false');
+  assert.equal(shouldSeedBundle({ name: 'p8', status: 'preinstalled' }, undefined), false, 'catalog=undefined 必须 false');
   // 正常 catalog 仍应放行
-  assert.equal(shouldSeedBundle({ status: 'preinstalled' }, {}), true, '空对象 catalog 应放行');
+  assert.equal(shouldSeedBundle({ name: 'p6', status: 'preinstalled' }, {}), true, '空对象 catalog 应放行');
 });
 test('非 preinstalled 状态不进 bundles', () => {
   // desktop-core-precedence：包已由桌面核自带，进 bundles 会重复挂载
-  assert.equal(shouldSeedBundle({ status: 'desktop-core-precedence' }, {}), false);
+  assert.equal(shouldSeedBundle({ name: 'p4', status: 'desktop-core-precedence' }, {}), false);
   // kernel-provided-precedence：内核已提供
-  assert.equal(shouldSeedBundle({ status: 'kernel-provided-precedence' }, {}), false);
-  assert.equal(shouldSeedBundle({ status: 'preinstalled' }, {}), true);
+  assert.equal(shouldSeedBundle({ name: 'p5', status: 'kernel-provided-precedence' }, {}), false);
+  assert.equal(shouldSeedBundle({ name: 'p6', status: 'preinstalled' }, {}), true);
 });
 
 test('皮肤与社区包仍然进 bundles（不能被 defaultEnabled 误伤）', () => {
   // 这是踩过的坑：按 defaultEnabled 过滤会把这些一起砍掉。
   // 皮肤的正确模式是「装着但默认 disabled」，所以必须进 bundles。
-  const skinEntry = { status: 'preinstalled' };
+  const skinEntry = { name: 'dsh-pet', status: 'preinstalled' };
   const skinCatalog = { defaultEnabled: false, packs: ['skins'] };
   assert.equal(shouldSeedBundle(skinEntry, skinCatalog), true, '皮肤必须进 bundles');
 

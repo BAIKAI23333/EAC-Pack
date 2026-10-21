@@ -60,8 +60,25 @@ export const SEED_BASE_BUNDLES = ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-web
  */
 export function shouldSeedBundle(entry, catalog) {
   if (!entry || typeof entry !== 'object') return false;
+  // entry.name 是**必需**输入，不是可选的。
+  //
+  // 为什么强制：退役清单（RETIRED_SEED_BUNDLES）按 name 查。曾经生成端写成
+  // `shouldSeedBundle({ status }, cat)` —— 没传 name，于是退役规则**静默失效**
+  // （加了 dafeiyu 到退役清单、重生成 seed，它仍出现在 bundles 里）。
+  //
+  // 现在改为「缺 name 就 throw」而不是静默放行：让调用方的契约错误立刻暴露，
+  // 而不是让一条安全规则悄悄变成 no-op。这是本仓第三次
+  // 「规则写了但没生效」——前两次分别是 execFileSync 读错流、git apply 缺 -v
+  // 没有信号源。共同的防法是：**在规则入口校验它依赖的输入，而不是依赖调用方自觉**。
+  if (typeof entry.name !== 'string' || entry.name === '') {
+    throw new Error(
+      'shouldSeedBundle: entry.name 是必需字段（退役清单按 name 判定）。\n'
+      + '  收到：' + JSON.stringify(entry) + '\n'
+      + '  调用方必须传 { name, status, catalog }，否则退役规则会静默失效。',
+    );
+  }
   // 显式退役清单优先：即使包仍是 preinstalled，也不进 bundles。
-  if (typeof entry.name === 'string' && RETIRED_SEED_BUNDLES.has(entry.name)) return false;
+  if (RETIRED_SEED_BUNDLES.has(entry.name)) return false;
   if (entry.status !== 'preinstalled') return false;
   // catalog 缺失 → **fail-closed**（不进 bundles）。
   //
