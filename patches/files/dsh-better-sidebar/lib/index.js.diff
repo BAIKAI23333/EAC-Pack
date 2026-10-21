@@ -1,5 +1,5 @@
 diff --git a/lib/index.js b/lib/index.js
-index 5cc368e..2ce3cc9 100644
+index 5cc368e..a990382 100644
 --- a/lib/index.js
 +++ b/lib/index.js
 @@ -8,7 +8,11 @@ import { once } from "node:events";
@@ -15,7 +15,38 @@ index 5cc368e..2ce3cc9 100644
  import { homedir, userInfo } from "node:os";
  import { defineTool } from "@deepseek-ai/dsh-tools";
  import { createUserMessage } from "@deepseek-ai/dsh-llm";
-@@ -3558,7 +3562,9 @@ function apply(ctx, config) {
+@@ -32,7 +36,7 @@ const SIDEBAR_PREFS_NS = "dsh-better-sidebar";
+ * @module dsh-better-sidebar/config
+ */
+ /** Schemastery schema for the plugin configuration. */
+-const Config = z.object({
++const BaseConfig = z.object({
+ 	readLimit: z.number().step(1).min(1).default(524288),
+ 	mediaLimit: z.number().step(1).min(1).default(20971520),
+ 	uploadLimit: z.number().step(1).min(1).default(134217728),
+@@ -42,6 +46,21 @@ const Config = z.object({
+ 	shell: z.string().default(""),
+ 	shellArgs: z.array(z.string()).default([])
+ });
++
++// 0.2.x：让根 schema 带 meta.volatile 标记。dsh-settings 的 volatileForm()
++//   第一行就是 if (schema.meta.volatile) return plainSchema(schema)，
++//   根标记直接返回整张表单；不标则投影为 undefined、设置卡不生成。
++//
++// 注意**不要**写 `typeof BaseConfig.volatile === "function" ? BaseConfig.volatile() : ...`：
++// 本仓 schemastery 3.18.0 实例上**没有** volatile() 方法，那种写法会永远走 else 分支、
++// 静默什么也没做（实测：base.volatile === undefined）。
++// 直接写 meta 是有效路径 —— 实测 base.meta.volatile = true 会让 toJSON() 输出
++//   {"type":"object","meta":{"default":{},"volatile":true},...}
++// 正是内核 volatileForm 要读的字段。
++if (BaseConfig.meta && typeof BaseConfig.meta === "object") {
++	BaseConfig.meta.volatile = true;
++}
++const Config = BaseConfig;
+ /**
+ * Apply direct-call defaults after Loader schema validation has normally run.
+ *
+@@ -3558,7 +3577,9 @@ function apply(ctx, config) {
  	};
  	ctx.inject(["settings"], (sctx) => {
  		const ns = settingsNamespace(SIDEBAR_PREFS_NS);
