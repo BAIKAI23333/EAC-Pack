@@ -43,6 +43,21 @@ export function syncBootstrapEntries(options = {}) {
   const bootByName = new Map((bootstrap.items ?? []).map((i) => [i.name, i]));
 
   let changed = 0;
+  // catalog 标了 `distExclude: true` 的条目有意不进 dist —— 从 bootstrap 里移除。
+  //
+  // 为什么必须在这里处理：syncBootstrapEntries 原先只**更新** manifest 里补丁包的
+  // hash，从不**删除**条目。于是 distExclude 的包（如退役的 dsh-dafeiyu，160MB）
+  // 会永久留在 bootstrap.items 里，安装包照样下载它 —— 排除等于白做。
+  {
+    const distNames = new Set(dist.map((e) => e.name));
+    const before = (bootstrap.items ?? []).length;
+    bootstrap.items = (bootstrap.items ?? []).filter((i) => distNames.has(i.name));
+    const removed = before - bootstrap.items.length;
+    if (removed > 0) {
+      changed += 1;
+      log(`bootstrap 移除 ${removed} 项（已不在 dist，含 distExclude 退役包）`);
+    }
+  }
   for (const patch of manifest.patches) {
     if (only && !only.has(patch.name)) continue;
     const d = distByName.get(patch.name);
@@ -84,3 +99,4 @@ if (invokedDirectly) {
   const changed = syncBootstrapEntries();
   console.log(`bootstrap items updated: ${changed}`);
 }
+

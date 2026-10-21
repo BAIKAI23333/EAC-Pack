@@ -208,6 +208,9 @@ test('bootstrap manifest covers the catalog and pins the patched hashes', (t) =>
   const catalogs = ['eac', 'aio', 'skins', 'community']
     .flatMap((p) => (fs.existsSync(path.join(ROOT, 'suite/catalog', `${p}.json`)) ? asArray(readJson(path.join(ROOT, 'suite/catalog', `${p}.json`))) : []))
   for (const entry of catalogs) {
+    // catalog 标 `distExclude: true` 的条目有意不进安装包（保留市场元数据，
+    // 但不出现在 bootstrap/items 里）—— 不参与「catalog 必须被 manifest 覆盖」的闭包断言。
+    if (entry.distExclude === true) continue
     assert.ok(
       bootstrap.items.some((i) => i.name === entry.name && i.version === entry.version),
       `manifest missing catalog resource ${entry.name}@${entry.version}`,

@@ -210,7 +210,21 @@ for (const [cat, list] of Object.entries(catalogs)) {
 }
 let entries = Array.from(byName.values());
 if (onlyArg) entries = entries.filter((e) => e.name.includes(onlyArg) || e.id.includes(onlyArg));
-log(`catalog 条目合并完成：${byName.size} 唯一包，本轮处理 ${entries.length}`);
+// catalog 条目可以带 `distExclude: true` 表示「保留市场元数据，但不打进 dist」。
+//
+// 为什么需要这个字段而不是直接删 catalog 条目：
+//   · 删条目会同时抹掉插件市场里的「可安装」信息（titleZh/descZh/tier/license 等）；
+//   · 而 `distExclude` 只让它不进安装包，用户仍能从市场按需装。
+//
+// 首个使用者是 `dsh-dafeiyu`：已按 external/market 退役，但它带一个 ~49MB 的
+// PyInstaller helper，tgz 合计 **160 MB**，占全 dist 289 MB 的 55%。
+// 退役前它既不在 seed bundles（不启动）却仍打进 dist —— 纯占体积。
+const distExcluded = entries.filter((e) => e.distExclude === true);
+if (distExcluded.length) {
+  entries = entries.filter((e) => e.distExclude !== true);
+  for (const e of distExcluded) log(`DIST-EXCLUDE ${e.name}（catalog 标 distExclude）`);
+}
+log(`catalog 条目合并完成：${byName.size} 唯一包，本轮处理 ${entries.length}${distExcluded.length ? `（已排除 ${distExcluded.length}）` : ''}`);
 
 // ---- 工具 ----
 // 手写递归复制：Windows 上 fs.cpSync 覆盖复制偶发 errno=0 的 unlink 怪癖

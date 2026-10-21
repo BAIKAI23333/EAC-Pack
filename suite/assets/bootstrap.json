@@ -272,16 +272,16 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-balance-0.1.0.tgz",
-      "sha256": "6ac0029eff2b9ee79d5348c107e167816cd707d467007f80b18cd7417c4c8d3e",
-      "bytes": 5343,
+      "sha256": "6012093596ca29137c20d2c06beecbdb7ccca80fc2a0f4c521421b5bbad3af8e",
+      "bytes": 5344,
       "source": "eac-tag",
       "locallyRepacked": true,
       "repackNote": "Drops the 价格设置 settings section and its now-unreachable implementation: its balancePrices/balanceModels/refreshBalance bridge is retired by ADR 0006, so the section could only ever render a misleading \"桥接不可用\" error. The composer dock is unchanged.",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-balance-0.1.0.tgz",
-          "bytes": 5343,
-          "sha256": "6ac0029eff2b9ee79d5348c107e167816cd707d467007f80b18cd7417c4c8d3e"
+          "bytes": 5344,
+          "sha256": "6012093596ca29137c20d2c06beecbdb7ccca80fc2a0f4c521421b5bbad3af8e"
         }
       ]
     },
@@ -293,14 +293,14 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-client-file-changes-0.1.0.tgz",
-      "sha256": "5f26de57d13f9c6dab153d0312ce4ae229dfaca89921458a4ce1bcd84baf4eae",
-      "bytes": 11373,
+      "sha256": "949f9811010f1e8e3b0b859ee5af3d8c61b248386775143d2de8eb201d29a216",
+      "bytes": 11377,
       "source": "eac-tag",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-client-file-changes-0.1.0.tgz",
-          "bytes": 11373,
-          "sha256": "5f26de57d13f9c6dab153d0312ce4ae229dfaca89921458a4ce1bcd84baf4eae"
+          "bytes": 11377,
+          "sha256": "949f9811010f1e8e3b0b859ee5af3d8c61b248386775143d2de8eb201d29a216"
         }
       ]
     },
@@ -312,16 +312,16 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-conversation-tweaks-0.1.0.tgz",
-      "sha256": "64e221e2180b07cbe56d7a5420e96f5aacf5786e66881e85843bfe093990a52b",
-      "bytes": 8737,
+      "sha256": "16d58c2d83721f5ab975a49fade725d97feec4680d5fd63fdb5d286bcdaecda6",
+      "bytes": 8742,
       "source": "eac-tag",
       "locallyRepacked": true,
       "repackNote": "conversation-tweaks: 0.2.x 退役了 dsh-settings 的 settingsNamespace/installSettingsSection 具名导出与 settingsScope 服务，并把设置表单改为由导出的 Config schema 派生（需 volatile() 标记）。本补丁补齐三处：自包含垫片、createSettingsScope 重建读写面、客户端运行时探测。",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-conversation-tweaks-0.1.0.tgz",
-          "bytes": 8737,
-          "sha256": "64e221e2180b07cbe56d7a5420e96f5aacf5786e66881e85843bfe093990a52b"
+          "bytes": 8742,
+          "sha256": "16d58c2d83721f5ab975a49fade725d97feec4680d5fd63fdb5d286bcdaecda6"
         }
       ]
     },
@@ -352,14 +352,14 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-file-changes-0.1.0.tgz",
-      "sha256": "d1f55f8410bc15246835b61efe4c7a8e0fe8d276817d090f58d6501ceeec834b",
-      "bytes": 6831,
+      "sha256": "93e2aa3f669d651401389047691be76f4bcfe353048c95099dcdab27ec2a084c",
+      "bytes": 6832,
       "source": "eac-tag",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-file-changes-0.1.0.tgz",
-          "bytes": 6831,
-          "sha256": "d1f55f8410bc15246835b61efe4c7a8e0fe8d276817d090f58d6501ceeec834b"
+          "bytes": 6832,
+          "sha256": "93e2aa3f669d651401389047691be76f4bcfe353048c95099dcdab27ec2a084c"
         }
       ]
     },
@@ -371,14 +371,14 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-float-window-0.1.0.tgz",
-      "sha256": "125b3fe7dbebedb47ed572a9d33e265739305888d15170f943fc073c4623a436",
-      "bytes": 6200,
+      "sha256": "0985fd6b0a8bee0dcd21695193e9f1db02a7e083d4c02eed8927cefb9846746b",
+      "bytes": 6204,
       "source": "eac-tag",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-float-window-0.1.0.tgz",
-          "bytes": 6200,
-          "sha256": "125b3fe7dbebedb47ed572a9d33e265739305888d15170f943fc073c4623a436"
+          "bytes": 6204,
+          "sha256": "0985fd6b0a8bee0dcd21695193e9f1db02a7e083d4c02eed8927cefb9846746b"
         }
       ]
     },
@@ -390,16 +390,16 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-openclaw-bridge-0.7.0.tgz",
-      "sha256": "85f78dc1f7bb53fa15b884013f5a54c8ac54fb382cfc7ff41c7b1cea7919353f",
-      "bytes": 47538,
+      "sha256": "1287658d8371744a0187856f3f2a122ecf892f0379661e3ff27d039db734a599",
+      "bytes": 47539,
       "source": "eac-tag",
       "locallyRepacked": true,
       "repackNote": "openclaw-bridge: settingsNamespace/installSettingsSection 具名导出与 settingsScope 服务在 0.2.x 均退役，且设置表单改由 Config schema 派生。本补丁补齐三处；桥接路由与微信区块不受影响。",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-openclaw-bridge-0.7.0.tgz",
-          "bytes": 47538,
-          "sha256": "85f78dc1f7bb53fa15b884013f5a54c8ac54fb382cfc7ff41c7b1cea7919353f"
+          "bytes": 47539,
+          "sha256": "1287658d8371744a0187856f3f2a122ecf892f0379661e3ff27d039db734a599"
         }
       ]
     },
@@ -412,14 +412,14 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-plugin-manager-0.1.0.tgz",
-      "sha256": "3aa8ca8802802cf754e71ac6352545cb090cb193e0d27cce3b688e5cd0b8b935",
-      "bytes": 7934,
+      "sha256": "abcabbd36f98c135e5f7dc6f43dad5fb44a7444e6249865d9da6b3d712b46e11",
+      "bytes": 7932,
       "source": "eac-tag",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-plugin-manager-0.1.0.tgz",
-          "bytes": 7934,
-          "sha256": "3aa8ca8802802cf754e71ac6352545cb090cb193e0d27cce3b688e5cd0b8b935"
+          "bytes": 7932,
+          "sha256": "abcabbd36f98c135e5f7dc6f43dad5fb44a7444e6249865d9da6b3d712b46e11"
         }
       ]
     },
@@ -431,16 +431,16 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-prompt-custom-0.1.0.tgz",
-      "sha256": "8e34d879a91791578623f5c0c4d64b9a8d044807de3f542cefd4a993d1f6ec27",
-      "bytes": 10270,
+      "sha256": "5fa1d01241208394b9d8a9881a624e26700e4ce3302b48eef2ee90accaa36291",
+      "bytes": 10274,
       "source": "eac-tag",
       "locallyRepacked": true,
       "repackNote": "prompt-custom: 同族的 settingsNamespace/installSettingsSection/settingsScope 退役，外加 PERSONA_SECTION/PERSONA_ORDER 改名为 PREFIX/SUFFIX。本补丁四类改动一并适配，保持原有分段顺序。",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-prompt-custom-0.1.0.tgz",
-          "bytes": 10270,
-          "sha256": "8e34d879a91791578623f5c0c4d64b9a8d044807de3f542cefd4a993d1f6ec27"
+          "bytes": 10274,
+          "sha256": "5fa1d01241208394b9d8a9881a624e26700e4ce3302b48eef2ee90accaa36291"
         }
       ]
     },
@@ -453,14 +453,14 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-skin-switch-0.1.0.tgz",
-      "sha256": "87befbd2305209d34b9e7167298c97f7d90348034a2f77a5fdb77d9a883c55e7",
-      "bytes": 12614,
+      "sha256": "5508d7125e5d3251d43c04addabc23d9bea1a0907680cedb4a9e62f123c21a93",
+      "bytes": 12616,
       "source": "eac-tag",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-skin-switch-0.1.0.tgz",
-          "bytes": 12614,
-          "sha256": "87befbd2305209d34b9e7167298c97f7d90348034a2f77a5fdb77d9a883c55e7"
+          "bytes": 12616,
+          "sha256": "5508d7125e5d3251d43c04addabc23d9bea1a0907680cedb4a9e62f123c21a93"
         }
       ]
     },
@@ -472,14 +472,14 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-terminal-0.1.0.tgz",
-      "sha256": "66665bd15ff2ae4105f093d54f4ed4d1c751219f5dff3460f8ef8b93236347ef",
-      "bytes": 11789,
+      "sha256": "1880a6dd34f7ba20d656f3af94a04ad870eb2cc4f2f6d1ce314f60a564155858",
+      "bytes": 11791,
       "source": "eac-tag",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-terminal-0.1.0.tgz",
-          "bytes": 11789,
-          "sha256": "66665bd15ff2ae4105f093d54f4ed4d1c751219f5dff3460f8ef8b93236347ef"
+          "bytes": 11791,
+          "sha256": "1880a6dd34f7ba20d656f3af94a04ad870eb2cc4f2f6d1ce314f60a564155858"
         }
       ]
     },
@@ -548,14 +548,14 @@
         "skins"
       ],
       "file": "@linxin666_dsh-client-ui-skin-blue-fantasy-0.2.0.tgz",
-      "sha256": "eb7880f35519e76a3663cfaaf9cd9dab4a194b4d839c57fb65884059333e0e4e",
-      "bytes": 5315934,
+      "sha256": "403dd82f723b361f78b83c0b6395d7a0b8af510348b24641ffef9bdc428c8cdd",
+      "bytes": 5315933,
       "source": "npm",
       "parts": [
         {
           "file": "@linxin666_dsh-client-ui-skin-blue-fantasy-0.2.0.tgz",
-          "bytes": 5315934,
-          "sha256": "eb7880f35519e76a3663cfaaf9cd9dab4a194b4d839c57fb65884059333e0e4e"
+          "bytes": 5315933,
+          "sha256": "403dd82f723b361f78b83c0b6395d7a0b8af510348b24641ffef9bdc428c8cdd"
         }
       ]
     },
@@ -916,14 +916,14 @@
         "eac"
       ],
       "file": "dsh-change-review-0.1.0.tgz",
-      "sha256": "faef26c9fcbb19bbe9962d2f5790131343fe7392adbfa8a975fa9f90731f2f09",
-      "bytes": 6451,
+      "sha256": "41457237b0d7ab637bc309b8e53ef14b601e656af6f0253d46758f7b4c66965a",
+      "bytes": 6452,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-change-review-0.1.0.tgz",
-          "bytes": 6451,
-          "sha256": "faef26c9fcbb19bbe9962d2f5790131343fe7392adbfa8a975fa9f90731f2f09"
+          "bytes": 6452,
+          "sha256": "41457237b0d7ab637bc309b8e53ef14b601e656af6f0253d46758f7b4c66965a"
         }
       ]
     },
@@ -986,45 +986,6 @@
       ]
     },
     {
-      "id": "dafeiyu",
-      "name": "dsh-dafeiyu",
-      "version": "0.1.14",
-      "packs": [
-        "eac"
-      ],
-      "file": "dsh-dafeiyu-0.1.14.tgz",
-      "sha256": "e9f506542488b6cc0aad5999315af54551b182214d6cfcce0d284e912d2489e2",
-      "bytes": 167827628,
-      "source": "npm",
-      "parts": [
-        {
-          "file": "dsh-dafeiyu-0.1.14.tgz.chunk-000.bin",
-          "bytes": 41943040,
-          "sha256": "9b5664dc7a6cbc66db5ff6c38543b0d0fe5ad8933410950d8a4820637f9d9479"
-        },
-        {
-          "file": "dsh-dafeiyu-0.1.14.tgz.chunk-001.bin",
-          "bytes": 41943040,
-          "sha256": "e60bd29d507d4a1018d4282548b1f7bd422ce5b5f58dce74248431e21c98cc8e"
-        },
-        {
-          "file": "dsh-dafeiyu-0.1.14.tgz.chunk-002.bin",
-          "bytes": 41943040,
-          "sha256": "43c74d3cceedeadfedf880b61dfec1aa4e33dafd8d1933ce6b3d76669447f5a3"
-        },
-        {
-          "file": "dsh-dafeiyu-0.1.14.tgz.chunk-003.bin",
-          "bytes": 41943040,
-          "sha256": "28db092978bfa90f3127cda6afd3f5316b159654039e967cd0daabc2e2f64eb9"
-        },
-        {
-          "file": "dsh-dafeiyu-0.1.14.tgz.chunk-004.bin",
-          "bytes": 55468,
-          "sha256": "574f73b7c2e8829c199d844f402a74ff7c8807b26096594cb51ed539d2d89b97"
-        }
-      ]
-    },
-    {
       "id": "dock-settings",
       "name": "dsh-dock-settings",
       "version": "0.1.0",
@@ -1070,14 +1031,14 @@
         "eac"
       ],
       "file": "dsh-eac-core-bridge-1.0.0.tgz",
-      "sha256": "f4aa6173364b8497781881128cd052f106880ef45ff51a7506b7864792e2bcd5",
-      "bytes": 4462,
+      "sha256": "fb7f41514ba19f6a8aeda4916778dc58abbcce278ab02bd775eb4de1039a5d2d",
+      "bytes": 4464,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-eac-core-bridge-1.0.0.tgz",
-          "bytes": 4462,
-          "sha256": "f4aa6173364b8497781881128cd052f106880ef45ff51a7506b7864792e2bcd5"
+          "bytes": 4464,
+          "sha256": "fb7f41514ba19f6a8aeda4916778dc58abbcce278ab02bd775eb4de1039a5d2d"
         }
       ]
     },
@@ -1089,14 +1050,14 @@
         "eac"
       ],
       "file": "dsh-eac-locale-compat-1.0.0.tgz",
-      "sha256": "467e8f51dd0f56314d3a464c7e1e7954c0aed845d54ab92fa8f754659817699d",
-      "bytes": 16556,
+      "sha256": "a23771dbf83cafd34ab90f808b5033e40328998c6619eed61a0ceb28814a40b9",
+      "bytes": 16555,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-eac-locale-compat-1.0.0.tgz",
-          "bytes": 16556,
-          "sha256": "467e8f51dd0f56314d3a464c7e1e7954c0aed845d54ab92fa8f754659817699d"
+          "bytes": 16555,
+          "sha256": "a23771dbf83cafd34ab90f808b5033e40328998c6619eed61a0ceb28814a40b9"
         }
       ]
     },
@@ -1108,14 +1069,14 @@
         "eac"
       ],
       "file": "dsh-feature-toggles-0.1.1.tgz",
-      "sha256": "1bfcb90ca885b8cfda2a16edd07e54160e8de5c54ec520d45b0d58fdfe405b6c",
-      "bytes": 4022,
+      "sha256": "78ef7d00b4180907bfdc64c26aa45dc995f0cb7c8f5eea3df585e9aa9756d06b",
+      "bytes": 4020,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-feature-toggles-0.1.1.tgz",
-          "bytes": 4022,
-          "sha256": "1bfcb90ca885b8cfda2a16edd07e54160e8de5c54ec520d45b0d58fdfe405b6c"
+          "bytes": 4020,
+          "sha256": "78ef7d00b4180907bfdc64c26aa45dc995f0cb7c8f5eea3df585e9aa9756d06b"
         }
       ]
     },
@@ -1127,14 +1088,14 @@
         "eac"
       ],
       "file": "dsh-file-drop-eac-0.1.0.tgz",
-      "sha256": "56ff0fcdc553a7ea29f847d962f354500c1b967fb0dd1a4f8cc77ecbd03f88bc",
-      "bytes": 8048,
+      "sha256": "893e300f4bf3562982cd3965e9f8e6b845cee03fea8a6b8815fd6976739087dd",
+      "bytes": 8049,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-file-drop-eac-0.1.0.tgz",
-          "bytes": 8048,
-          "sha256": "56ff0fcdc553a7ea29f847d962f354500c1b967fb0dd1a4f8cc77ecbd03f88bc"
+          "bytes": 8049,
+          "sha256": "893e300f4bf3562982cd3965e9f8e6b845cee03fea8a6b8815fd6976739087dd"
         }
       ]
     },
@@ -1165,14 +1126,14 @@
         "eac"
       ],
       "file": "dsh-font-custom-0.1.0.tgz",
-      "sha256": "ba3b4b55e6f5d4b600dc366b635125f8f265e158d58ceaeac3b446ae92b15e5d",
+      "sha256": "83311b179b3c030d14b8f556d04252a80794e943d9b427ecd020ba5d78890f5b",
       "bytes": 8773,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-font-custom-0.1.0.tgz",
           "bytes": 8773,
-          "sha256": "ba3b4b55e6f5d4b600dc366b635125f8f265e158d58ceaeac3b446ae92b15e5d"
+          "sha256": "83311b179b3c030d14b8f556d04252a80794e943d9b427ecd020ba5d78890f5b"
         }
       ]
     },
@@ -1184,14 +1145,14 @@
         "eac"
       ],
       "file": "dsh-image-paste-0.1.0.tgz",
-      "sha256": "690fbffec88e268a6a368c8c9cce3a719b27c4aaeeaf0df9a58610e768675264",
-      "bytes": 4486,
+      "sha256": "8f8c83eb4cfdd7cfb6839890fc3dbc896536d8a4f2c5cd358392e8cbb327ca58",
+      "bytes": 4489,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-image-paste-0.1.0.tgz",
-          "bytes": 4486,
-          "sha256": "690fbffec88e268a6a368c8c9cce3a719b27c4aaeeaf0df9a58610e768675264"
+          "bytes": 4489,
+          "sha256": "8f8c83eb4cfdd7cfb6839890fc3dbc896536d8a4f2c5cd358392e8cbb327ca58"
         }
       ]
     },
@@ -1241,14 +1202,14 @@
         "eac"
       ],
       "file": "dsh-offpeak-9.9.9.tgz",
-      "sha256": "ac5ce82c64c857c52d80c8cbd67c24eb16707a74fe2f47bc42667051dad4ebb7",
-      "bytes": 22017,
+      "sha256": "fe8063d64ddc4987f63f20769ed495dca528a2ec683cb4979b36bc96aadfc4fa",
+      "bytes": 22018,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-offpeak-9.9.9.tgz",
-          "bytes": 22017,
-          "sha256": "ac5ce82c64c857c52d80c8cbd67c24eb16707a74fe2f47bc42667051dad4ebb7"
+          "bytes": 22018,
+          "sha256": "fe8063d64ddc4987f63f20769ed495dca528a2ec683cb4979b36bc96aadfc4fa"
         }
       ]
     },
@@ -1303,14 +1264,14 @@
         "eac"
       ],
       "file": "dsh-pet-settings-0.1.0.tgz",
-      "sha256": "4e48ee9df7b1830dd16064fc9ea11791da06b7610ff76ad26f0d63040961c81a",
-      "bytes": 4236,
+      "sha256": "8622b0661570f4a78ac1c81240cd00b8b724949636a93b21ff30b12197d1ddbc",
+      "bytes": 4237,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-pet-settings-0.1.0.tgz",
-          "bytes": 4236,
-          "sha256": "4e48ee9df7b1830dd16064fc9ea11791da06b7610ff76ad26f0d63040961c81a"
+          "bytes": 4237,
+          "sha256": "8622b0661570f4a78ac1c81240cd00b8b724949636a93b21ff30b12197d1ddbc"
         }
       ]
     },
@@ -1342,14 +1303,14 @@
         "eac"
       ],
       "file": "dsh-plugin-shield-0.1.0.tgz",
-      "sha256": "2ea43a63d36fc386a8de80914645b39ee2c4fce522a6e2bd2b334465c707b1e2",
-      "bytes": 5826,
+      "sha256": "cb00f05d6e72762a7a53029f6e2dc66c4a90a0b7733984afa7548bb512faeb79",
+      "bytes": 5827,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-plugin-shield-0.1.0.tgz",
-          "bytes": 5826,
-          "sha256": "2ea43a63d36fc386a8de80914645b39ee2c4fce522a6e2bd2b334465c707b1e2"
+          "bytes": 5827,
+          "sha256": "cb00f05d6e72762a7a53029f6e2dc66c4a90a0b7733984afa7548bb512faeb79"
         }
       ]
     },
@@ -1422,16 +1383,16 @@
         "eac"
       ],
       "file": "dsh-settings-groups-0.1.0.tgz",
-      "sha256": "0b3e39aa7fccbe70745b7c8cece6447e4015e5f8e0cfc5aa7b8e4b0b01bfe8f9",
-      "bytes": 5893,
+      "sha256": "a9caf11cb449078c39b451ef0cf2227b2d542cb026d48aac14d632fb0036eb03",
+      "bytes": 5894,
       "source": "eac-tag",
       "locallyRepacked": true,
       "repackNote": "General-settings collapser: real rows are the slot wrapper children, not the wrapper itself (the whole page used to be hidden as a single \"advanced\" row).",
       "parts": [
         {
           "file": "dsh-settings-groups-0.1.0.tgz",
-          "bytes": 5893,
-          "sha256": "0b3e39aa7fccbe70745b7c8cece6447e4015e5f8e0cfc5aa7b8e4b0b01bfe8f9"
+          "bytes": 5894,
+          "sha256": "a9caf11cb449078c39b451ef0cf2227b2d542cb026d48aac14d632fb0036eb03"
         }
       ]
     },
@@ -1577,14 +1538,14 @@
         "eac"
       ],
       "file": "dsh-viewport-lock-1.0.1.tgz",
-      "sha256": "2c4bfb137428932cd5a95e2ddf07e7840cc0e5b15711d507608b66df885573be",
-      "bytes": 4878,
+      "sha256": "527b9d8052e197f52e958248615534b2412f4e04dd10bda5401160287a8a6029",
+      "bytes": 4877,
       "source": "eac-tag",
       "parts": [
         {
           "file": "dsh-viewport-lock-1.0.1.tgz",
-          "bytes": 4878,
-          "sha256": "2c4bfb137428932cd5a95e2ddf07e7840cc0e5b15711d507608b66df885573be"
+          "bytes": 4877,
+          "sha256": "527b9d8052e197f52e958248615534b2412f4e04dd10bda5401160287a8a6029"
         }
       ]
     },
