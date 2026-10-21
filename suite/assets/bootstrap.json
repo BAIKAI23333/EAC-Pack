@@ -272,16 +272,16 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-balance-0.1.0.tgz",
-      "sha256": "66e77b4259950d953ebf712e678b770f28e2a735132c87055a53ed6f15ca5fc1",
-      "bytes": 5345,
+      "sha256": "82cd2e34590e314d887d6033b8db35cdb261458d8f24811bb7abba8bbb48b6b7",
+      "bytes": 5281,
       "source": "eac-tag",
       "locallyRepacked": true,
       "repackNote": "Drops the 价格设置 settings section and its now-unreachable implementation: its balancePrices/balanceModels/refreshBalance bridge is retired by ADR 0006, so the section could only ever render a misleading \"桥接不可用\" error. The composer dock is unchanged.",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-balance-0.1.0.tgz",
-          "bytes": 5345,
-          "sha256": "66e77b4259950d953ebf712e678b770f28e2a735132c87055a53ed6f15ca5fc1"
+          "bytes": 5281,
+          "sha256": "82cd2e34590e314d887d6033b8db35cdb261458d8f24811bb7abba8bbb48b6b7"
         }
       ]
     },
@@ -1422,16 +1422,16 @@
         "eac"
       ],
       "file": "dsh-settings-groups-0.1.0.tgz",
-      "sha256": "59bbc08a9793a6727c37db872dcff13ba057a47087cc3afb5df90638f92038a8",
-      "bytes": 5895,
+      "sha256": "7cbe1cb485c2138794fd35a98e438371f442d2cb3f0677f94a20d79b429ed457",
+      "bytes": 5887,
       "source": "eac-tag",
       "locallyRepacked": true,
       "repackNote": "General-settings collapser: real rows are the slot wrapper children, not the wrapper itself (the whole page used to be hidden as a single \"advanced\" row).",
       "parts": [
         {
           "file": "dsh-settings-groups-0.1.0.tgz",
-          "bytes": 5895,
-          "sha256": "59bbc08a9793a6727c37db872dcff13ba057a47087cc3afb5df90638f92038a8"
+          "bytes": 5887,
+          "sha256": "7cbe1cb485c2138794fd35a98e438371f442d2cb3f0677f94a20d79b429ed457"
         }
       ]
     },
