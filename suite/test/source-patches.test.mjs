@@ -321,3 +321,113 @@ test('multi-file patch failure rolls back every already-written staging file', a
     fs.rmSync(staging, { recursive: true, force: true })
   }
 })
+
+/**
+ * modify 分支的**成功路径**：从真实上游字节出发，跑真实补丁，产出必须等于
+ * manifest 的 `outputSha256`。
+ *
+ * 为什么需要这条
+ * --------------
+ * 上面那条回滚测试里所有 modify 用例都以 `inputSha256` 不匹配**失败**收场
+ * （第 2 个条目故意写错哈希）。也就是说：modify 的成功分支在整个测试套件里
+ * 从未被执行过。能覆盖它的地方只有两类：
+ *   - `fetch-eac-src.mjs` 只校验 `inputSha256`（补丁**前**），不跑 diff；
+ *   - dist 级测试在干净 clone 上 skip（需要 dist/）。
+ * 于是「diff 能应用、结果等于 outputSha256」全靠一次真跑 repack 来证明，
+ * 而那是几百 MB 的流程，没人会为改一行测试去跑。
+ *
+ * 失败方向是**致命**的：modify 分支若静默产出与 manifest 不符的字节，
+ * outputSha256 校验会抛错（好），但若校验逻辑本身写错（比如比错了字段），
+ * 就会打出「repack 全绿、装出来的插件行为不对」的包。
+ *
+ * fixture 来源
+ * ------------
+ * 用 `.cache/eac-src`（fetch-eac-src.mjs 物化的 pinned tag 源码）。这是
+ * **真实**上游字节，不是手搓的。cache 不在就跳过 —— 跳过必须可见，不能让
+ * 绿条掩盖「没验」。
+ *
+ * 覆盖范围
+ * --------
+ * manifest 共 21 个 modify 条目，本测试覆盖其中 16 个（所有 `source: eac-tag`
+ * 的）。剩下 5 个属于 `source: npm`（dsh-plugin-wallpaper-engine、
+ * dsh-session-manager），上游是 npm tarball，不在 `.cache/eac-src` 里 —— 要覆盖
+ * 它们得先落一份 npm tarball 缓存。这是已知边界，不是遗漏。
+ */
+test('modify 补丁成功路径：真实上游字节 + 真实 diff → outputSha256', async (t) => {
+  const { applySourcePatches } = await import('../../scripts/repack/source-patches.mjs')
+  const os = await import('node:os')
+
+  const eacSrc = path.join(ROOT, '.cache', 'eac-src')
+  if (!fs.existsSync(eacSrc)) {
+    return t.skip('.cache/eac-src absent (run scripts/repack/fetch-eac-src.mjs first)')
+  }
+
+  const base = manifest.base.eac
+  const pluginsDir = path.join(eacSrc, ...base.subdir.split('/'))
+
+  // 按**补丁粒度**跑，而不是按文件粒度：同一个 patch 里可能同时有 create 和
+  // modify 条目，只放其中一个会让 applySourcePatches 在处理另一个时失败
+  // （create 目标已存在 / modify 目标缺失），测不到想测的东西。
+  const todo = manifest.patches.filter(
+    (patch) => patch.source === 'eac-tag'
+      && patch.files.some((file) => file.create !== true)
+      // 只挑**所有** modify 条目的上游源都在 cache 里的补丁
+      && patch.files.every((file) => file.create === true
+        || fs.existsSync(path.join(pluginsDir, path.basename(patch.name), ...file.path.split('/')))),
+  )
+  assert.ok(
+    todo.length > 0,
+    '.cache/eac-src 里找不到任何可完整回放的 modify 补丁 —— fetch-eac-src.mjs 可能没跑完',
+  )
+
+  let checked = 0
+  for (const patch of todo) {
+    const modifyFiles = patch.files.filter((file) => file.create !== true)
+    if (!modifyFiles.length) continue
+    const staging = fs.mkdtempSync(path.join(os.tmpdir(), 'eac-modify-ok-'))
+    try {
+      // 把该补丁所有 modify 条目的上游源按原路径铺进 staging
+      for (const file of modifyFiles) {
+        const src = path.join(pluginsDir, path.basename(patch.name), ...file.path.split('/'))
+        const dest = path.join(staging, ...file.path.split('/'))
+        fs.mkdirSync(path.dirname(dest), { recursive: true })
+        fs.copyFileSync(src, dest)
+        assert.equal(
+          sha256(fs.readFileSync(dest)), file.inputSha256,
+          `${patch.name} ${file.path}: cache 里的上游字节与 manifest inputSha256 不符`
+          + '（fetch-eac-src.mjs 已校验过这一项，走到这里说明 cache 被改过）',
+        )
+      }
+      fs.writeFileSync(
+        path.join(staging, 'package.json'),
+        JSON.stringify({ name: patch.name, version: patch.version }),
+      )
+
+      const applied = applySourcePatches(
+        { name: patch.name, version: patch.version },
+        staging,
+        () => {},
+        { schemaVersion: 1, patches: [patch] },
+      )
+
+      for (const file of modifyFiles) {
+        assert.ok(
+          applied.some((a) => a.path === file.path),
+          `${patch.name} ${file.path}: 补丁没有报告应用成功`
+          + `（applied=${JSON.stringify(applied.map((a) => a.path))}）`,
+        )
+        const after = sha256(fs.readFileSync(path.join(staging, ...file.path.split('/'))))
+        assert.equal(
+          after, file.outputSha256,
+          `${patch.name} ${file.path}: 打完补丁的字节与 manifest outputSha256 不符\n`
+          + '  → 要么 diff 被改过，要么上游源变了。两者都会让 npm pack 出去一个'
+          + '「哈希对不上」或「行为不对」的包。',
+        )
+        checked++
+      }
+    } finally {
+      fs.rmSync(staging, { recursive: true, force: true })
+    }
+  }
+  assert.ok(checked > 0, '一条 modify 用例都没跑 —— 测试无效')
+})
