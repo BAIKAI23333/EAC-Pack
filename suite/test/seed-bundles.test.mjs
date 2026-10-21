@@ -7,7 +7,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { shouldSeedBundle, computeSeedBundles, SEED_BASE_BUNDLES } from '../../scripts/repack/seed-bundles.mjs';
+import { shouldSeedBundle, computeSeedBundles, SEED_BASE_BUNDLES, RETIRED_SEED_BUNDLES } from '../../scripts/repack/seed-bundles.mjs';
 
 test('compat 条目一律不进 bundles', () => {
   // 两个真实案例：都是 compat: eac-fork，都曾让全新 full 实例 GUI 起不来
@@ -77,10 +77,17 @@ test('真实 composition：排除全部 compat、保留全部皮肤（数字按�
     if (e.status !== 'preinstalled') continue;
     if (!e.catalog) continue;            // fail-closed
     if (e.catalog.compat) continue;
+    // 显式退役清单：即使仍标 preinstalled 也不进 bundles。
+    if (RETIRED_SEED_BUNDLES.has(e.name)) continue;
     expected.add(e.name);
   }
   assert.equal(bundles.length, expected.size, `bundles 数量应为 ${expected.size}`);
   assert.equal(seeded.size, bundles.length, '不得有重复条目');
+
+  // 退役清单里的包绝不能出现在 bundles 中
+  for (const retired of RETIRED_SEED_BUNDLES) {
+    assert.ok(!seeded.has(retired), `退役包 ${retired} 不应进 bundles`);
+  }
 
   // 所有 compat 条目都不得在内
   const compatNames = (composition.entries ?? [])

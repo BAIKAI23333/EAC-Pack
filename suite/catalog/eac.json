@@ -724,7 +724,7 @@
       "eac"
     ],
     "tier": "visual",
-    "defaultEnabled": true,
+    "defaultEnabled": false,
     "titleZh": "大肥鱼桌面伴侣",
     "titleEn": "BigFish Companion",
     "descZh": "真实会话状态驱动的原生置顶桌宠（空闲/思考/工作/等待/完成/错误六态 + 项目状态卡）。",

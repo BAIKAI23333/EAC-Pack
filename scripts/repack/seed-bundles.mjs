@@ -24,6 +24,23 @@
  */
 
 /** 永远进入 bundles 的三个基座条目（与官方 web profile 出厂模板一致）。 */
+/**
+ * 显式退役清单：这些包**不再进入 seed 的 dsh.profile.bundles**（用户按需从市场装）。
+ *
+ * 为什么需要一份显式清单，而不是「按 external 类一律排除」：
+ * 分发表里 20 个 external/market 包中有 16 个仍留在 seed bundles，其中 5 个
+ * （computer-user / openclaw-bridge / settings-groups / agent-teams /
+ * webui-prompt-optimizer）正是我们打过补丁的包。按类清退会连修复一起消失，
+ * 超出维护者裁决范围。所以只把**明确点名退役**的包列在这里。
+ *
+ * dsh-dafeiyu（大肥鱼桌面伴侣）：分发表标 external/market，
+ * 且 dsh-desktop/assets/plugins 下**没有它的实物**（不随桌面壳分发），
+ * 所以它不该出现在 full 实例的启动清单里。
+ */
+export const RETIRED_SEED_BUNDLES = new Set([
+  'dsh-dafeiyu',
+]);
+
 export const SEED_BASE_BUNDLES = ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-web-app', 'eac-plugin-suite'];
 
 /**
@@ -43,6 +60,8 @@ export const SEED_BASE_BUNDLES = ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-web
  */
 export function shouldSeedBundle(entry, catalog) {
   if (!entry || typeof entry !== 'object') return false;
+  // 显式退役清单优先：即使包仍是 preinstalled，也不进 bundles。
+  if (typeof entry.name === 'string' && RETIRED_SEED_BUNDLES.has(entry.name)) return false;
   if (entry.status !== 'preinstalled') return false;
   // catalog 缺失 → **fail-closed**（不进 bundles）。
   //
