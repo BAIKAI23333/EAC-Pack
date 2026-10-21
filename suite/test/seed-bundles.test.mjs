@@ -17,6 +17,18 @@ test('compat 条目一律不进 bundles', () => {
   assert.equal(shouldSeedBundle({ status: 'preinstalled' }, { compat: undefined, packs: ['eac'] }), true);
 });
 
+test('退役清单按 name 判定，调用方必须传 name', () => {
+  // 回归：生成端原先调 shouldSeedBundle({ status }, cat) —— 没传 name，
+  // 于是 RETIRED_SEED_BUNDLES 静默失效（加了 dafeiyu 退役、重新生成 seed，
+  // 它仍出现在 bundles 里）。这条测试钉住「必须按 name 判定」这个契约。
+  assert.equal(RETIRED_SEED_BUNDLES.has('dsh-dafeiyu'), true, '退役清单应含 dsh-dafeiyu');
+  // 传了 name 且命中 → 排除
+  assert.equal(shouldSeedBundle({ status: 'preinstalled', name: 'dsh-dafeiyu' }, {}), false);
+  // 传了 name 但未命中 → 放行
+  assert.equal(shouldSeedBundle({ status: 'preinstalled', name: 'dsh-not-retired' }, {}), true);
+  // 没传 name → 退役规则不生效（这是已知的调用契约，生成端必须补 name）
+  assert.equal(shouldSeedBundle({ status: 'preinstalled' }, {}), true);
+});
 test('catalog 缺失时 fail-closed，不放行（防 compat 包混进 bundles 拖垮 GUI）', () => {
   // 曾经 catalog 为 null 时直接 return true —— 等于「不知道是不是 compat 就放行」。
   // compat 包进 bundles 会让 0.2.x web boot fail-loud、整机 GUI 拒绝渲染。
@@ -109,4 +121,5 @@ test('真实 composition：排除全部 compat、保留全部皮肤（数字按�
   }
   console.log(`[seed-bundles] 真实 composition: ${bundles.length} 条 bundles，排除 compat ${compatNames.length} 条`);
 });
+
 
