@@ -69,7 +69,22 @@ const SKIP_DIRS = new Set(['node_modules', 'vendor', 'releases', '.git', '.pnpm'
  * 引擎只报告不在本表里的新问题，避免门禁长期变红后被整体忽略。
  */
 export const DEFAULT_ALLOWLIST = [
-  // 目前没有：computer-user 已由补丁修好；其余 5 个待修，理应让门禁变红。
+  // `@ha-na-bi/dsh-client-ui-custom` 引用了 3 个 0.2.x 已移除的旧图标名
+  // （…16 后缀），拿到 undefined 后会 React #130。
+  //
+  // 为什么**不修**而是豁免：
+  //   1. 该包 catalog 标 `compat: "eac-fork"`、`defaultEnabled: false` ——
+  //      运行时由 companion-sync 的 stripIncompatibleProfileBundles() 从
+  //      profile 剥离，永远不激活（实测：注入后启动会被剥回，依赖同步移除）；
+  //   2. 它的源码不在 `.cache/eac-src` / `.cache/aio-src`，只能从已打包的 tgz
+  //      反向修补 —— 属于对上游实现做 fork，违反 patches/README.md 的红线；
+  //   3. 它依赖 EAC 分叉内核的专有服务（settingsScope 等），本身与官方 0.2.x
+  //      不兼容，图标只是冰山一角。
+  //
+  // 因此这三个符号豁免；若将来把它改造成官方内核可用，必须先修掉这些图标。
+  { plugin: '@ha-na-bi/dsh-client-ui-custom', symbol: 'IconChevronDownOutline14', spec: '@deepseek-ai/dsh-client-ui-primitives' },
+  { plugin: '@ha-na-bi/dsh-client-ui-custom', symbol: 'IconCheckOutline16', spec: '@deepseek-ai/dsh-client-ui-primitives' },
+  { plugin: '@ha-na-bi/dsh-client-ui-custom', symbol: 'IconCopyOutline16', spec: '@deepseek-ai/dsh-client-ui-primitives' },
 ]
 
 /* ------------------------------------------------------------------ *
@@ -95,6 +110,24 @@ const RE_EXPORT_LIST = /export\s*\{([^}]*)\}/g
 const RE_EXPORT_DECL = /export\s+(?:async\s+)?(?:function|class|const|let|var)\s+([A-Za-z_$][\w$]*)/g
 const RE_EXPORT_STAR_AS = /export\s*\*\s*as\s+([A-Za-z_$][\w$]*)\s*from/g
 const RE_NAMED_FROM = /(?:^|[^\w$.])(?:import|export)\s*\{([^}]*)\}\s*from\s*['"]([^'"]+)['"]/g
+
+/**
+ * 客户端 bundle 里对 primitives 的成员访问。
+ *
+ * 打平后的 client bundle 有两种形态：
+ *   1. `_deepseek_ai_dsh_client_ui_primitives.IconX16`
+ *      —— 打包器给 `import * as … from '@deepseek-ai/dsh-client-ui-primitives'` 生成的默认名；
+ *   2. `<alias>.IconX16` —— 作者手写时的短别名（如 `P`）。
+ *
+ * 形态 2 的别名**必须从同一文件里的 import 语句动态提取**，不能用固定别名表：
+ * 否则 `primitives.X` / `prims.X` 这种猜测既可能漏掉真实别名，
+ * 又可能把别的对象同名属性误当成 primitives 符号（误报会让门禁噪音化）。
+ */
+const PRIMITIVES_LONG_RE = /(?:^|[^\w$])_deepseek_ai_dsh_client_ui_primitives\.([A-Za-z_$][\w$]*)/g
+/** 捕获 `import * as P from '<...>/dsh-client-ui-primitives'` 的别名。 */
+const RE_PRIM_NAMESPACE_IMPORT = /import\s*\*\s*as\s+([A-Za-z_$][\w$]*)\s+from\s*['"][^'"]*dsh-client-ui-primitives['"]/g
+/** 捕获 `const P = require('…/dsh-client-ui-primitives')` 的别名。 */
+const RE_PRIM_REQUIRE = /(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*require\(\s*['"][^'"]*dsh-client-ui-primitives['"]\s*\)/g
 
 /** 从源码文本收集导出名（包目录内所有文件求并集 = 真实导出的超集）。 */
 export function collectExportNames(text, into = new Set()) {
@@ -218,7 +251,19 @@ export function makeClientSideExcluder(pluginDir, pkgJson) {
   }
 }
 
-/** 扫一个已展开插件目录的服务端侧内核具名导入。 */
+/** 扫一个已展开插件目录的内核符号引用。
+ *
+ * 两类引用都要扫：
+ *   1. **服务端具名导入**：`import { A, B } from '@deepseek-ai/x'` —— 缺失会在 ESM
+ *      链接期抛 SyntaxError。
+ *   2. **客户端成员访问**：浏览器侧 bundle 常写成 `_deepseek_ai_dsh_client_ui_primitives.X`
+ *      或 `P.X`。这类**不在链接期检查**，但运行时拿到 `undefined` 后 `jsx(undefined)`
+ *      就是 React #130 —— 整个 slot 渲染成空 div，无任何报错文案。
+ *
+ * 第 2 类此前被整体跳过（「不经 Node ESM 链接期」），实测是错的：
+ * better-sidebar / session-manager / prompt-optimizer 三个插件都因此静默缺一块 UI，
+ * 其中一个修了三轮才定位到。见 patches/README.md 的图标命名一节。
+ */
 export function scanPluginImports(pluginDir) {
   const pkgJson = readJsonSafe(path.join(pluginDir, 'package.json'))
   const isClientSide = makeClientSideExcluder(pluginDir, pkgJson)
@@ -226,18 +271,47 @@ export function scanPluginImports(pluginDir) {
   let fileCount = 0
   let clientFileCount = 0
   for (const file of walkFiles(pluginDir)) {
-    if (isClientSide(file)) { clientFileCount += 1; continue }
-    fileCount += 1
-    const text = stripComments(readTextSafe(file))
-    if (!text.includes(KERNEL_SCOPE)) continue
-    for (const m of text.matchAll(RE_NAMED_FROM)) {
-      const spec = m[2]
-      if (!spec.startsWith(KERNEL_SCOPE)) continue
-      const pkg = spec.slice(KERNEL_SCOPE.length).split('/')[0]
-      for (const piece of m[1].split(',')) {
-        const symbol = symbolOf(piece)
-        if (!symbol) continue
-        refs.push({ file: path.relative(pluginDir, file), spec, pkg, symbol })
+    const clientSide = isClientSide(file)
+    if (clientSide) clientFileCount += 1
+    else fileCount += 1
+    const raw = readTextSafe(file)
+    const text = stripComments(raw)
+
+    // (1) 服务端具名导入
+    if (!clientSide && text.includes(KERNEL_SCOPE)) {
+      for (const m of text.matchAll(RE_NAMED_FROM)) {
+        const spec = m[2]
+        if (!spec.startsWith(KERNEL_SCOPE)) continue
+        const pkg = spec.slice(KERNEL_SCOPE.length).split('/')[0]
+        for (const piece of m[1].split(',')) {
+          const symbol = symbolOf(piece)
+          if (!symbol) continue
+          refs.push({ file: path.relative(pluginDir, file), spec, pkg, symbol })
+        }
+      }
+    }
+
+    // (2) 客户端对 primitives 的成员访问
+    if (clientSide) {
+      const seen = new Set()
+      // 形态 1：打包器默认名
+      for (const m of text.matchAll(PRIMITIVES_LONG_RE)) seen.add(m[1])
+      // 形态 2：本文件里 `import * as P from '…/primitives'` 或 require 的别名
+      const aliases = new Set()
+      for (const m of text.matchAll(RE_PRIM_NAMESPACE_IMPORT)) aliases.add(m[1])
+      for (const m of text.matchAll(RE_PRIM_REQUIRE)) aliases.add(m[1])
+      for (const alias of aliases) {
+        const re = new RegExp(`(?:^|[^\\w$.])${alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\.([A-Za-z_$][\\w$]*)`, 'g')
+        for (const m of text.matchAll(re)) seen.add(m[1])
+      }
+      for (const symbol of seen) {
+        refs.push({
+          file: path.relative(pluginDir, file),
+          spec: `${KERNEL_SCOPE}dsh-client-ui-primitives`,
+          pkg: 'dsh-client-ui-primitives',
+          symbol,
+          kind: 'member-access',
+        })
       }
     }
   }
@@ -337,7 +411,7 @@ export function formatReport(result) {
   const s = result.stats
   lines.push(`  产物 ${s.packageCount} 个 / 服务端源码 ${s.fileCount} 个文件 / 具名导入 ${s.refCount} 处`)
   if (s.clientFileCount) {
-    lines.push(`  另跳过客户端（浏览器侧）bundle ${s.clientFileCount} 个文件 —— 不经 Node ESM 链接期`)
+    lines.push(`  客户端（浏览器侧）bundle ${s.clientFileCount} 个文件 —— 查 primitives 成员访问（运行时 undefined → React #130）`)
   }
   lines.push(`  引用内核包 ${s.referencedPackages} 个（已静态解析导出 ${s.checkedPackages} 个）`)
   if (result.waived?.length) lines.push(`  已豁免（allowlist）${result.waived.length} 处`)
