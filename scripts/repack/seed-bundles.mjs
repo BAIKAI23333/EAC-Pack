@@ -44,7 +44,17 @@ export const SEED_BASE_BUNDLES = ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-web
 export function shouldSeedBundle(entry, catalog) {
   if (!entry || typeof entry !== 'object') return false;
   if (entry.status !== 'preinstalled') return false;
-  if (catalog && typeof catalog === 'object' && catalog.compat) return false;
+  // catalog 缺失 → **fail-closed**（不进 bundles）。
+  //
+  // 曾经写成 `if (catalog && catalog.compat) return false` —— catalog 为
+  // null/undefined 时整个条件为假，直接落到 `return true`，于是「不知道它是不是
+  // compat 包」被判成「可以进 bundles」。而 compat 包一旦进 bundles 就会让
+  // 0.2.x 的 web boot fail-loud、**整机 GUI 拒绝渲染**（RPC 全绿，只有截图看得出）。
+  //
+  // 宁可少装一个插件，也不能让整机起不来 —— 所以这里取 fail-closed。
+  // 调用方若真的没有 catalog（不该发生），应当先补全再算，而不是默默放行。
+  if (!catalog || typeof catalog !== 'object') return false;
+  if (catalog.compat) return false;
   return true;
 }
 

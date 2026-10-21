@@ -17,6 +17,14 @@ test('compat 条目一律不进 bundles', () => {
   assert.equal(shouldSeedBundle({ status: 'preinstalled' }, { compat: undefined, packs: ['eac'] }), true);
 });
 
+test('catalog 缺失时 fail-closed，不放行（防 compat 包混进 bundles 拖垮 GUI）', () => {
+  // 曾经 catalog 为 null 时直接 return true —— 等于「不知道是不是 compat 就放行」。
+  // compat 包进 bundles 会让 0.2.x web boot fail-loud、整机 GUI 拒绝渲染。
+  assert.equal(shouldSeedBundle({ status: 'preinstalled' }, null), false, 'catalog=null 必须 false');
+  assert.equal(shouldSeedBundle({ status: 'preinstalled' }, undefined), false, 'catalog=undefined 必须 false');
+  // 正常 catalog 仍应放行
+  assert.equal(shouldSeedBundle({ status: 'preinstalled' }, {}), true, '空对象 catalog 应放行');
+});
 test('非 preinstalled 状态不进 bundles', () => {
   // desktop-core-precedence：包已由桌面核自带，进 bundles 会重复挂载
   assert.equal(shouldSeedBundle({ status: 'desktop-core-precedence' }, {}), false);
@@ -53,14 +61,26 @@ test('computeSeedBundles 保留基座条目并去重', () => {
   assert.equal(bundles.filter((b) => b === '@deepseek-ai/dsh-base').length, 1, '不得重复');
 });
 
-test('真实 composition 算出 61 条（63 减去 2 个 compat）', (t) => {
-  // 用本机的真实 composition 跑一次：63 个 bundle 里含 2 个 compat，
-  // 算出来必须是 61，且不含那两个。
+test('真实 composition：排除全部 compat、保留全部皮肤（数字按实际算）', (t) => {
+  // 用例名不再写死数字 —— 之前写「61 条（63 减 2）」是错的：实际 62 条、
+  // compat 3 条（其中 1 条不满足 preinstalled，所以从 63 只减 2 到 61 并不成立）。
+  // 现在改成按实际算出来的数字断言，避免名字与事实脱节。
   const compositionPath = 'D:/AI_Coding/EAC/EAC-Full-Build-20261004/EAC-Desktop/dsh-desktop/assets/full-pack/composition.json';
   if (!fs.existsSync(compositionPath)) return t.skip('composition.json 不存在（未装配 full-pack）');
   const composition = JSON.parse(fs.readFileSync(compositionPath, 'utf8'));
   const bundles = computeSeedBundles(composition.entries);
   const seeded = new Set(bundles);
+
+  // 独立重算一遍期望值，与 computeSeedBundles 相互印证（不直接复用被测函数）
+  const expected = new Set(SEED_BASE_BUNDLES);
+  for (const e of composition.entries ?? []) {
+    if (e.status !== 'preinstalled') continue;
+    if (!e.catalog) continue;            // fail-closed
+    if (e.catalog.compat) continue;
+    expected.add(e.name);
+  }
+  assert.equal(bundles.length, expected.size, `bundles 数量应为 ${expected.size}`);
+  assert.equal(seeded.size, bundles.length, '不得有重复条目');
 
   // 所有 compat 条目都不得在内
   const compatNames = (composition.entries ?? [])
@@ -75,8 +95,11 @@ test('真实 composition 算出 61 条（63 减去 2 个 compat）', (t) => {
   const skinNames = (composition.entries ?? [])
     .filter((e) => e.status === 'preinstalled' && (e.catalog?.packs ?? []).includes('skins'))
     .map((e) => e.name);
+  assert.ok(skinNames.length > 0, '真实 composition 里应有皮肤（否则本测试失去意义）');
   for (const n of skinNames) {
     assert.ok(seeded.has(n), `皮肤 ${n} 必须进 bundles`);
+
   }
   console.log(`[seed-bundles] 真实 composition: ${bundles.length} 条 bundles，排除 compat ${compatNames.length} 条`);
 });
+

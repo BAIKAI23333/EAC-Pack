@@ -29,30 +29,62 @@ export function isCoveredByFilesEntry(filePath, entry) {
   if (typeof filePath !== 'string' || !filePath) return false;
   if (typeof entry !== 'string' || !entry) return false;
   if (entry === filePath) return true;
-  // 目录形式（"lib/" 或 "lib"）覆盖其下全部内容。
+  // 目录形式（"lib/" 或 "lib"）覆盖其下全部内容（含更深层级）。
   const dir = entry.replace(/\/+$/, '');
   if (dir && filePath.startsWith(`${dir}/`)) return true;
-  // glob：**必须校验后缀**，不能只看前缀。
-  //
-  // 曾经只判前缀（`filePath.startsWith(entry.slice(0, star))`），于是
-  //   entry = 'lib/types/**/*.d.ts'
-  //   filePath = 'lib/types/foo.js'
-  // 被判为「已覆盖」—— 但 npm 的 glob 不会匹配 .js，文件会被**静默丢弃**。
-  // 这正是本模块要防的失败模式，却在自己的判据里复现了一次。
-  //
-  // 现在：把 glob 拆成「首个 `*` 之前的前缀」+「最后一个 `*` 之后的后缀」，
-  // 两者都必须成立；后缀里的通配只允许 `*.ext` 这种单星形态。
-  const star = entry.indexOf('*');
-  if (star <= 0) return false;
-  const prefix = entry.slice(0, star);
-  if (!filePath.startsWith(prefix)) return false;
-  // 取最后一个 `*` 之后的部分作为后缀要求（如 '/**/*.d.ts' -> '.d.ts'）。
-  const lastStar = entry.lastIndexOf('*');
-  const suffix = entry.slice(lastStar + 1);
-  if (!suffix) return true; // 形如 'lib/**' —— 前缀之后全都算覆盖
-  // 后缀必须是纯字面（不含通配），否则无法保守判定，按"未覆盖"处理。
-  if (suffix.includes('*')) return false;
-  return filePath.endsWith(suffix);
+  // 含通配时走 glob 判定。**单星与双星语义必须区分**：
+  //   `*`  只匹配**一个**路径段，不得跨 `/`
+  //   `**` 可跨任意层级
+  // npm（11.6.2 实测）就是这个语义：files=['lib/*.js'] 只收 `lib/top.js`，
+  // 不收 `lib/a/top.js`；files=['lib/*/index.js'] 不收 `lib/a/b/index.js`。
+  if (!entry.includes('*')) return false;
+  return globMatch(filePath, entry);
+}
+
+/**
+ * 按 npm/packlist 的语义做通配匹配：`*` 单段、`**` 跨段。
+ *
+ * 用「段数组 + 动态规划」实现，避免正则转义带来的隐蔽错误。
+ * 每个模式段要么是：
+ *   - `**`  → 吃掉 0..n 个路径段（含 0，即可以匹配「目录自身」）
+ *   - 含 `*` 的字面段 → 在该段内做单星匹配（`*` 只吃段内字符，不吃 `/`）
+ *   - 纯字面段 → 精确比较
+ *
+ * @param {string} filePath 相对包根路径（正斜杠）
+ * @param {string} pattern  files 条目（正斜杠）
+ * @returns {boolean}
+ */
+function globMatch(filePath, pattern) {
+  const F = filePath.split('/');
+  const P = pattern.replace(/^\.\//, '').split('/');
+  // dp[j] = 「前 i 个文件段」能否被「前 j 个模式段」匹配
+  const memo = new Map();
+  const go = (i, j) => {
+    const key = `${i},${j}`;
+    if (memo.has(key)) return memo.get(key);
+    let ok;
+    if (j === P.length) {
+      ok = i === F.length;
+    } else if (P[j] === '**') {
+      // 吃掉 0 段，或吃掉 1 段后继续用 `**`
+      ok = go(i, j + 1) || (i < F.length && go(i + 1, j));
+    } else if (i === F.length) {
+      ok = false;
+    } else if (P[j].includes('*')) {
+      // 段内单星：把该段编译成只在本段内生效的正则（`*` → `[^/]*`）
+      const re = new RegExp('^' + P[j].split('*').map(escapeRe).join('[^/]*') + '$');
+      ok = re.test(F[i]) && go(i + 1, j + 1);
+    } else {
+      ok = P[j] === F[i] && go(i + 1, j + 1);
+    }
+    memo.set(key, ok);
+    return ok;
+  };
+  return go(0, 0);
+}
+
+function escapeRe(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /**

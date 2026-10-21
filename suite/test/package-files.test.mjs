@@ -57,6 +57,27 @@ test('glob 条目按「前缀 + 后缀」覆盖，不能只看前缀', () => {
   assert.equal(isCoveredByFilesEntry('library/x.js', 'lib/**'), false);
 });
 
+test('单星 `*` 只匹配一个路径段，不得跨 `/`（与 npm pack 实测一致）', () => {
+  // 曾经把单个 `*` 当成能跨段的 `**`，于是 `lib/*.js` 误判覆盖 `lib/a/top.js`。
+  // 实测 npm 11.6.2：files=['lib/*.js'] 只收 lib/top.js，不收 lib/a/top.js。
+  // 影响面不是理论风险 —— dist 里已有 10 个在销包用单星条目
+  // （dsh-raw-html 的 lib/*.js、三个皮肤的 locale/*.json 与 assets/icons/*.ico）。
+  assert.equal(isCoveredByFilesEntry('lib/top.js', 'lib/*.js'), true, '同层应覆盖');
+  assert.equal(isCoveredByFilesEntry('lib/a/top.js', 'lib/*.js'), false, '子目录不应覆盖');
+
+  assert.equal(isCoveredByFilesEntry('lib/a/index.js', 'lib/*/index.js'), true, '单星占一段应覆盖');
+  assert.equal(isCoveredByFilesEntry('lib/a/b/index.js', 'lib/*/index.js'), false, '单星只占一段，深两层不覆盖');
+
+  // 皮肤包的真实条目形态
+  assert.equal(isCoveredByFilesEntry('locale/zh.json', 'locale/*.json'), true);
+  assert.equal(isCoveredByFilesEntry('locale/sub/en.json', 'locale/*.json'), false);
+  assert.equal(isCoveredByFilesEntry('assets/icons/a.ico', 'assets/icons/*.ico'), true);
+  assert.equal(isCoveredByFilesEntry('assets/icons/x/b.ico', 'assets/icons/*.ico'), false);
+
+  // 双星才跨段
+  assert.equal(isCoveredByFilesEntry('lib/a/b/deep.js', 'lib/**/*.js'), true);
+});
+
 test('无 files 字段时不动 pkg（npm 会收全部内容）', () => {
   const pkg = { name: 'x' };
   const added = ensurePatchedFiles(pkg, [{ path: 'lib/new.js' }]);

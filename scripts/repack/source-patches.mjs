@@ -50,6 +50,29 @@ const MANIFEST = path.join(ROOT, 'patches', 'source-patches.json');
 
 const sha256 = (buf) => crypto.createHash('sha256').update(buf).digest('hex');
 
+/**
+ * 递归列出目录下所有文件的相对路径（正斜杠），用于比对 `git apply` 前后的
+ * 文件集合、发现 diff 里夹带的未登记文件。
+ *
+ * @param {string} dir
+ * @returns {Set<string>}
+ */
+function listFilesRecursive(dir) {
+  const out = new Set();
+  const walk = (abs, rel) => {
+    let entries;
+    try { entries = fs.readdirSync(abs, { withFileTypes: true }); } catch { return; }
+    for (const e of entries) {
+      const childAbs = path.join(abs, e.name);
+      const childRel = rel ? `${rel}/${e.name}` : e.name;
+      if (e.isDirectory()) walk(childAbs, childRel);
+      else out.add(childRel);
+    }
+  };
+  walk(dir, '');
+  return out;
+}
+
 export function loadPatchManifest() {
   const manifest = JSON.parse(fs.readFileSync(MANIFEST, 'utf8'));
   if (manifest.schemaVersion !== 1) {
@@ -122,6 +145,14 @@ export function applySourcePatches(entry, staging, log = console.log, manifestOv
       const scratchFile = path.join(scratchRoot, ...file.path.split('/'));
       fs.mkdirSync(path.dirname(scratchFile), { recursive: true });
       if (!isCreate) fs.copyFileSync(target, scratchFile);
+      // apply 前记下 scratch 里已有的文件，apply 后多出来的必须**恰好**是 manifest
+      // 声明的这一个。否则说明 diff 里夹带了未登记的文件 —— 那些文件会在这里被
+      // 创建、却永远不会被回读到 staging（本函数只读 scratchFile），表现为
+      // 「repack 全绿、运行期缺文件」。
+      //
+      // 实测过这种情形：一份 diff 声明 2 个新文件时，applied 只返回 1 个，
+      // 另一个凭空消失，而函数正常返回 success。
+      const beforeFiles = listFilesRecursive(scratchRoot);
       try {
         execFileSync(
           'git',
@@ -132,6 +163,17 @@ export function applySourcePatches(entry, staging, log = console.log, manifestOv
       } catch (err) {
         const stderr = err && err.stderr ? String(err.stderr) : '';
         throw new Error(`git apply failed for ${entry.name} ${file.path}: ${stderr.trim() || err.message}`);
+      }
+      const afterFiles = listFilesRecursive(scratchRoot);
+      const expectedRel = file.path.split('/').join('/');
+      const extra = [...afterFiles].filter((rel) => !beforeFiles.has(rel) && rel !== expectedRel);
+      if (extra.length) {
+        throw new Error(
+          `source patch diff 夹带了未登记的文件：${entry.name} ${file.diff}\n`
+          + `  manifest 只登记了 ${file.path}\n`
+          + `  但 diff 额外创建了：${extra.join(', ')}\n`
+          + '  → 这些文件不会被回读到 staging，必须拆成独立的 manifest 条目（或从 diff 里移除）',
+        );
       }
 
       const after = fs.readFileSync(scratchFile);
