@@ -28,17 +28,27 @@
 export function isCoveredByFilesEntry(filePath, entry) {
   if (typeof filePath !== 'string' || !filePath) return false;
   if (typeof entry !== 'string' || !entry) return false;
-  if (entry === filePath) return true;
+  // 前导 `./` 归一化必须在**所有**分支之前做。
+  //
+  // 原先只在 globMatch 里 `pattern.replace(/^\.\//, '')`，于是 `./lib/index.js`
+  // （精确）和 `./lib/`（目录）两条早退路径都失效，只有含 `*` 的写法生效。
+  // 实测（2026-10-21）：`./lib/index.js` vs `lib/index.js` → false，
+  // 而 `./lib/**/*.js` vs `lib/a/x.js` → true，同一前缀两种结果，属实现不一致。
+  // 失败方向是「误判未覆盖」（会多补一条精确路径，无害），但语义应当统一。
+  const p = filePath.replace(/^\.\//, '');
+  const e = entry.replace(/^\.\//, '');
+  if (!p || !e) return false;
+  if (e === p) return true;
   // 目录形式（"lib/" 或 "lib"）覆盖其下全部内容（含更深层级）。
-  const dir = entry.replace(/\/+$/, '');
-  if (dir && filePath.startsWith(`${dir}/`)) return true;
+  const dir = e.replace(/\/+$/, '');
+  if (dir && p.startsWith(`${dir}/`)) return true;
   // 含通配时走 glob 判定。**单星与双星语义必须区分**：
   //   `*`  只匹配**一个**路径段，不得跨 `/`
   //   `**` 可跨任意层级
   // npm（11.6.2 实测）就是这个语义：files=['lib/*.js'] 只收 `lib/top.js`，
   // 不收 `lib/a/top.js`；files=['lib/*/index.js'] 不收 `lib/a/b/index.js`。
-  if (!entry.includes('*')) return false;
-  return globMatch(filePath, entry);
+  if (!e.includes('*')) return false;
+  return globMatch(p, e);
 }
 
 /**

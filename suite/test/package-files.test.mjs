@@ -115,3 +115,39 @@ test('多个补丁文件按顺序补齐', () => {
   ]);
   assert.deepEqual(added, ['lib/a.js', 'lib/b.js']);
 });
+
+/**
+ * `**` 必须能吃掉 **0 个**路径段（`a/**\/b` 要匹配 `a/b`）。
+ *
+ * 这是 globstar 语义最容易写错的地方：若 `**` 被实现成「至少吃 1 段」，
+ * `lib/**\/*.js` 就匹配不到 `lib/x.js`。而本模块的失败方向是「误判未覆盖
+ * → 白名单多补一条精确路径」（无害），所以这种错**不会让测试变红**，
+ * 只会让白名单逐渐变胖 —— 正因如此需要显式钉住。
+ */
+test('globstar 吃 0 段：a/**\/b 匹配 a/b', () => {
+  assert.equal(isCoveredByFilesEntry('a/b', 'a/**/b'), true, '** 应可吃 0 段');
+  assert.equal(isCoveredByFilesEntry('a/x/b', 'a/**/b'), true, '** 吃 1 段');
+  assert.equal(isCoveredByFilesEntry('a/x/y/b', 'a/**/b'), true, '** 吃多段');
+  assert.equal(isCoveredByFilesEntry('a/b/c', 'a/**/b'), false, '尾部不得多段');
+  assert.equal(isCoveredByFilesEntry('a/b', 'a/*/b'), false, '单星必须吃满一段');
+  assert.equal(isCoveredByFilesEntry('lib/x.js', 'lib/**/*.js'), true, 'lib/**/*.js 应覆盖 lib/x.js');
+});
+
+/** 前导 `./` 归一化：npm 的 files 条目允许写 `./lib/`。 */
+test('./ 前缀的条目同样生效', () => {
+  assert.equal(isCoveredByFilesEntry('lib/index.js', './lib/index.js'), true);
+  assert.equal(isCoveredByFilesEntry('lib/a/x.js', './lib/**/*.js'), true);
+});
+
+/**
+ * 字符类与 `?` 按**字面量**处理（本实现只认 `*`）。
+ *
+ * npm 的 files 底层是 glob，理论上支持 `[ab]` / `?`，本实现不支持。方向是
+ * 「误判未覆盖 → 多补精确路径」（无害），符合模块声明的保守契约。
+ * 这条测试把这个已知限制**显式钉住**：将来若有人误以为已支持字符类，
+ * 会在这里被拦住，而不是在生产里发现白名单没生效。
+ */
+test('字符类与 ? 不被当作通配（已知限制，方向安全）', () => {
+  assert.equal(isCoveredByFilesEntry('lib/a.js', 'lib/[ab].js'), false, '当前不解析字符类');
+  assert.equal(isCoveredByFilesEntry('lib/x.js', 'lib/?.js'), false, '当前不解析 ?');
+});
