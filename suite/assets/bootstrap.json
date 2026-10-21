@@ -272,16 +272,16 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-balance-0.1.0.tgz",
-      "sha256": "82cd2e34590e314d887d6033b8db35cdb261458d8f24811bb7abba8bbb48b6b7",
-      "bytes": 5281,
+      "sha256": "6ac0029eff2b9ee79d5348c107e167816cd707d467007f80b18cd7417c4c8d3e",
+      "bytes": 5343,
       "source": "eac-tag",
       "locallyRepacked": true,
       "repackNote": "Drops the 价格设置 settings section and its now-unreachable implementation: its balancePrices/balanceModels/refreshBalance bridge is retired by ADR 0006, so the section could only ever render a misleading \"桥接不可用\" error. The composer dock is unchanged.",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-balance-0.1.0.tgz",
-          "bytes": 5281,
-          "sha256": "82cd2e34590e314d887d6033b8db35cdb261458d8f24811bb7abba8bbb48b6b7"
+          "bytes": 5343,
+          "sha256": "6ac0029eff2b9ee79d5348c107e167816cd707d467007f80b18cd7417c4c8d3e"
         }
       ]
     },
@@ -312,16 +312,16 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-conversation-tweaks-0.1.0.tgz",
-      "sha256": "62342254cf323a2aae2589cf430f92da84bebd9f9a5a25716f3af023114f8491",
-      "bytes": 8705,
+      "sha256": "64e221e2180b07cbe56d7a5420e96f5aacf5786e66881e85843bfe093990a52b",
+      "bytes": 8737,
       "source": "eac-tag",
       "locallyRepacked": true,
       "repackNote": "conversation-tweaks: 0.2.x 退役了 dsh-settings 的 settingsNamespace/installSettingsSection 具名导出与 settingsScope 服务，并把设置表单改为由导出的 Config schema 派生（需 volatile() 标记）。本补丁补齐三处：自包含垫片、createSettingsScope 重建读写面、客户端运行时探测。",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-conversation-tweaks-0.1.0.tgz",
-          "bytes": 8705,
-          "sha256": "62342254cf323a2aae2589cf430f92da84bebd9f9a5a25716f3af023114f8491"
+          "bytes": 8737,
+          "sha256": "64e221e2180b07cbe56d7a5420e96f5aacf5786e66881e85843bfe093990a52b"
         }
       ]
     },
@@ -390,16 +390,16 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-openclaw-bridge-0.7.0.tgz",
-      "sha256": "e64bb7e265cda0a5b34eff3e8d3aa574a49b7b5246c10546249c983b6c3e81c0",
-      "bytes": 47523,
+      "sha256": "85f78dc1f7bb53fa15b884013f5a54c8ac54fb382cfc7ff41c7b1cea7919353f",
+      "bytes": 47538,
       "source": "eac-tag",
       "locallyRepacked": true,
       "repackNote": "openclaw-bridge: settingsNamespace/installSettingsSection 具名导出与 settingsScope 服务在 0.2.x 均退役，且设置表单改由 Config schema 派生。本补丁补齐三处；桥接路由与微信区块不受影响。",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-openclaw-bridge-0.7.0.tgz",
-          "bytes": 47523,
-          "sha256": "e64bb7e265cda0a5b34eff3e8d3aa574a49b7b5246c10546249c983b6c3e81c0"
+          "bytes": 47538,
+          "sha256": "85f78dc1f7bb53fa15b884013f5a54c8ac54fb382cfc7ff41c7b1cea7919353f"
         }
       ]
     },
@@ -431,16 +431,16 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-prompt-custom-0.1.0.tgz",
-      "sha256": "99f53530e1b6ea216ac4d1220efccd3d1c5f79851ab851dd0de51e83b839f89f",
-      "bytes": 10297,
+      "sha256": "8e34d879a91791578623f5c0c4d64b9a8d044807de3f542cefd4a993d1f6ec27",
+      "bytes": 10270,
       "source": "eac-tag",
       "locallyRepacked": true,
       "repackNote": "prompt-custom: 同族的 settingsNamespace/installSettingsSection/settingsScope 退役，外加 PERSONA_SECTION/PERSONA_ORDER 改名为 PREFIX/SUFFIX。本补丁四类改动一并适配，保持原有分段顺序。",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-prompt-custom-0.1.0.tgz",
-          "bytes": 10297,
-          "sha256": "99f53530e1b6ea216ac4d1220efccd3d1c5f79851ab851dd0de51e83b839f89f"
+          "bytes": 10270,
+          "sha256": "8e34d879a91791578623f5c0c4d64b9a8d044807de3f542cefd4a993d1f6ec27"
         }
       ]
     },
@@ -1422,16 +1422,16 @@
         "eac"
       ],
       "file": "dsh-settings-groups-0.1.0.tgz",
-      "sha256": "7cbe1cb485c2138794fd35a98e438371f442d2cb3f0677f94a20d79b429ed457",
-      "bytes": 5887,
+      "sha256": "0b3e39aa7fccbe70745b7c8cece6447e4015e5f8e0cfc5aa7b8e4b0b01bfe8f9",
+      "bytes": 5893,
       "source": "eac-tag",
       "locallyRepacked": true,
       "repackNote": "General-settings collapser: real rows are the slot wrapper children, not the wrapper itself (the whole page used to be hidden as a single \"advanced\" row).",
       "parts": [
         {
           "file": "dsh-settings-groups-0.1.0.tgz",
-          "bytes": 5887,
-          "sha256": "7cbe1cb485c2138794fd35a98e438371f442d2cb3f0677f94a20d79b429ed457"
+          "bytes": 5893,
+          "sha256": "0b3e39aa7fccbe70745b7c8cece6447e4015e5f8e0cfc5aa7b8e4b0b01bfe8f9"
         }
       ]
     },

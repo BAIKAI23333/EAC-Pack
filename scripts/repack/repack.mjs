@@ -19,7 +19,7 @@
  *
  * 用法：node repack.mjs [--only <name-substring>]
  */
-import { execSync } from 'node:child_process';
+import { execSync, execFileSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -575,6 +575,44 @@ for (const name of fs.readdirSync(DIST)) {
   } catch { /* delete-pending：报告但不阻塞 */ }
 }
 if (orphans) log(`清理孤儿 tgz：${orphans} 个`);
+
+// 自动补齐 `dsh.bundle` 声明（ensure-bundles）。
+//
+// 为什么必须自动做：清空 dist 全量重建后，**产物里没有 `dsh.bundle`**，
+// 而 seed 的 `dsh.profile.bundles` 又把这些包列进了启动清单。
+// 内核加载 bundle 行时要求包自带 `dsh.bundle` 声明，缺失就**静默跳过**：
+//
+//   dsh: skipping profile bundle "@deepseek-ai/dsh-balance":
+//     Error: profile bundle ... declares no dsh.bundle in its package.json
+//
+// 实测清空 dist 重建后，62 个 seed bundle 里 **16 个**被跳过 —— 包括
+// balance / conversation-tweaks / prompt-custom / openclaw-bridge /
+// settings-groups 这些补丁包。它们的设置面和功能会全部消失，而启动审计
+// 只在最后给一行 `1 entry did not activate`，极难归因。
+//
+// `ensure-bundles.mjs` 会扫 dist、给缺声明的包补 `dsh.bundle.patch` 并重打 tgz；
+// 实测补了 23 个包。它原先只能手工跑，属于「只有本机作者知道的一步」。
+//
+// 顺序很重要：**先 ensure-bundles，再 sync-bootstrap** —— 前者会改 tgz 字节，
+// 后者才能把新 hash 写进 bootstrap.json。
+if (!MERGE_MODE) {
+  try {
+    execFileSync(process.execPath, [path.join(ROOT, 'scripts', 'repack', 'ensure-bundles.mjs')], {
+      cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'], encoding: 'utf8', windowsHide: true,
+    });
+    // ensure-bundles 会重写 index.json，重新读一遍
+    finalIndex = JSON.parse(fs.readFileSync(path.join(DIST, 'index.json'), 'utf8'));
+    log('已补齐 dsh.bundle 声明（ensure-bundles）');
+  } catch (err) {
+    const out = err && (err.stdout || err.stderr) ? String(err.stdout || err.stderr) : '';
+    log(`WARN 补齐 dsh.bundle 失败：${(err.message || '').split('\n')[0]}`);
+    if (out) log('  ' + out.trim().split('\n').slice(-3).join('\n  '));
+    log('  → 产物已生成；请手动运行 node scripts/repack/ensure-bundles.mjs');
+  }
+} else {
+  log('（--only 模式跳过 ensure-bundles：它需要完整 dist 才能判定 bundle 清单）');
+}
+
 
 // 自动同步 suite/assets/bootstrap.json 里与本轮重建相关的条目。
 //
