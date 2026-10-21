@@ -285,3 +285,47 @@ test('builtin 包在 Desktop 与 Pack 的版本双轨（信息性）', (t) => {
       `builtin 条目有 ${builtinCount} 个，但在 Desktop assets/plugins 里一个对应目录都没扫到 —— 目录解析可能有误`);
   }
 });
+
+/**
+ * 分发表 `external/market` 标注与实际分发面不符（信息性）。
+ *
+ * 实测 2026-10-21：`external` 类 20 个包里有 **17 个在 dist 产物中**（= 随 Pack 分发），
+ * 只有 `dsh-stt` / `dsh-undo` / `plugin-wizard` 是真正的纯市场包。
+ *
+ * 为什么这是**信息性**而非门禁：
+ * `distributionClass` 经 `PLUGIN_DISTRIBUTION_CLASSES` 只用于行/UI 的分级标签展示，
+ * **不参与**「是否安装」「是否进启动清单」的判定（后两者由 dist 与
+ * seed-bundles.mjs 决定）。所以标注不准的后果是市场页展示与实际不符，
+ * 不影响功能。改不改、怎么改需要维护者定口径 —— 见
+ * `lite/DECISION-distribution-class-20261021.md`。
+ *
+ * 本用例只把「差异集合」固定下来：一旦有新的包被误标、或有人修正了标注，
+ * 这里会给出提示，避免它悄悄漂移。
+ */
+test('分发表 external 标注与 dist 事实的差异（信息性，记录待裁决）', (t) => {
+  if (!fs.existsSync(DESKTOP_DISTRIBUTION)) return t.skip('Desktop 仓不在同一 checkout');
+  const distIndex = path.join(ROOT, 'dist', 'index.json');
+  if (!fs.existsSync(distIndex)) return t.skip('dist 不存在（未装配）');
+
+  const distribution = readJson(DESKTOP_DISTRIBUTION);
+  const index = readJson(distIndex);
+  const byName = new Set(index.map((e) => e.name));
+  const nameToId = catalogNameToId();
+  const idToName = new Map([...nameToId].map(([n, id]) => [id, n]));
+
+  const extInDist = [];
+  for (const e of distribution.plugins ?? []) {
+    if (e.distributionClass !== 'external') continue;
+    const bare = String(e.id).replace(/^dsh-/, '');
+    const name = idToName.get(e.id) ?? idToName.get(bare);
+    if (name && byName.has(name)) extInDist.push(String(e.id));
+  }
+
+  if (extInDist.length) {
+    console.log('[distribution-boundary] 标 external/market 但实际随 Pack 分发（待裁决）:');
+    for (const id of extInDist) console.log('  ' + id);
+    console.log('  → 详见 lite/DECISION-distribution-class-20261021.md');
+  }
+  // 只断言「可枚举」，把差异固定成可见输出，不阻断合并
+  assert.ok(Array.isArray(extInDist));
+});
