@@ -32,11 +32,27 @@ export function isCoveredByFilesEntry(filePath, entry) {
   // 目录形式（"lib/" 或 "lib"）覆盖其下全部内容。
   const dir = entry.replace(/\/+$/, '');
   if (dir && filePath.startsWith(`${dir}/`)) return true;
-  // glob：只按字面前缀判断。npm 的 files 用的是 glob，但本仓既有条目都是
-  // `lib/types/**/*.d.ts` 这类固定前缀形态；按前缀判即可，且偏向"判为未覆盖"。
+  // glob：**必须校验后缀**，不能只看前缀。
+  //
+  // 曾经只判前缀（`filePath.startsWith(entry.slice(0, star))`），于是
+  //   entry = 'lib/types/**/*.d.ts'
+  //   filePath = 'lib/types/foo.js'
+  // 被判为「已覆盖」—— 但 npm 的 glob 不会匹配 .js，文件会被**静默丢弃**。
+  // 这正是本模块要防的失败模式，却在自己的判据里复现了一次。
+  //
+  // 现在：把 glob 拆成「首个 `*` 之前的前缀」+「最后一个 `*` 之后的后缀」，
+  // 两者都必须成立；后缀里的通配只允许 `*.ext` 这种单星形态。
   const star = entry.indexOf('*');
-  if (star > 0 && filePath.startsWith(entry.slice(0, star))) return true;
-  return false;
+  if (star <= 0) return false;
+  const prefix = entry.slice(0, star);
+  if (!filePath.startsWith(prefix)) return false;
+  // 取最后一个 `*` 之后的部分作为后缀要求（如 '/**/*.d.ts' -> '.d.ts'）。
+  const lastStar = entry.lastIndexOf('*');
+  const suffix = entry.slice(lastStar + 1);
+  if (!suffix) return true; // 形如 'lib/**' —— 前缀之后全都算覆盖
+  // 后缀必须是纯字面（不含通配），否则无法保守判定，按"未覆盖"处理。
+  if (suffix.includes('*')) return false;
+  return filePath.endsWith(suffix);
 }
 
 /**
