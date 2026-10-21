@@ -575,4 +575,35 @@ for (const name of fs.readdirSync(DIST)) {
   } catch { /* delete-pending：报告但不阻塞 */ }
 }
 if (orphans) log(`清理孤儿 tgz：${orphans} 个`);
+
+// 自动同步 suite/assets/bootstrap.json 里与本轮重建相关的条目。
+//
+// 为什么必须自动做：`full-package.test.mjs` 有一条断言「manifest hash must
+// match dist」。repack 改变 tgz 字节后若不回写 bootstrap，这条就会红 ——
+// 而这个同步原先只是 `.cache/` 里的一个 gitignored 一次性脚本，
+// 等于「只有本机作者知道的一步」。实测踩过：重打包 4 个 create 包做回归，
+// 之后测试报 `@deepseek-ai/dsh-conversation-tweaks: manifest hash must match dist`，
+// 排查一轮才想起要手动跑那个脚本。
+//
+// 同步范围刻意收窄（与 sync-bootstrap.mjs 一致）：
+//   · 全量模式：只同步 manifest.patches 里登记过的包；
+//   · --only 模式：只同步**本轮重建**且**已登记在 manifest** 的包，
+//     避免单包重打包时顺手改到别人的条目。
+try {
+  const { syncBootstrapEntries } = await import('./sync-bootstrap.mjs');
+  const manifestPath = path.join(ROOT, 'patches', 'source-patches.json');
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const touchable = new Set(manifest.patches.map((p) => p.name));
+  const scope = MERGE_MODE
+    ? index.filter((e) => touchable.has(e.name)).map((e) => e.name)
+    : undefined; // undefined = 全量：同步所有已登记补丁包
+  const changed = syncBootstrapEntries({ names: scope, log });
+  if (changed) log(`同步 bootstrap.json：${changed} 条`);
+} catch (err) {
+  // 不因同步失败而判定整轮 repack 失败 —— 产物本身是对的，bootstrap 可以事后补。
+  // 但必须响亮提示，否则又是"静默漏了一步"。
+  log(`WARN 同步 suite/assets/bootstrap.json 失败：${err && err.message ? err.message : err}`);
+  log('  → 产物已生成；请手动运行 node scripts/repack/sync-bootstrap.mjs');
+}
+
 log(`完成：dist/ 共 ${finalIndex.length} 个 tgz + index.json + SHA256SUMS${MERGE_MODE ? `（合并模式，本轮重建 ${index.length} 个）` : ''}`);
