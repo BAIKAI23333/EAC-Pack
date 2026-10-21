@@ -39,6 +39,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import {
+  findBuiltinConflicts,
+  findDistributionEntry,
+  isDesktopBuiltin,
+  candidateIds,
+} from '../../scripts/repack/distribution-entry.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..', '..');
 const DESKTOP_DISTRIBUTION = path.join(ROOT, '..', 'EAC-Desktop', '.sync', 'plugin-distribution.json');
@@ -66,19 +72,15 @@ test('Pack 不给 Desktop 内置（builtin/bundled）的包打补丁', (t) => {
   }
   const manifest = readJson(path.join(ROOT, 'patches', 'source-patches.json'));
   const distribution = readJson(DESKTOP_DISTRIBUTION);
-  const byId = new Map((distribution.plugins ?? []).map((x) => [x.id, x]));
   const nameToId = catalogNameToId();
 
-  const offenders = [];
-  for (const patch of manifest.patches) {
-    const id = nameToId.get(patch.name);
-    if (id === undefined) continue; // 不在 catalog：不属于分发面讨论范围
-    const entry = byId.get(id);
-    if (entry === undefined) continue; // 只经 Pack 分发：允许
-    if (entry.distributionClass === 'builtin' || entry.delivery === 'bundled') {
-      offenders.push(`${patch.name} (id=${id}, class=${entry.distributionClass}, delivery=${entry.delivery})`);
-    }
-  }
+  // 走共享实现（scripts/repack/distribution-entry.mjs）—— 与「反向自测」同一份判据，
+  // 且带 id 命名空间归一化。此前是本文件自己内联一份字面相等查找，
+  // 于是 14 条 `dsh-<id>` 前缀条目全部漏掉，3 个补丁包静默走「找不到 → 放行」。
+  const conflicts = findBuiltinConflicts(manifest.patches, nameToId, distribution.plugins);
+  const offenders = conflicts.map(
+    (c) => `${c.name} (id=${c.matchedId}, class=${c.distributionClass}, delivery=${c.delivery})`,
+  );
 
   assert.deepEqual(
     offenders,
@@ -89,23 +91,55 @@ test('Pack 不给 Desktop 内置（builtin/bundled）的包打补丁', (t) => {
   );
 });
 
-test('分发归属守卫自身能识别 builtin 冲突（反向自测）', (t) => {
+test('分发归属守卫自身能识别 builtin 冲突（反向自测，走真实实现）', (t) => {
   if (!fs.existsSync(DESKTOP_DISTRIBUTION)) {
     return t.skip('Desktop 仓不在同一 checkout');
   }
-  // 用一份构造的 manifest 验证判据本身有效：把 compact 塞回去必须被抓到。
+  // 本用例**不再自己重写判据** —— 之前写成
+  //   const isConflict = (e) => e.distributionClass === 'builtin' || ...
+  // 等于把被测逻辑抄一遍再断言它自己，对解析链的缺陷（id 命名空间不一致、
+  // catalog 查不到时的静默放行）完全视而不见，形同虚设。
+  // 现在直接走 findDistributionEntry / isDesktopBuiltin / findBuiltinConflicts。
   const distribution = readJson(DESKTOP_DISTRIBUTION);
-  const compact = (distribution.plugins ?? []).find((x) => x.id === 'compact');
-  assert.ok(compact, 'distribution 里应有 compact 条目');
-  assert.equal(compact.distributionClass, 'builtin');
-  assert.equal(compact.delivery, 'bundled');
-  // 判据：builtin 或 bundled 任一命中即冲突
-  const isConflict = (e) => e.distributionClass === 'builtin' || e.delivery === 'bundled';
-  assert.equal(isConflict(compact), true, 'compact 必须被判为冲突');
-  // 对照：一个 recommended/pack 的包不应被判冲突
-  const sidebar = (distribution.plugins ?? []).find((x) => x.id === 'better-sidebar');
-  assert.ok(sidebar, 'distribution 里应有 better-sidebar 条目');
-  assert.equal(isConflict(sidebar), false, 'better-sidebar 不应被判为冲突');
+  const plugins = distribution.plugins ?? [];
+
+  // (a) compact 是 builtin/bundled，必须被判为冲突
+  const compact = findDistributionEntry('dsh-compact', 'compact', plugins);
+  assert.ok(compact, 'compact 应能在分发表里找到');
+  assert.equal(compact.entry.distributionClass, 'builtin');
+  assert.equal(compact.entry.delivery, 'bundled');
+  assert.equal(isDesktopBuiltin(compact.entry), true, 'compact 必须被判为 builtin');
+
+  // (b) better-sidebar 是 recommended/pack，不该判冲突
+  const sidebar = findDistributionEntry('dsh-better-sidebar', 'better-sidebar', plugins);
+  assert.ok(sidebar, 'better-sidebar 应能在分发表里找到');
+  assert.equal(isDesktopBuiltin(sidebar.entry), false, 'better-sidebar 不应判为 builtin');
+
+  // (c) **关键回归**：id 命名空间归一化。distribution 里有 14 条用 `dsh-<id>`
+  // 前缀，而 catalog 用裸 id；字面相等查找会漏掉它们，全部走「找不到 → 放行」。
+  // 用 session-manager 这个真实存在的例子验证归一化确实生效。
+  const byLiteral = findDistributionEntry('dsh-session-manager', 'dsh-session-manager', plugins);
+  const byBare = findDistributionEntry('dsh-session-manager', 'session-manager', plugins);
+  assert.ok(byBare, '裸 id session-manager 应通过归一化命中 dsh-session-manager');
+  assert.equal(byBare.matchedId, 'dsh-session-manager');
+  assert.equal(byBare.viaNormalization, true, '应标记为经过了归一化');
+  assert.ok(byLiteral, '带前缀的 id 也应能直接命中');
+  assert.equal(isDesktopBuiltin(byBare.entry), false, 'session-manager 不是 builtin');
+
+  // (d) candidateIds 双向都要覆盖
+  assert.deepEqual(candidateIds('compact').sort(), ['compact', 'dsh-compact'].sort());
+  assert.deepEqual(candidateIds('dsh-pet').sort(), ['dsh-pet', 'pet'].sort());
+
+  // (e) 用一份人造 patches 验证 findBuiltinConflicts 真的会报出来
+  const fakeNameToId = new Map([['dsh-compact', 'compact'], ['dsh-better-sidebar', 'better-sidebar']]);
+  const fakeConflicts = findBuiltinConflicts(
+    [{ name: 'dsh-compact' }, { name: 'dsh-better-sidebar' }],
+    fakeNameToId,
+    plugins,
+  );
+  assert.equal(fakeConflicts.length, 1, '只应报出 compact 一条');
+  assert.equal(fakeConflicts[0].name, 'dsh-compact');
+  assert.equal(fakeConflicts[0].matchedId, 'compact');
 });
 
 /**
@@ -161,7 +195,12 @@ test('seed bundles 不含 compat 条目（信息性；有运行时兜底）', (t
     console.log('  → 生成端应调用 scripts/repack/seed-bundles.mjs 的 shouldSeedBundle()；');
     console.log('    若它已调用却仍有残留，说明 seed 是旧的、需要重跑 prepare-composition。');
   }
-  assert.ok(Array.isArray(offenders), 'offenders 必须可枚举');
+  // 实质断言：seed 里**不得**出现 compat 条目。
+  // 之前这里是 `assert.ok(Array.isArray(offenders))` —— 恒真，等于没测。
+  // 现在 seed 已经由 shouldSeedBundle() 过滤干净（实测 0 残留），可以直接断言。
+  // 若将来生成端规则退化，这条会红，并打印上面的定位提示。
+  assert.deepEqual(offenders, [],
+    'seed bundles 里不应有 compat 条目：' + offenders.join(', '));
 });
 
 /**
@@ -222,5 +261,27 @@ test('builtin 包在 Desktop 与 Pack 的版本双轨（信息性）', (t) => {
     console.log('[distribution-boundary] builtin 包版本双轨（Desktop 内置版优先，Pack 那份不会被用到）:');
     for (const d of drift) console.log('  ' + d);
   }
-  assert.ok(Array.isArray(drift), 'drift 列表必须可枚举');
+  // 本用例是**信息性**的（不设门槛，见上方注释：这是分发策略问题，需维护者裁决）。
+  // 原来的 `assert.ok(Array.isArray(drift))` 恒真、没有意义。改成一个真正会失败的
+  // 结构性检查：drift 列表里每条都必须能被解析出 desktop/pack 两侧版本 ——
+  // 若解析逻辑坏了（例如命中了错误目录），drift 会为空或含畸形项，这里就会红。
+  for (const d of drift) {
+    assert.match(d, /^.+: desktop=.+ pack=.+$/, `drift 条目格式应可解析：${d}`);
+  }
+  // 至少确认「真的扫描过」而不是「一个都没扫到」：builtin 条目存在时，
+  // 必然有若干能在 Desktop assets 里找到对应 package.json；若一个都没找到，
+  // 说明目录解析错了，本用例会静默失真（永远输出空 drift）。
+  const builtinCount = [...byId.values()].filter(isDesktopBuiltin).length;
+  if (builtinCount > 0) {
+    let scanned = 0;
+    for (const [, id] of nameToId) {
+      const entry = byId.get(id);
+      if (!entry || !isDesktopBuiltin(entry)) continue;
+      for (const dir of [`dsh-${id}`, id]) {
+        if (fs.existsSync(path.join(desktopPluginsDir, dir, 'package.json'))) { scanned++; break; }
+      }
+    }
+    assert.ok(scanned > 0,
+      `builtin 条目有 ${builtinCount} 个，但在 Desktop assets/plugins 里一个对应目录都没扫到 —— 目录解析可能有误`);
+  }
 });
