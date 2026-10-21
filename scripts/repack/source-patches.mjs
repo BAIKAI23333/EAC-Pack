@@ -153,16 +153,40 @@ export function applySourcePatches(entry, staging, log = console.log, manifestOv
       // 实测过这种情形：一份 diff 声明 2 个新文件时，applied 只返回 1 个，
       // 另一个凭空消失，而函数正常返回 success。
       const beforeFiles = listFilesRecursive(scratchRoot);
+      let applyStderr = '';
       try {
-        execFileSync(
+        // 捕获 stderr：`git apply` 对**路径不匹配**的补丁会 **exit 0 但什么都不做**，
+        // 只在 stderr 里留一句 `Skipped patch '<path>'.`。只看退出码会把
+        // 「补丁静默未应用」当成成功。
+        //
+        // 实测触发条件：diff 带了 `diff --git a/x b/x` 头、而 `-p1` 剥前缀后路径
+        // 与工作区不符时，git 就跳过。真正的 create diff 格式是**没有 diff --git 头**、
+        // 直接从 `--- /dev/null` 起（见 patches/files/*/lib/settings-compat.js.diff），
+        // 那种写法才匹配得上。
+        //
+        // 目前还有 outputSha256 兜底（文件内容不对会 hash 不匹配而报错），所以这条
+        // 缝不会真的把坏补丁放过去；但把 stderr 也纳入判定能让失败信息**指向真因**
+        // （"Skipped" 而非 "hash mismatch"），省掉一次误判排查。
+        const out = execFileSync(
           'git',
           ['-c', 'core.autocrlf=false', '-c', 'core.safecrlf=false',
             'apply', '--whitespace=nowarn', '-p1', diffPath],
-          { cwd: scratchRoot, stdio: ['ignore', 'pipe', 'pipe'] },
+          { cwd: scratchRoot, stdio: ['ignore', 'pipe', 'pipe'], encoding: 'utf8' },
         );
+        applyStderr = String(out ?? '');
       } catch (err) {
         const stderr = err && err.stderr ? String(err.stderr) : '';
         throw new Error(`git apply failed for ${entry.name} ${file.path}: ${stderr.trim() || err.message}`);
+      }
+      const skipped = /Skipped patch/.test(applyStderr);
+      if (skipped) {
+        throw new Error(
+          `git apply 静默跳过了补丁（exit 0 但未应用）：${entry.name} ${file.path}\n`
+          + `  git stderr: ${applyStderr.trim()}\n`
+          + '  最常见原因：diff 带了 `diff --git a/<p> b/<p>` 头，而 -p1 剥一层前缀后\n'
+          + '  路径与目标不符。本仓的 create diff 约定是**不带 diff --git 头**、\n'
+          + '  直接从 `--- /dev/null` 起（参考 patches/files/*/lib/settings-compat.js.diff）。',
+        );
       }
       const afterFiles = listFilesRecursive(scratchRoot);
       const expectedRel = file.path.split('/').join('/');
