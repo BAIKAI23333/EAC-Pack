@@ -738,16 +738,16 @@
         "eac"
       ],
       "file": "@nanmicoder_dsh-agent-teams-0.1.13-eac.3.tgz",
-      "sha256": "be4366c86e29f88ed1429ee6b9ef8cb90098b65e69cb6f246ab2d49bbcfbb956",
-      "bytes": 1810632,
+      "sha256": "ae8b19ef70287fb27e5f1ded6ee1af6a86dbb002c0fc68007a4cee7c59b38b6b",
+      "bytes": 1810644,
       "source": "eac-tag",
       "locallyRepacked": true,
       "repackNote": "agent-teams 在 0.2.x 上因 ctx.subagents.registerContinuableSetup 被退役（改 provider 模式）而在 apply 期抛 TypeError，整个插件不激活、8 个 agent_teams_* 工具全丢。本补丁改为存在性探测 + 降级：缺该钩子时成员模型选择的持久化/冷恢复降级，建队/任务 DAG/派活/消息/状态照常可用。",
       "parts": [
         {
           "file": "@nanmicoder_dsh-agent-teams-0.1.13-eac.3.tgz",
-          "bytes": 1810632,
-          "sha256": "be4366c86e29f88ed1429ee6b9ef8cb90098b65e69cb6f246ab2d49bbcfbb956"
+          "bytes": 1810644,
+          "sha256": "ae8b19ef70287fb27e5f1ded6ee1af6a86dbb002c0fc68007a4cee7c59b38b6b"
         }
       ]
     },
@@ -895,16 +895,16 @@
         "eac"
       ],
       "file": "dsh-better-sidebar-0.15.3-eac.1.tgz",
-      "sha256": "c4cda0578144e87cc1ea0e9dee4435aa73d4c5fca2829a9a81d05641e63f071a",
-      "bytes": 2478653,
+      "sha256": "bea37a787615246ef21d24241987d685918f41b4398c734fbb2674489be7e794",
+      "bytes": 2478696,
       "source": "eac-tag",
       "locallyRepacked": true,
       "repackNote": "better-sidebar: 0.2.x 移除了 settingsNamespace 具名导出与 ctx.settings.register（改指自包含垫片重建 scope）；给根 Config 标 volatile()（0.2.x 的 volatileForm() 需要，否则设置卡不生成）；另补 conversation.chat.turnTail 的 options.id —— 它是 list slot，0.2.x 缺 id 直接 throw，该槽位在界面上整体消失。",
       "parts": [
         {
           "file": "dsh-better-sidebar-0.15.3-eac.1.tgz",
-          "bytes": 2478653,
-          "sha256": "c4cda0578144e87cc1ea0e9dee4435aa73d4c5fca2829a9a81d05641e63f071a"
+          "bytes": 2478696,
+          "sha256": "bea37a787615246ef21d24241987d685918f41b4398c734fbb2674489be7e794"
         }
       ]
     },

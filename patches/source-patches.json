@@ -193,6 +193,27 @@
           "create": true,
           "outputSha256": "7903a52199ebaeafb8599709c214800e5bbcdc2e8cf963fb87bd486309faece8",
           "note": "Self-contained 0.1.x-compatible shim for the retired @deepseek-ai/dsh-settings userland (settingsNamespace / installSettingsSection) plus a createSettingsScope helper that rebuilds the retired ctx.settings.register() surface on top of the 0.2.x describe()/update() API. EAC plugins ship self-contained and do not resolve through the kernel package graph, so this file travels with the plugin."
+        },
+        {
+          "path": "lib/client-editor.js",
+          "diff": "files/dsh-better-sidebar/lib/client-editor.js.diff",
+          "inputSha256": "c7d88aed8f81574ee76fccd5a3952965d4e008cb8d807514cd2a5ca544646261",
+          "outputSha256": "cf646b873714920df9de9437736ae1f010e44cc10e12a50e2bb1ea39ffee6aa4",
+          "note": "Old size-suffixed primitives icon names (…16 / …14) were removed in 0.2.x, which exports only <Name>Medium / <Name>Regular. As written, jsx(undefined) throws React #130 and this surface renders as an empty div."
+        },
+        {
+          "path": "lib/client-mermaid.js",
+          "diff": "files/dsh-better-sidebar/lib/client-mermaid.js.diff",
+          "inputSha256": "d2a77f0b7af231f2baf31442994e170dcb789d1c43d5510ad37c377f70562905",
+          "outputSha256": "e8b040487258c4e4ccd0eaa31bf0a9c9778c7627144e549f709169bab966f558",
+          "note": "Old size-suffixed primitives icon names (…16 / …14) were removed in 0.2.x, which exports only <Name>Medium / <Name>Regular. As written, jsx(undefined) throws React #130 and this surface renders as an empty div."
+        },
+        {
+          "path": "lib/client-registry.js",
+          "diff": "files/dsh-better-sidebar/lib/client-registry.js.diff",
+          "inputSha256": "b98b82dc09e3ac6d093a7a06d8f97b82f9a8a41533b38a153360f026efb40ca1",
+          "outputSha256": "4818b8771f6d78d7769b4c71c5a440883bd9b5b976698d90b8a0eb02a74970e1",
+          "note": "Old size-suffixed primitives icon names (…16 / …14) were removed in 0.2.x, which exports only <Name>Medium / <Name>Regular. As written, jsx(undefined) throws React #130 and this surface renders as an empty div."
         }
       ]
     },
@@ -238,6 +259,13 @@
           "inputSha256": "e12365bfdcc58f694aa55ad8208cf3d6c91e784623c215a9bc934c16198064bc",
           "outputSha256": "dc655c2edba97d9e9fc8770c979e603ff90ad10cbf60335bd4f7d59f375fe367",
           "note": "0.2.x SubagentRuntime retired registerContinuableSetup (replaced by the provider model: registerProvider + observeActivation). Calling it unconditionally threw during apply(), so the fiber failed and none of the 8 agent_teams_* tools registered. Detect its absence and degrade that one enhancement (member model-route persistence on cold resume) while team creation, task DAG, dispatch, messaging and status keep working."
+        },
+        {
+          "path": "lib/client.js",
+          "diff": "files/dsh-agent-teams/lib/client.js.diff",
+          "inputSha256": "625959c94347884af6dde6a16a2cad05c13b6ff60984a3ee1de4d5ff91632bc2",
+          "outputSha256": "927b586bd812af94070f452d1686bc4187d5286c041c9796505235840c8ce851",
+          "note": "Old size-suffixed primitives icon names (…16 / …14) were removed in 0.2.x, which exports only <Name>Medium / <Name>Regular. As written, jsx(undefined) throws React #130 and this surface renders as an empty div."
         }
       ]
     }
