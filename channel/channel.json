@@ -662,13 +662,13 @@
     {
       "id": "wallpaper-engine",
       "name": "dsh-plugin-wallpaper-engine",
-      "version": "0.6.7",
+      "version": "1.3.3",
       "packs": [
         "aio"
       ],
-      "file": "dsh-plugin-wallpaper-engine-0.6.7.tgz",
-      "sha256": "e7050458718567f941400448df8a264a85ec9ccdac5c13696aa1e7c5518a3a66",
-      "bytes": 794049,
+      "file": "dsh-plugin-wallpaper-engine-1.3.3.tgz",
+      "sha256": "581d75a69634e82469988da798df1713470cd6eb673be77ace4b0e4df77278b3",
+      "bytes": 3529607,
       "source": "npm"
     },
     {
