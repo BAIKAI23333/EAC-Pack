@@ -99,7 +99,7 @@ test('real HTTP API verifies installed files and installs only pinned targets wi
   const installed = []; let handler
   const pm = { async listBundles() { return installed.map(row => ({ name: row.name, version: '1.0.0', enabled: row.enabled })) },
     async installBundle(target, options) { assert.deepEqual(fs.readFileSync(target), bodies.get(manifest.items[0].file)); installed.push({ target, name: manifest.items[0].name, enabled: options.enabled }); return { application: 'applied' } } }
-  apply({ logger: {}, effect: fn => fn(), inject(deps, fn) { fn({ pluginManager: pm, webServer: { register(def) { handler = def.handler } } }) } }, {})
+  apply({ logger: {}, effect: fn => fn(), get: (n) => (n === 'connection' ? { requestRejection: () => undefined } : undefined), inject(deps, fn) { fn({ pluginManager: pm, webServer: { register(def) { handler = def.handler } } }) } }, {})
   host.state.catalog = { packs: { eac: manifest.items, aio: [], skins: [] }, retired: [] }; host.state.resources = manager
   t.after(async () => { await host.state.queueTail; host.state.resources = null })
   const server = http.createServer((req, res) => handler(req, res).catch(error => res.writeHead(500).end(error.message)))
@@ -151,7 +151,7 @@ test('missing pinned version never falls back to upstream or grants a version ex
   const { manifest, dir, manager } = fixture(t, { count: 1 }); const prev = process.env.DSH_HOME; process.env.DSH_HOME = dir
   t.after(() => { if (prev === undefined) delete process.env.DSH_HOME; else process.env.DSH_HOME = prev })
   let handler, installs = 0, exemptions = 0
-  apply({ logger: {}, effect: fn => fn(), inject(deps, fn) { fn({ pluginManager: { async listBundles() { return [] }, async installBundle() { installs++ }, async setVersionExemption() { exemptions++ } }, webServer: { register(def) { handler = def.handler } } }) } }, {})
+  apply({ logger: {}, effect: fn => fn(), get: (n) => (n === 'connection' ? { requestRejection: () => undefined } : undefined), inject(deps, fn) { fn({ pluginManager: { async listBundles() { return [] }, async installBundle() { installs++ }, async setVersionExemption() { exemptions++ } }, webServer: { register(def) { handler = def.handler } } }) } }, {})
   host.state.resources = manager; host.state.catalog = { packs: { eac: [{ ...manifest.items[0], version: '2.0.0', spec: 'upstream@latest' }], aio: [], skins: [] }, retired: [] }
   t.after(() => { host.state.resources = null })
   const req = { url: '/api/eac-plugin-suite/install', method: 'POST', on(event, fn) { if (event === 'data') fn(Buffer.from('{"ids":["fixture-0"]}')); if (event === 'end') fn() } }

@@ -350,16 +350,18 @@
         "eac"
       ],
       "file": "@deepseek-ai_dsh-file-changes-0.1.0.tgz",
-      "sha256": "601b23fcec3d39f8d726dbe09fca9720361bf3d4f402ceaff655cbcdf52ecb4d",
-      "bytes": 6979,
+      "sha256": "2501b40d04bec08fb0e0fd21724bb263c430734c7a2b17050d71c3a3d76e2a4c",
+      "bytes": 7797,
       "source": "eac-tag",
       "parts": [
         {
           "file": "@deepseek-ai_dsh-file-changes-0.1.0.tgz",
-          "bytes": 6979,
-          "sha256": "601b23fcec3d39f8d726dbe09fca9720361bf3d4f402ceaff655cbcdf52ecb4d"
+          "bytes": 7797,
+          "sha256": "2501b40d04bec08fb0e0fd21724bb263c430734c7a2b17050d71c3a3d76e2a4c"
         }
-      ]
+      ],
+      "locallyRepacked": true,
+      "repackNote": "Auth-fence defect (BUG-AUTH-FENCE-HANDOVER-20261017): the kernel authentication gate is itself a route on /api and webServer matches the LONGEST prefix first, so mounting /api/dsh-files/* silently bypasses it — register() adds no fence of its own. Every route (the 4 JSON endpoints plus the /dsh-files/static/ preview prefix) now asks the kernel connection.requestRejection() before doing any work, and FAILS CLOSED (503) when that service is unreachable instead of letting the request through. The service is resolved with ctx.get('connection'), NOT Reflect.get: a real cordis Context is a Proxy that throws for services not declared in inject, which would turn every request into a 503."
     },
     {
       "id": "float-window",

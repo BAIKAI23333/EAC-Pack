@@ -38,7 +38,7 @@ function makeReq(url, method = 'GET', body) {
   }
 }
 
-function mockCtx({ pluginManager }) {
+function mockCtx({ pluginManager, fence } = {}) {
   const registered = []
   const webServer = {
     register(def) {
@@ -46,14 +46,22 @@ function mockCtx({ pluginManager }) {
       return () => registered.splice(registered.indexOf(def), 1)
     },
   }
+  // See host.test.mjs: the handler resolves the kernel `connection` service via
+  // `ctx.get('connection')` (a real cordis Context throws on Reflect.get for
+  // undeclared services). Default stub passes; `fence` overrides for negatives.
+  const connection = { requestRejection: fence ?? (() => undefined) }
   const ctx = {
     pluginManager,
+    connection,
     logger: { info() {}, warn() {}, error() {} },
+    get(name) {
+      return name === 'connection' ? connection : undefined
+    },
     effect(fn) {
       return fn()
     },
     inject(deps, cb) {
-      cb({ webServer, pluginManager })
+      cb({ webServer, pluginManager, connection })
     },
   }
   return { ctx, registered }

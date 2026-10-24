@@ -1239,8 +1239,75 @@ function json(res, status, payload) {
   res.end(body)
 }
 
+/**
+ * Resolve the kernel `connection` service for one request.
+ *
+ * This MUST go through `ctx.get()`, not `Reflect.get(ctx, 'connection')`.
+ * A cordis Context is a Proxy: reading an undeclared service off it throws
+ * `cannot get property "..." without inject`. This plugin deliberately keeps
+ * `connection` OUT of `inject`, because `inject` is a hard dependency -- when
+ * the host does not provide the service, `apply()` never runs at all and the
+ * whole plugin stops loading. `ctx.get()` has the semantics we need here:
+ * the service when present, `undefined` when absent, no throw either way.
+ *
+ * @returns {object|undefined} service instance, or undefined (caller answers 503).
+ */
+function connectionOf(ctx) {
+  if (!ctx || typeof ctx.get !== 'function') return undefined
+  return ctx.get('connection')
+}
+
+/**
+ * Kernel trust fence for every route below this prefix.
+ *
+ * `webServer` matches the LONGEST registered prefix first, so the moment this
+ * plugin mounts `/api/eac-plugin-suite` the kernel's own authentication gate
+ * (which lives on the shorter `/api` prefix) stops seeing these requests
+ * entirely. `register()` adds no fence of its own, so each handler has to ask
+ * the kernel's `connection` service for a verdict.
+ *
+ * The service is resolved per request (never cached at apply time) so a late
+ * binding is picked up, and the check FAILS CLOSED: an unreachable or
+ * misbehaving fence answers 503 rather than letting the request through.
+ *
+ * @returns {boolean} true when the request was rejected and the response ended.
+ */
+function rejected(ctx, req, res) {
+  let connection
+  try {
+    connection = connectionOf(ctx)
+  } catch (err) {
+    return fenceUnavailable(res, err)
+  }
+  if (!connection || typeof connection.requestRejection !== 'function') {
+    return fenceUnavailable(res, new Error('connection service exposes no requestRejection'))
+  }
+  let rejection
+  try {
+    rejection = connection.requestRejection(req)
+  } catch (err) {
+    return fenceUnavailable(res, err)
+  }
+  if (rejection === undefined) return false
+  res.writeHead(rejection, { 'Cache-Control': 'no-store' })
+  res.end()
+  return true
+}
+
+/**
+ * Fence verdict could not be obtained. Answer 503 with an empty body: no
+ * internals leak to the caller, and the failure is loud instead of silent.
+ */
+function fenceUnavailable(res, err) {
+  trace('fence-unavailable', String(err?.message ?? err))
+  res.writeHead(503, { 'Cache-Control': 'no-store' })
+  res.end()
+  return true
+}
+
 function createApiHandler(ctx) {
   return async function handler(req, res) {
+    if (rejected(ctx, req, res)) return
     const url = new URL(req.url ?? '/', 'http://localhost')
     const routePath = url.pathname.replace(/^\/api\/eac-plugin-suite/, '').replace(/\/+$/, '') || '/'
     const method = String(req.method ?? 'GET').toUpperCase()
