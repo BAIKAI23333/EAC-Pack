@@ -56,6 +56,38 @@ Packages without an entry are untouched. When a patch is applied,
 `dist/index.json` records `locallyRepacked: true` plus `repackNote`, which
 propagates into `suite/assets/bootstrap.json`.
 
+For packages with several patched files, set an optional package-level
+`summary` on the patch entry. `repackNote` then uses that one string instead of
+concatenating every per-file `note`. Keep the long explanations in the per-file
+`note` fields (they are the maintainer-facing record); a manifest is read by the
+installer and should not carry a thousand characters of rationale.
+
+### `.gitattributes` pins diff line endings — do not remove
+
+`.gitattributes` carries exactly one rule beyond the baseline comment:
+
+```
+patches/**/*.diff -text
+```
+
+It looks cosmetic and is not. The diffs are **data**, not source: `git apply -p1`
+matches their context lines byte-for-byte against the materialized upstream
+files, which are LF. With `core.autocrlf=true` (the Windows default) a normal
+text checkout rewrites every diff to CRLF, and the replay then fails with:
+
+```
+error: patch failed: lib/client.js:121
+error: lib/client.js: patch does not apply
+```
+
+Measured on a clean `main` worktree without the rule: the three tracked diffs
+came out with 304 / 23 / 109 CR bytes and `git apply` rejected them outright.
+With the rule they are byte-identical to their blobs.
+
+Keep the file to that one rule line. Several branches independently added this
+rule with different wording, which turns a trivial change into a merge conflict;
+the explanation belongs here, not in every branch's copy of the file.
+
 ### The `eac-tag` base pin
 
 `repack.mjs` reads `source: "eac-tag"` packages from

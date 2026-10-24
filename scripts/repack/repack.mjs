@@ -475,7 +475,12 @@ for (const entry of entries) {
     ...(appliedSourcePatches.length
       ? {
           locallyRepacked: true,
-          repackNote: appliedSourcePatches.map((p) => p.note).filter(Boolean).join(' '),
+          // 有包级 summary 时用它（多文件补丁的 per-file note 拼起来会很长，
+          // 1367 字符会把 index.json 撑大约 7%，而这些细节更适合留在
+          // patches/source-patches.json 里给维护者看）；否则回退拼 per-file note
+          // 以保持既有包的行为不变。
+          repackNote: appliedSourcePatches[0]?.summary
+            ?? appliedSourcePatches.map((p) => p.note).filter(Boolean).join(' '),
         }
       : {}),
   });
