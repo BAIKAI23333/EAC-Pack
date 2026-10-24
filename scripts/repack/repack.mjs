@@ -49,6 +49,18 @@ const GH_SOURCES = {
   '@nagi-ovo/dsh-visualize': { url: 'https://github.com/Nagi-ovo/dsh-visualize.git', dir: 'visualize-src' },
   'dsh-drag-and-drop': { url: 'https://github.com/bill9109/dsh-drag-and-drop.git', dir: 'dragdrop-src' },
   'dsh-theme-endfield': { url: 'https://github.com/ymh0000123/dsh-theme-endfield.git', dir: 'endfield-src' },
+  // picturereader 3.5.0：上游 main 已两端适配 0.2.x 内核 —— 客户端不再 inject
+  // 已移除的 settingsScope（改为运行时探测：有旧的内核就走 bind，没有就用插件
+  // 自建的 loopback 路由 createRemoteScope 提供同构快照面），宿主半不再 import
+  // 已删除的 settingsNamespace，且 settings.register 缺失时降级到自有配置覆盖层
+  // 而不是抛 TypeError。但**既没有 npm 发布也没有 tag** —— npm 上最新只到 3.3.3，
+  // 而 3.3.3 的宿主半仍在 settings.register 处无保护地调用、客户端仍 inject
+  // settingsScope。因此只能钉 commit；ref 用完整 SHA，避免上游后续提交让产物漂移。
+  picturereader: {
+    url: 'https://github.com/jing-hy/picturereader.git',
+    dir: 'picturereader-src',
+    ref: 'ebbb2f098ecf3fe18a47eaaa361ae157d31272cc',
+  },
 };
 
 // github-tgz 源：社区作者经 GitHub Release 分发的 npm-pack 形态 tgz。
@@ -250,13 +262,50 @@ function materializeEacTag(entry, staging) {
   copyTree(src, staging);
 }
 
+// github / github-repo：浅克隆上游仓库后交给统一规范化。
+//
+// 可复现性：映射里可以写 `ref` 钉住 commit/tag。实测有必要 —— catalog 的期望
+// 版本和仓库 HEAD 会脱钩（例如 @nagi-ovo/dsh-visualize 的 catalog 要 0.1.4，
+// 而 .cache 里的克隆是 0.1.7），此时产物取决于本机缓存的运气。给了 ref 就
+// 按 ref 分桶缓存并校验 HEAD；没给 ref 则保持历史行为（克隆默认分支）并告警。
+//
+// 兼容性取舍：不把 ref 设为必填，否则既有 4 个映射会立刻全部 die —— 补 ref
+// 需要先确认每个仓库对应哪个 commit，属于独立的一件事，不该和「新增一个源」
+// 混在同一个改动里。
 function materializeGithub(entry, staging) {
   const gh = GH_SOURCES[entry.name];
   if (!gh) die(`catalog github 来源缺少 GH_SOURCES 映射: ${entry.name}`);
+  const ref = gh.ref;
+  if (!ref) {
+    log(`WARN ${entry.name} 未钉 ref：产物跟随上游默认分支，不可复现`);
+    const cloneDir = path.join(CACHE, gh.dir);
+    if (!fs.existsSync(path.join(cloneDir, 'package.json'))) {
+      log(`git clone --depth 1 ${gh.url}`);
+      sh(`git clone --depth 1 ${gh.url} ${q(cloneDir)}`);
+    }
+    copyTree(cloneDir, staging);
+    return;
+  }
   const cloneDir = path.join(CACHE, gh.dir);
-  if (!fs.existsSync(path.join(cloneDir, 'package.json'))) {
-    log(`git clone --depth 1 ${gh.url}`);
-    sh(`git clone --depth 1 ${gh.url} ${q(cloneDir)}`);
+  const stamp = path.join(cloneDir, '.repack-ref');
+  const current = fs.existsSync(stamp) ? fs.readFileSync(stamp, 'utf8').trim() : '';
+  if (!fs.existsSync(path.join(cloneDir, 'package.json')) || current !== ref) {
+    rmRf(cloneDir);
+    fs.mkdirSync(path.dirname(cloneDir), { recursive: true });
+    log(`git clone ${gh.url} @ ${ref}`);
+    try {
+      // tag / 分支名走 --branch；40 位 SHA 不被 --branch 接受，故全克隆后 checkout。
+      sh(`git clone --depth 1 --branch ${q(ref)} ${gh.url} ${q(cloneDir)}`);
+    } catch {
+      rmRf(cloneDir);
+      sh(`git clone ${gh.url} ${q(cloneDir)}`);
+      sh(`git -C ${q(cloneDir)} checkout --detach ${q(ref)}`);
+    }
+    const head = execSync(`git -C ${q(cloneDir)} rev-parse HEAD`, { encoding: 'utf8' }).trim();
+    if (!(head === ref || head.startsWith(ref))) {
+      die(`github 源钉点不符 ${entry.name}: 期望 ${ref}, 实际 HEAD ${head}`);
+    }
+    fs.writeFileSync(stamp, ref + '\n');
   }
   copyTree(cloneDir, staging);
 }
